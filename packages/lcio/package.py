@@ -12,18 +12,12 @@ class Lcio(CMakePackage, MCIlcsoftpackage):
     """HEP Library for Linear Collider Input/Output"""
 
     homepage = "http://lcio.desy.de"
-    git      = "https://github.com/MuonColliderSoft/LCIO.git"
-    url      = "https://github.com/MuonColliderSoft/LCIO/archive/refs/tags/v02-17-MC.tar.gz"
+    git = "https://github.com/tmadlener/LCIO"
+    url = "https://github.com/tmadlener/LCIO/archive/refs/tags/v02-17-MC.tar.gz"
 
     tags = ["hep"]
 
-    maintainers = ['gianelle', 'pandreetto']
-
-    version("master",  branch="master")
-    version('2.19.1', sha256='ae2c417381025bbebeef9c9806ab104c3404474ab555569f64c5dabd5c69b5d5')
-    version('2.17',    sha256='b04422eaf224a0e64d5410bedc47bf0259912990fda136ec3dcdaee8c79e6b86')
-    version('2.16.1',  sha256='e5319053c1f8fe7be40fb250e3694c926595533b13e108a08cb718a04bef137e')
-    version('2.15.4',  sha256='80a6be5bf14c33e62710f55850985a347529b42c8279e6d230ba7b48a420b596')
+    version("2.19.2",  branch="backport-patch-coll-fixes")
 
     variant(
         "cxxstd",
@@ -33,8 +27,10 @@ class Lcio(CMakePackage, MCIlcsoftpackage):
         description="Use the specified C++ standard when building.",
     )
     variant("jar", default=False, description="Turn on to build/install lcio.jar")
-    variant("rootdict", default=True, description="Turn on to build/install ROOT dictionary.")
-    variant("examples", default=False, description="Turn on to build LCIO examples")
+    variant("rootdict", default=True,
+            description="Turn on to build/install ROOT dictionary.")
+    variant("examples", default=False,
+            description="Turn on to build LCIO examples")
 
     depends_on("sio@0.0.2:", when="@2.14:")
     depends_on("sio@0.1:", when="@2.16:")
@@ -50,7 +46,8 @@ class Lcio(CMakePackage, MCIlcsoftpackage):
 
     def cmake_args(self):
         args = [
-            self.define("CMAKE_CXX_STANDARD", self.spec.variants["cxxstd"].value),
+            self.define("CMAKE_CXX_STANDARD",
+                        self.spec.variants["cxxstd"].value),
             self.define("BUILD_TESTING", self.run_tests),
             self.define_from_variant("BUILD_LCIO_EXAMPLES", "examples"),
             self.define_from_variant("BUILD_ROOTDICT", "rootdict"),
@@ -72,7 +69,11 @@ class Lcio(CMakePackage, MCIlcsoftpackage):
             # This has been fixed upstream
             return
 
-        install_tree("src/cpp/include/pre-generated/", self.prefix.include + "/pre-generated")
-        install("src/cpp/include/IOIMPL/LCEventLazyImpl.h", self.prefix.include + "/IOIMPL/")
-        install("src/cpp/include/SIO/SIOHandlerMgr.h", self.prefix.include + "/SIO/")
-        install("src/cpp/include/SIO/SIOObjectHandler.h", self.prefix.include + "/SIO/")
+        install_tree("src/cpp/include/pre-generated/",
+                     self.prefix.include + "/pre-generated")
+        install("src/cpp/include/IOIMPL/LCEventLazyImpl.h",
+                self.prefix.include + "/IOIMPL/")
+        install("src/cpp/include/SIO/SIOHandlerMgr.h",
+                self.prefix.include + "/SIO/")
+        install("src/cpp/include/SIO/SIOObjectHandler.h",
+                self.prefix.include + "/SIO/")

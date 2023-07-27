@@ -9,7 +9,7 @@ packages:
   root:
     require: '@6.28.02 +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+x+xml+xrootd cxxstd=17 build_type=RelWithDebInfo'
   dd4hep:
-    require: '@1.25.1 +lcio+xercesc+hepmc3+edm4hep'
+    require: '@1.25.2 +lcio+xercesc+hepmc3+edm4hep'
   whizard:
     require: '@3.0.3 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
   pythia8:
@@ -86,7 +86,7 @@ packages:
   lcgeo:
     require: '@0.18.1'
   lcio:
-    require: '@2.19.1'
+    require: '@2.19.2'
   gear:
     require: '@1.9.1'
   garlic:
