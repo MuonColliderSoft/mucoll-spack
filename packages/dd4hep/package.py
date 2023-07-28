@@ -23,7 +23,7 @@ class Dd4hep(CMakePackage):
 
     tags = ["hep"]
 
-    version("1.25.2", branch="toroidalField")
+    version("1.25.3", branch="rebase1251")
 
     generator("ninja")
 
