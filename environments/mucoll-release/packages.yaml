@@ -53,7 +53,7 @@ packages:
   acts:
     require: '@13.0.0'
   actstracking:
-    require: '@1.1.1'
+    require: '@1.1.0'
 
   kitrack:
     require: '@1.10'
