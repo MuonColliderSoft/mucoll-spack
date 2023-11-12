@@ -9,16 +9,13 @@ from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
 class Overlay(CMakePackage, MCIlcsoftpackage):
     """The package Overlay provides code for event overlay with Marlin."""
 
-    homepage = "https://github.com/MuonColliderSoft/Overlay"
-    git      = "https://github.com/MuonColliderSoft/Overlay.git"
-    url      = "https://github.com/MuonColliderSoft/Overlay/archive/refs/tags/v00-24-MC.tar.gz"
+    homepage = "https://github.com/madbaron/Overlay"
+    git = "https://github.com/madbaron/Overlay.git"
+    url = "https://github.com/madbaron/Overlay/archive/refs/tags/v00-24-MC.tar.gz"
 
-    maintainers = ['gianelle', 'pandreetto']
+    maintainers = ['fmeloni']
 
-    version('master',  branch='master')
-    version('0.24',    sha256='83ddebb4c3e36b9b5bda2acfb658e5fd0fd2b31f5e5a38c54f72601379949c04')
-    version('0.23',    sha256='b885bed6c386676e74db21dafde6bc08bcac2a16df89892759415fb8bbb331ed')
-    version('0.22.2',  sha256='9d4ed2d218897f0cbec233d5c588db41bd002dcd5ce809f5b3bad7767408de58')
+    version('master',  branch='randomFileOverlay')
 
     depends_on('ilcutil')
     depends_on('marlin')
@@ -27,7 +24,8 @@ class Overlay(CMakePackage, MCIlcsoftpackage):
     depends_on('raida')
 
     def setup_run_environment(self, spack_env):
-        spack_env.prepend_path('MARLIN_DLL', self.prefix.lib + "/libOverlay.so")
+        spack_env.prepend_path(
+            'MARLIN_DLL', self.prefix.lib + "/libOverlay.so")
 
     def cmake_args(self):
         # C++ Standard
