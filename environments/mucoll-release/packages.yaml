@@ -82,7 +82,7 @@ packages:
   cedviewer:
     require: '@1.19.1'
   overlay:
-    require: '@0.24'
+    require: '@0.25'
   lcgeo:
     require: '@0.18.1'
   lcio:

@@ -15,7 +15,7 @@ class Overlay(CMakePackage, MCIlcsoftpackage):
 
     maintainers = ['fmeloni']
 
-    version('master',  branch='randomFileOverlay')
+    version('0.25',  branch='randomFileOverlay')
 
     depends_on('ilcutil')
     depends_on('marlin')
