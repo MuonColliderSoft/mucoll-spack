@@ -87,7 +87,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ############## modified ILCSoft packages ##############
     #######################################################
     depends_on('lcio')
-    depends_on('lcgeo')
+    depends_on('k4geo')
     depends_on('lctuple')
     depends_on('overlay')
     depends_on('marlintrkprocessors')
@@ -139,7 +139,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # (see https://github.com/key4hep/key4hep-spack/issues/170)
         env.set("LC_ALL", "C")
         env.set('MUCOLL_STACK', os.path.join(self.spec.prefix, 'setup.sh'))
-        env.set('MUCOLL_GEO', os.path.join(self.spec['lcgeo'].prefix.share.lcgeo.compact, 'MuColl/MuColl_v1/MuColl_v1.xml'))
+        #env.set('MUCOLL_GEO', os.path.join(self.spec['lcgeo'].prefix.share.lcgeo.compact, 'MuColl/MuColl_v1/MuColl_v1.xml'))
         env.set('MUCOLL_RELEASE_VERSION', self.spec.version)
 
         env.prepend_path('LD_LIBRARY_PATH', self.spec['root'].prefix.lib.root)

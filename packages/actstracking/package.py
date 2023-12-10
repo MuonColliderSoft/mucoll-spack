@@ -9,17 +9,14 @@ from spack.pkg.k4.key4hep_stack import Key4hepPackage
 class Actstracking(CMakePackage, Key4hepPackage):
     """Marlin package for track reconstructions using the ACTS library"""
 
-    homepage = "https://github.com/madbaron/ACTSTracking"
-    git = "https://github.com/madbaron/ACTSTracking.git"
-    url = "https://github.com/madbaron/ACTSTracking/archive/refs/tags/v1.1.0.tar.gz"
+    homepage = "https://github.com/MuonColliderSoft/ACTSTracking"
+    git      = "https://github.com/MuonColliderSoft/ACTSTracking.git"
+    url      = "https://github.com/MuonColliderSoft/ACTSTracking/archive/refs/tags/v1.1.0.tar.gz"
 
     maintainers = ['gianelle', 'kkrizka']
 
-    version("1.1.1", branch="KITP_10TeV")
-    version(
-        '1.1.0', sha256='d565e70a2fec97d0d2e81ada69ed54ef8dacc44b0f608b4cf3dffa561091afeb')
-    version(
-        '1.0.0', sha256='0e98f2185920358d9c220883a48df42f3b5282beb32a91a19f9f3f5c1adc103b')
+    version('1.1.0', sha256='d565e70a2fec97d0d2e81ada69ed54ef8dacc44b0f608b4cf3dffa561091afeb')
+    version('1.0.0', sha256='0e98f2185920358d9c220883a48df42f3b5282beb32a91a19f9f3f5c1adc103b')
 
     # Ensuring correct ACTS version due to its evolving API
     depends_on('acts +dd4hep+tgeo+identification+json+fatras')

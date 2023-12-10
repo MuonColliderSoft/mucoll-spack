@@ -10,9 +10,9 @@ from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
 class Marlintrkprocessors(CMakePackage, MCIlcsoftpackage):
     """A collection of Tracking Relelated Processors Based on MarlinTrk"""
 
-    homepage = "https://github.com/MuonColliderSoft/MarlinTrkProcessors"
-    git      = "https://github.com/MuonColliderSoft/MarlinTrkProcessors.git"
-    url      = "https://github.com/MuonColliderSoft/MarlinTrkProcessors/archive/refs/tags/v02-14-MC.tar.gz"
+    homepage = "https://github.com/madbaron/MarlinTrkProcessors"
+    git      = "https://github.com/madbaron/MarlinTrkProcessors.git"
+    url      = "https://github.com/madbaron/MarlinTrkProcessors/archive/refs/tags/v02-14-MC.tar.gz"
 
     maintainers = ['gianelle', 'pandreetto']
 
