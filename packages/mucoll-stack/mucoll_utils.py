@@ -18,18 +18,21 @@ class MCIlcsoftpackage(Key4hepPackage):
            e.g. 0.1.4 -> 00-01-04-MC
         """
         base_url = self.url.rsplit('/', 1)[0]
+        major, minor, patch, rc = 0, 0, 0, 0
         if len(version) == 1:
             major = version[0]
-            minor, patch = 0, 0
         elif len(version) == 2:
             major, minor = version
-            patch = 0
-        else:
+        elif len(version) == 3:
             major, minor, patch = version
+        else:
+            major, minor, patch, rc = version
+
         # By now the data is normalized enough to handle it easily depending
         # on the value of the patch version
+        suffix = 'MC' if rc == 0 else 'RC%d' % rc
         if patch == 0:
-            version_str = 'v%02d-%02d-MC.tar.gz' % (major, minor)
+            version_str = 'v%02d-%02d-%s.tar.gz' % (major, minor, suffix)
         else:
-            version_str = 'v%02d-%02d-%02d-MC.tar.gz' % (major, minor, patch)
+            version_str = 'v%02d-%02d-%02d-%s.tar.gz' % (major, minor, patch, suffix)
         return base_url + '/' + version_str
