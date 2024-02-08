@@ -46,7 +46,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ############################### Key4hep ###############
     #######################################################
     depends_on('whizard +lcio +openloops')
-    depends_on('k4lcioreader')
     depends_on('k4simdelphes')
     depends_on('delphes')
 
