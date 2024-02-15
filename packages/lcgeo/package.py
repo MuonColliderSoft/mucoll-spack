@@ -60,7 +60,7 @@ class Lcgeo(CMakePackage, MCIlcsoftpackage):
     def setup_run_environment(self, env):
         env.set('LCGEO', self.prefix.share.lcgeo.compact)
         env.set('lcgeo_DIR', self.prefix.share.lcgeo.compact)
-        env.prepend_path("LD_LIBRARY_PATH", self.spec['lcgeo'].libs.directories[0])
+        env.prepend_path("LD_LIBRARY_PATH", self.spec['lcgeo'].prefix.lib)
 
     def setup_build_environment(self, env):
         env.set('LCGEO', self.prefix.share.lcgeo.compact)
@@ -71,7 +71,7 @@ class Lcgeo(CMakePackage, MCIlcsoftpackage):
     def setup_dependent_build_environment(self, env, dependent_spec):
         env.set('LCGEO', self.prefix.share.lcgeo.compact)
         env.set('lcgeo_DIR', self.prefix.share.lcgeo.compact)
-        env.prepend_path("LD_LIBRARY_PATH", self.spec['lcgeo'].libs.directories[0])
+        env.prepend_path("LD_LIBRARY_PATH", self.spec['lcgeo'].prefix.lib)
         env.prepend_path("LD_LIBRARY_PATH", self.spec['lcio'].libs.directories[0])
 
     # dd4hep tests need to run after install step:
