@@ -1,0 +1,57 @@
+spack:
+  packages:
+    geant4:
+      require: '@11.2.0 ~qt+opengl+vecgeom cxxstd=17'
+    clhep:
+      require: '@2.4.7.1'
+    root:
+      require: '@6.30.02 +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+x+xml+xrootd cxxstd=17 build_type=RelWithDebInfo'
+    dd4hep:
+      require: '@1.27.2 +lcio+xercesc+hepmc3+edm4hep'
+    edm4hep:
+      require: '@0.10.4'
+    podio:
+      require: '@0.17.3'
+#    whizard:
+#      require: '@3.1.2 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
+    pythia8:
+      require: '@8.310 ~hepmc+hepmc3'
+#    k4simdelphes:
+#      require: '@00-03-01 ~delphes_hepmc'
+
+    mucoll-stack:
+      require: '~devtools'
+
+    overlay:
+      require: '@0.25.0.1'
+    lcgeo:
+      require: '@0.19.0.2'
+    lcio:
+      require: '@2.20.2.1'
+    forwardtracking:
+      require: '@1.14.2.1'
+    conformaltracking:
+      require: '@1.12.1.1'
+    marlintrkprocessors:
+      require: '@2.15.1.1'
+
+#    gear:
+#      require: '@1.9.2'
+#    ilcutil:
+#      require: '@1.7.2'
+#    marlin:
+#      require: '@1.19.1'
+#    marlintrkprocessors:
+#      require: '@2.15.1'
+#    pandorapfa:
+#      require: '@4.6.2'
+    gdb:
+      require: '@14.1'
+
+    all:
+      target: [x86_64]
+      variants: build_type=Release cxxstd=17
+      buildable: true
+      providers:
+        gl: [mesa]
+        glu: [mesa]

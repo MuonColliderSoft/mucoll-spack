@@ -17,6 +17,7 @@ class Marlintrkprocessors(CMakePackage, MCIlcsoftpackage):
     maintainers = ['gianelle', 'pandreetto']
 
     version('master', branch='master')
+    version('2.15.1.1', sha256='0c44729dc463ea16bd554bbb7c68de6d13fdef942fc20be0da003dfbbafe3bc9')
     version("2.15",   sha256="439c2d01bd36c165a2a9e19caeceb807466691a5f240984a2654e2b6d3d0bcbf")
     version('2.14',   sha256='3fda69fbbd23e8e3e7f3c47d898dcd301693286f0a17854e919cfbe68bf3918f')
     version('2.13',   sha256='a44fe66a62d252f5226ca710a913fca6337812af1b7937bfb050d8f2d34df011')

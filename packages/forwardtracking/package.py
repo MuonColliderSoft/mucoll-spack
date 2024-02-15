@@ -16,6 +16,7 @@ class Forwardtracking(CMakePackage, MCIlcsoftpackage):
     maintainers = ['gianelle', 'pandreetto']
 
     version('master', branch='master')
+    version('1.14.2.1', sha256='56474f7eb82d687414aeb0d654a0e8ab100429754a0087751edb4ed6ba8431d4')
     version('1.14',   sha256='00e4fd4fc4be2c0c6febf6927fd5b37856ecb80a82d62836086ce4b53c1fb107')
 
     patch('testing.patch', when="@:1.15")

@@ -45,9 +45,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
 
     ############################### Key4hep ###############
     #######################################################
-    depends_on('whizard +lcio +openloops')
-    depends_on('k4simdelphes')
-    depends_on('delphes')
+#    depends_on('whizard +lcio +openloops')
+#    depends_on('k4simdelphes')
+#    depends_on('delphes')
 
 
     ############################### ILCSoft ###############
@@ -96,7 +96,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
 
     ############ custom Muon Collider packages ############
     #######################################################
-    depends_on('actstracking')
+#    depends_on('actstracking')
     depends_on('muoncvxddigitiser')
 
 

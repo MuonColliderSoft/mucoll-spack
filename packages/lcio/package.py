@@ -20,6 +20,7 @@ class Lcio(CMakePackage, MCIlcsoftpackage):
     maintainers = ['gianelle', 'pandreetto']
 
     version("master",  branch="master")
+    version('2.20.2.1', sha256='b2d3779acfc444167129c5865395600561b364acf658f1303ac66fb4e7ea6bfb')
     version('2.19.1', sha256='ae2c417381025bbebeef9c9806ab104c3404474ab555569f64c5dabd5c69b5d5')
     version('2.17',    sha256='b04422eaf224a0e64d5410bedc47bf0259912990fda136ec3dcdaee8c79e6b86')
     version('2.16.1',  sha256='e5319053c1f8fe7be40fb250e3694c926595533b13e108a08cb718a04bef137e')
