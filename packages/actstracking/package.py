@@ -34,6 +34,7 @@ class Actstracking(CMakePackage, Key4hepPackage):
     
     def setup_run_environment(self, spack_env):
         spack_env.prepend_path('MARLIN_DLL', self.prefix.lib + "/libACTSTracking.so")
+        spack_env.set('ACTSTRACKING_DATA', self.prefix.share)
 
     def cmake_args(self):
         # C++ Standard
