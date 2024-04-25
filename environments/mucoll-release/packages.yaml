@@ -53,9 +53,9 @@ packages:
     require: '@1.14.2'
 
   acts:
-    require: '@13.0.0'
+    require: '@32.0.0'
   actstracking:
-    require: '@1.1.0'
+    require: '@porting_v32'
 
   kitrack:
     require: '@1.10'
