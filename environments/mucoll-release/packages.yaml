@@ -4,105 +4,19 @@ packages:
   intel-tbb:
     require: '@:2020.3'
 
-  geant4:
-    require: '@11.1.1 ~qt+opengl+vecgeom cxxstd=17'
-  root:
-    require: '@6.30.02 +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+x+xml+xrootd cxxstd=17 build_type=RelWithDebInfo'
-  dd4hep:
-    require: '@1.27.1 +lcio+xercesc+hepmc3+edm4hep'
-  whizard:
-    require: '@3.0.3 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
-  pythia8:
-    require: '@8.306 ~hepmc+hepmc3'
-  k4simdelphes:
-    require: '@0.6 ~delphes_hepmc'
-
-  marlindd4hep:
-    require: '@0.6.2'
-  marlin:
-    require: '@1.19'
-  marlinreco:
-    require: '@1.34'
-  marlinutil:
-    require: '@1.17'
-
-  pandoraanalysis:
-    require: '@2.0.1'
-  pandorapfa:
-    require: '@4.2.0'
-  ddmarlinpandora:
-    require: '@0.14'
   k4geo:
     require: '@0.19'
   k4edm4hep2lcioconv:
     require: '@0.7'  
 
-  lcfivertex:
-    require: '@0.8'
-  lcfiplus:
-    require: '@0.10.1'
-  fastjet:
-    require: '@3.4.0'
-  marlinfastjet:
-    require: '@0.5.3'
-  marlintrk:
-    require: '@2.9.1'
-  marlintrkprocessors:
-    require: '@master'
-  forwardtracking:
-    require: '@1.14.2'
-
   actstracking:
     require: '@porting_v32'
 
-  kitrack:
-    require: '@1.10'
-  kitrackmarlin:
-    require: '@1.13.2'
-
-  ddkaltest:
-    require: '@1.7'
-  kaltest:
-    require: '@2.5.1'
-  kaldet:
-    require: '@1.14.1'
-
-  marlinkinfit:
-    require: '@0.6.1'
-  marlinkinfitprocessors:
-    require: '@0.5'
-
-  lctuple:
-    require: '@1.15'
-  clicperformance:
-    require: '@2.5'
   muoncvxddigitiser:
     require: '@0.1'
 
-  cedviewer:
-    require: '@1.19.1'
   overlay:
     require: '@0.25'
-#  lcgeo:
-#    require: '@0.18.1'
-  lcio:
-    require: '@2.20.2'
-  gear:
-    require: '@1.9.1'
-  garlic:
-    require: '@3.1'
-  ced:
-    require: '@1.9.4'
-  sio:
-    require: '@0.1'
-  ilcutil:
-    require: '@1.7'
-  aidatt:
-    require: '@0.10'
-  raida:
-    require: '@1.9.0'
-  generalbrokenlines:
-    require: '@2.2.1'
 
   # Loose version requirements
   gdb:

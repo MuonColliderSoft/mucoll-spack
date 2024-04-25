@@ -23,6 +23,7 @@ class Actstracking(CMakePackage, Key4hepPackage):
 
     # Ensuring correct ACTS version due to its evolving API
     depends_on('acts +dd4hep+tgeo+identification+json+fatras')
+    depends_on('acts@32 +dd4hep+tgeo+identification+json+fatras', when="@porting_v32")
     depends_on('acts@13 +dd4hep+tgeo+identification+json+fatras', when="@:1.1.0")
 
     depends_on('dd4hep')
