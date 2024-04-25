@@ -52,8 +52,6 @@ packages:
   forwardtracking:
     require: '@1.14.2'
 
-  acts:
-    require: '@32.0.0'
   actstracking:
     require: '@porting_v32'
 

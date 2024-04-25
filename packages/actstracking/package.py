@@ -16,7 +16,6 @@ class Actstracking(CMakePackage, Key4hepPackage):
     maintainers = ['gianelle', 'kkrizka']
 
     version("porting_v32", branch="porting_v32")
-    version("1.1.1", branch="KITP_10TeV")
     version(
         '1.1.0', sha256='d565e70a2fec97d0d2e81ada69ed54ef8dacc44b0f608b4cf3dffa561091afeb')
     version(
