@@ -16,8 +16,8 @@ spack:
 #      require: '@3.1.2 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
     pythia8:
       require: '@8.310 ~hepmc+hepmc3'
-#    k4simdelphes:
-#      require: '@00-03-01 ~delphes_hepmc'
+    k4simdelphes:
+      require: '@00-03-01 ~delphes_hepmc'
 
     mucoll-stack:
       require: '~devtools'
@@ -34,17 +34,17 @@ spack:
       require: '@1.12.1.1'
     marlintrkprocessors:
       require: '@2.15.1.1'
+    actstracking:
+      require: '@1.2.0.2'
 
-#    gear:
-#      require: '@1.9.2'
-#    ilcutil:
-#      require: '@1.7.2'
-#    marlin:
-#      require: '@1.19.1'
-#    marlintrkprocessors:
-#      require: '@2.15.1'
-#    pandorapfa:
-#      require: '@4.6.2'
+    gear:
+      require: '@1.9.2'
+    ilcutil:
+      require: '@1.7.2'
+    marlin:
+      require: '@1.19.1'
+    pandorapfa:
+      require: '@4.6.2'
     gdb:
       require: '@14.1'
 
