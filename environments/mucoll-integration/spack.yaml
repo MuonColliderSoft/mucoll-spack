@@ -9,7 +9,7 @@ spack:
     dd4hep:
       require: '@1.27.2 +lcio+xercesc+hepmc3+edm4hep'
     edm4hep:
-      require: '@0.10.4'
+      require: '@0.10.5'
     podio:
       require: '@0.17.3'
 #    whizard:
@@ -44,7 +44,7 @@ spack:
     marlin:
       require: '@1.19.1'
     pandorapfa:
-      require: '@4.6.2'
+      require: '@4.8.1'
     gdb:
       require: '@14.1'
 
