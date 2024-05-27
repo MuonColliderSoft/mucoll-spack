@@ -12,6 +12,8 @@ spack:
       require: '@0.10.5'
     podio:
       require: '@0.17.3'
+    acts:
+      require: '@32.0.0'
 #    whizard:
 #      require: '@3.1.2 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
     pythia8:
