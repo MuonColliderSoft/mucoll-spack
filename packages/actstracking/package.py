@@ -3,10 +3,10 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack.pkg.k4.key4hep_stack import Key4hepPackage
+from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
 
 
-class Actstracking(CMakePackage, Key4hepPackage):
+class Actstracking(CMakePackage, MCIlcsoftpackage):
     """Marlin package for track reconstructions using the ACTS library"""
 
     homepage = "https://github.com/MuonColliderSoft/ACTSTracking"
