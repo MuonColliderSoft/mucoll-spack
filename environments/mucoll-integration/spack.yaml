@@ -1,25 +1,27 @@
 spack:
   packages:
     geant4:
-      require: '@11.2.0 ~qt+opengl+vecgeom cxxstd=17'
+      require: '@11.2.0 ~ipo~motif+opengl~qt~tbb+threads~timemory+vecgeom~vtk~x11 build_system=cmake build_type=Release cxxstd=17 generator=make'
     clhep:
-      require: '@2.4.7.1'
+      require: '@2.4.7.1 ~cms~ipo build_system=cmake build_type=Release cxxstd=17 generator=make'
     root:
-      require: '@6.30.02 +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+x+xml+xrootd cxxstd=17 build_type=RelWithDebInfo'
+      require: '@6.30.02 ~aqua~arrow~cuda~cudnn+davix~dcache~emacs+examples+fftw~fits~fortran+gdml+gminimal~graphviz+gsl~http~ipo+math+minuit+mlp~mysql+opengl~oracle~postgres~pythia6+pythia8+python+r+roofit+root7+rpath~shadow~spectrum+sqlite+ssl+tbb+threads+tmva+tmva-cpu~tmva-gpu~tmva-pymva~tmva-sofie+unuran+vc+vdt~veccore~webgui+x+xml+xrootd build_system=cmake build_type=RelWithDebInfo cxxstd=17 generator=make patches=22af347'
     dd4hep:
-      require: '@1.27.2 +lcio+xercesc+hepmc3+edm4hep'
+      require: '@1.27.2 +ddalign+ddcad+ddcond+dddetectors+dddigi+ddeve+ddg4+ddrec~debug+edm4hep~geant4units+hepmc3~hepmc3-gz~ipo+lcio~tbb+utilityapps+xercesc build_system=cmake build_type=Release generator=ninja'
     edm4hep:
-      require: '@0.10.5'
+      require: '@0.10.5 ~ipo build_system=cmake build_type=Release cxxstd=17 generator=make'
     podio:
-      require: '@0.17.3'
+      require: '@0.17.3 ~ipo~rntuple~sio build_system=cmake build_type=Release cxxstd=17 generator=make'
     acts:
-      require: '@32.0.0'
+      require: '@32.0.0 ~alignment~analysis~autodiff~benchmarks~cuda~edm4hep~fatras~fatras_geant4~identification~integration_tests~ipo~json~legacy~odd~onnx~podio~profilecpu~profilemem~svg~sycl~unit_tests build_system=cmake build_type=Release cxxstd=17 generator=make log_failure_threshold=MAX'
 #    whizard:
 #      require: '@3.1.2 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
     pythia8:
       require: '@8.310 ~hepmc+hepmc3'
     k4simdelphes:
       require: '@00-03-01 ~delphes_hepmc'
+    gaudi:
+      require: '@38.1 ~aida~cppunit~docs~examples~gaudialg~gperftools~heppdt~ipo~jemalloc~unwind~vtune~xercesc build_system=cmake build_type=Release generator=make patches=41aa158'
 
     mucoll-stack:
       require: '~devtools'
