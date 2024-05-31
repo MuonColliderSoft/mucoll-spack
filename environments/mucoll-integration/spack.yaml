@@ -39,6 +39,8 @@ spack:
       require: '@2.15.1.2'
     actstracking:
       require: '@1.2.0.2'
+    muoncvxddigitiser:
+      require: '@0.2.0.1'
 
     gear:
       require: '@1.9.2'
