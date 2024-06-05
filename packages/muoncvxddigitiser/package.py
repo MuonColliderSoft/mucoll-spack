@@ -3,10 +3,10 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack.pkg.k4.key4hep_stack import Ilcsoftpackage
+from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
 
 
-class Muoncvxddigitiser(CMakePackage, Ilcsoftpackage):
+class Muoncvxddigitiser(CMakePackage, MCIlcsoftpackage):
     """Realistic digitiser of pixelated sensors for Muon Collider"""
 
     homepage = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser"
