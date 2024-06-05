@@ -30,7 +30,7 @@ spack:
     lcgeo:
       require: '@0.19.0.2'
     lcio:
-      require: '@2.20.2.2'
+      require: '@2.22.0.1'
     forwardtracking:
       require: '@1.14.2.1'
     conformaltracking:
