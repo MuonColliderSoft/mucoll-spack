@@ -1,40 +1,27 @@
 # Strict version requirements for stable builds
 packages:
-  # FIXME: temporary fix for incompatibility of the latest version with Gaudi
-  intel-tbb:
-    require: '@:2020.3'
 
   k4geo:
-    require: '@0.19'
-  k4edm4hep2lcioconv:
-    require: '@0.7'  
+    require: '@ZsegPR'
 
   actstracking:
     require: '@:porting_v32'
 
   muoncvxddigitiser:
-    require: '@0.1'
+    require: '@master'
 
   overlay:
     require: '@0.25'
 
-  # Loose version requirements
-  gdb:
-    require: '@10:'
-  xrootd:
-    require: '@5:'
+  lcio:
+    require: '@master cxxstd=20'
 
-  # Just variants. No specific version requirements
-  fftw:
-    variants: ~mpi
-  mesa:
-    variants: ~llvm+glx+opengl swr=none
-  tauola:
-    variants: ~lhapdf
+  dd4hep:
+    require: '@master+edm4hep+lcio+xercesc+hepmc3'
 
   all:
     target: [x86_64]
-    variants: build_type=Release cxxstd=17
+    variants: build_type=Release cxxstd=20
     buildable: true
     providers:
       gl: [mesa]

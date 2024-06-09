@@ -1,3 +1,8 @@
 spack:
+  view: false
   include:
   - packages.yaml
+  - ../../../key4hep-spack/environments/key4hep-common/config.yaml
+  - ../../../key4hep-spack/environments/key4hep-common/packages.yaml
+  specs:
+  - mucoll-stack

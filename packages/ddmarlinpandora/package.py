@@ -15,7 +15,7 @@ class Ddmarlinpandora(CMakePackage, MCIlcsoftpackage):
 
     maintainers = ['tmadlener']
 
-    version('0.14', branch='ecal-energy-corrections')
+    version('ECALcorr', branch='ecal-energy-corrections')
 
     depends_on('ilcutil')
     depends_on('marlinutil')
