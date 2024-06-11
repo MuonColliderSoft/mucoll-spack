@@ -10,14 +10,17 @@ packages:
   muoncvxddigitiser:
     require: '@master'
 
+  marlintrackprocessors:
+    require: '@master'
+
   overlay:
     require: '@0.25'
 
   lcio:
-    require: '@master cxxstd=20'
+    require: '@2.22 cxxstd=20'
 
   dd4hep:
-    require: '@master+edm4hep+lcio+xercesc+hepmc3'
+    require: '@1.29+edm4hep+lcio+xercesc+hepmc3'
 
   all:
     target: [x86_64]
