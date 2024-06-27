@@ -1,17 +1,17 @@
 spack:
   packages:
     geant4:
-      require: '@11.2.0 ~ipo~motif+opengl~qt~tbb+threads~timemory+vecgeom~vtk~x11 build_system=cmake build_type=Release cxxstd=17 generator=make'
+      require: '@11.2.0 ~ipo~motif+opengl~qt~tbb+threads~timemory+vecgeom~vtk~x11'
     clhep:
-      require: '@2.4.7.1 ~cms~ipo build_system=cmake build_type=Release cxxstd=17 generator=make'
+      require: '@2.4.7.1 ~cms~ipo'
     root:
-      require: '@6.30.02 +davix+fftw+gsl+http+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+webgui+x+xml+xrootd cxxstd=17 build_type=RelWithDebInfo'
+      require: '@6.32.00 +davix+fftw+gsl+http+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+webgui+x+xml+xrootd'
     dd4hep:
-      require: '@1.27.2 +ddalign+ddcad+ddcond+dddetectors+dddigi+ddeve+ddg4+ddrec~debug+edm4hep~geant4units+hepmc3~hepmc3-gz~ipo+lcio~tbb+utilityapps+xercesc build_system=cmake build_type=Release generator=ninja'
+      require: '@1.27.2 +ddalign+ddcad+ddcond+dddetectors+dddigi+ddeve+ddg4+ddrec~debug+edm4hep~geant4units+hepmc3~hepmc3-gz~ipo+lcio~tbb+utilityapps+xercesc'
     edm4hep:
-      require: '@0.10.5 ~ipo build_system=cmake build_type=Release cxxstd=17 generator=make'
+      require: '@0.10.5 ~ipo'
     podio:
-      require: '@0.17.3 ~ipo~rntuple~sio build_system=cmake build_type=Release cxxstd=17 generator=make'
+      require: '@0.17.3 ~ipo~rntuple~sio'
     acts:
       require: '@32.1.0'
     whizard:
@@ -28,7 +28,7 @@ spack:
     overlay:
       require: '@0.25.0.1'
     lcgeo:
-      require: '@0.19.0.2'
+      require: '@0.20.0.1'
     lcio:
       require: '@2.22.0.2'
     forwardtracking:
