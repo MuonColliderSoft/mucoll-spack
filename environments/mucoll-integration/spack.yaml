@@ -7,7 +7,7 @@ spack:
     root:
       require: '@6.32.00 +davix+fftw+gsl+http+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+webgui+x+xml+xrootd'
     dd4hep:
-      require: '@1.27.2 +ddalign+ddcad+ddcond+dddetectors+dddigi+ddeve+ddg4+ddrec~debug+edm4hep~geant4units+hepmc3~hepmc3-gz~ipo+lcio~tbb+utilityapps+xercesc'
+      require: '@1.29 +ddalign+ddcad+ddcond+dddetectors+dddigi+ddeve+ddg4+ddrec~debug+edm4hep~geant4units+hepmc3~hepmc3-gz~ipo+lcio~tbb+utilityapps+xercesc'
     edm4hep:
       require: '@0.10.5 ~ipo'
     podio:
