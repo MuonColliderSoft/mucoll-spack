@@ -15,13 +15,13 @@ spack:
     acts:
       require: '@32.1.0'
     whizard:
-      require: '@3.1.2 ~fastjet~latex+lcio~lhapdf+openloops~openmp+pythia8 hepmc=3'
+      require: '@3.1.4 +lcio+openloops+openmp+pythia8'
     pythia8:
-      require: '@8.310 ~hepmc+hepmc3'
+      require: '@8.311 ~hepmc'
     k4simdelphes:
-      require: '@00-03-01 ~delphes_hepmc'
+      require: '@00-06-02 ~delphes_hepmc'
     gaudi:
-      require: '@38.1'
+      require: '@38.1 +aida+gaudialg'
     mucoll-stack:
       require: '~devtools'
 
