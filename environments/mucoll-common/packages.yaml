@@ -1,7 +1,7 @@
 # Very loose requirements for nightly builds
 packages:
   geant4:
-    variants: ~qt+opengl+vecgeom cxxstd=17
+    variants: ~qt+opengl+vecgeom cxxstd=20
   root:
     variants: +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia6+pythia8+python+r+root7+roofit+rpath~shadow+sqlite+ssl+tbb+threads+tmva+unuran+vc+vdt+x+xml+xrootd cxxstd=17 build_type=RelWithDebInfo
   dd4hep:
@@ -14,7 +14,7 @@ packages:
     variants: ~delphes_hepmc
   all:
     target: [x86_64]
-    variants: build_type=Release cxxstd=17
+    variants: build_type=Release cxxstd=20
     buildable: true
     providers:
       gl: [mesa]

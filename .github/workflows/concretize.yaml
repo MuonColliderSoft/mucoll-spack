@@ -1,6 +1,6 @@
 name: concretize-ubuntu
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   concretize:
@@ -11,4 +11,3 @@ jobs:
     uses: ./.github/workflows/concretize-template.yaml
     with:
       target: ${{ matrix.target }}
-
