@@ -1,0 +1,91 @@
+name: Spack Build
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: gitlab-registry.cern.ch/linuxsupport/alma9-base:latest
+    permissions:
+      packages: write
+    steps:
+      - name: Setup System Dependencies
+        run: |
+          dnf update -y
+          dnf groupinstall -y "Development Tools"
+          dnf install -y vim gfortran wget python3-pip epel-release mesa-libGL mesa-libGL-devel mesa-libGLU mesa-libGLU-devel krb5-devel
+          dnf install -y parallel ccache mold
+          dnf clean all
+          # Add the new Certificate Authority (needed for xrootd)
+          wget https://uit.stanford.edu/sites/default/files/2023/10/11/incommon-rsa-ca2.pem -P /usr/share/pki/ca-trust-source/anchors && \
+          /usr/bin/update-ca-trust
+      - name: Checkout mucoll repository
+        uses: actions/checkout@v4
+        with:
+          path: mucoll-spack  
+      - name: Determine spack and key3hep ref
+        id: getref
+        run: |
+          echo "spack_ref=$(cat mucoll-spack/.latest-commit)" >>${GITHUB_OUTPUT}
+          echo "key4hep_ref=$(cat mucoll-spack/.key4hep-commit)" >>${GITHUB_OUTPUT}
+      - name: Checkout key4hep repository
+        uses: actions/checkout@v4
+        with:
+          repository: key4hep/key4hep-spack
+          ref: ${{ steps.getref.outputs.key4hep_ref }}
+          path: key4hep-spack
+      - name: Set up Spack
+        uses: spack/setup-spack@v2
+        with:
+          ref: ${{ steps.getref.outputs.spack_ref }} # Spack version (examples: develop, releases/v0.23)
+          color: true                                # Force color output (SPACK_COLOR=always)
+          path: spack                                # Where to clone Spack
+          buildcache: false                          # No central build cache (incompatible)
+      - name: Spack Setup Build Cache
+        shell: spack-bash {0}
+        run: |
+          git -C spack fetch # Needed to fetch the full history for backporting patches
+          spack config add 'config:install_tree:padded_length:128'
+          spack mirror add --oci-username '${{ github.actor }}' --oci-password '${{ secrets.GITHUB_TOKEN }}' --unsigned --autopush local-buildcache 'oci://ghcr.io/${{ github.repository_owner }}/spack-buildcache'
+      - name: Apply the patches
+        shell: spack-bash {0}
+        run: |
+          SPACK_ROOT=$(realpath spack) mucoll-spack/AlmaLinux9/apply_patches.sh key4hep-spack
+          SPACK_ROOT=$(realpath spack) mucoll-spack/AlmaLinux9/apply_patches.sh mucoll-spack
+      - name: Spack Local Setup
+        shell: spack-bash {0}
+        run: |
+          spack --version
+          spack repo add key4hep-spack
+          spack repo add mucoll-spack
+          spack compiler find
+      # The key4hep-dev-external needs to be built first. Otherwise gdb will fail with
+      # the following error. Probably some compile-time check being triggered due to a
+      # dependency being compiled in the wrong order.
+      #
+      #     error: expected identifier before numeric constant
+      #        180 | # define TRAP_HWBKPT 4
+      #            |                      ^
+      #
+      - name: Spack Build key4hep-dev-external
+        shell: spack-bash {0}
+        run: |
+          spack env activate key4hep-spack/environments/key4hep-dev-external
+          spack concretize --reuse
+          spack install --only-concrete --no-add --fail-fast
+      - name: Spack Concretize
+        shell: spack-bash {0}
+        run: |
+          spack env activate mucoll-spack/environments/mucoll-${{ inputs.target }}
+          spack concretize --reuse
+      - name: Spack Install
+        shell: spack-bash {0}
+        run: |
+          spack env activate mucoll-spack/environments/mucoll-${{ inputs.target }}
+          spack install --only-concrete --no-add --fail-fast

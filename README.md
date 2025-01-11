@@ -131,3 +131,18 @@ spack env deactivate
 # Activate the default environment (if in a Docker container)
 spack env activate sim
 ```
+
+## Build Docker Images
+
+The `Dockerfile`s used to build the official releases are provided in this repository. To build a local release, run the following script. The arguments are used to create the image tags.
+
+```shell
+cd AlmaLinux9
+./build.sh REPOSITORY VERSION
+```
+
+Three images are created in sucession:
+
+- `${REPOSITORY}/mucoll-spack:${VERSION}-alma9`: Base OS with developement tools and any Spack installed under `/opt/spack`.
+- `${REPOSITORY}/mucoll-externals:${VERSION}-alma9`: Contains a minimal Spack environment composed of the external packages needed to build the key4hep or mucoll stacks.
+- `${REPOSITORY}/mucoll-sim:${VERSION}-alma9`: Contains the full Muon Collider Spack environment.

@@ -1,29 +1,20 @@
 spack:
   packages:
-    geant4:
-      require: '@11.2.0 +opengl+vecgeom'
     clhep:
       require: '@2.4.7.1 ~cms~ipo'
-    root:
-      require: '@6.32.00 +fftw+http+mlp+pythia8+r+root7+sqlite+ssl+tmva+vc'
-    dd4hep:
-      require: '@1.29 +hepmc3+lcio+xercesc'
-    edm4hep:
-      require: '@0.10.5 ~ipo'
-    podio:
-      require: '@0.17.3 ~ipo~rntuple~sio'
     acts:
       require: '@32.1.0'
-    whizard:
-      require: '@3.1.4 +lcio+openloops+openmp+pythia8'
-    pythia8:
-      require: '@8.311 ~hepmc'
     k4simdelphes:
       require: '@00-06-02 ~delphes_hepmc'
-    gaudi:
-      require: '@38.2 +aida+gaudialg'
     mucoll-stack:
-      require: '@2.9'
+      require: '@2.9 +devtools+pytools+ml'
+
+    # The version seems to be necessary, otherwise it defaults to an older version
+    root:
+      require: '@6.32: +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+threads+tmva+tmva-cpu+unuran+vc+vdt+x+xml+xrootd cxxstd=20'
+
+    geant4:
+      require: +opengl+qt~vecgeom cxxstd=20
 
     overlay:
       require: '@0.25'
@@ -42,20 +33,54 @@ spack:
     muoncvxddigitiser:
       require: '@0.2'
 
-    gear:
-      require: '@1.9.2'
     ilcutil:
       require: '@1.7.2'
-    marlin:
-      require: '@1.19.1'
-    pandorapfa:
-      require: '@4.8.1'
-    gdb:
-      require: '@14.1'
+
+    # Use the system OpenGL as recommended by spack
+    # See https://github.com/key4hep/key4hep-spack/issues/318 and
+    # https://github.com/key4hep/key4hep-spack/issues/516
+    # A version is needed and we set it to 99 so that spack thinks it's the latest
+    # (it may not work if the versions in the current system are not what's required
+    # but that hasn't happened yet)
+    opengl:
+      buildable: False
+      externals:
+      - spec: opengl@99
+        prefix: /usr
+    openglu:
+      buildable: False
+      externals:
+      - spec: openglu@99
+        prefix: /usr
+    mesa:
+      buildable: False
+      externals:
+      - spec: mesa@99
+        prefix: /usr
+    mesa-glu:
+      buildable: False
+      externals:
+      - spec: mesa-glu@99
+        prefix: /usr
+    # Use the system kerberos, otherwise the tickets obtained at login with the
+    # system version don't appear for the spack kerberos (happening on lxplus at least)
+    krb5:
+      buildable: False
+      externals:
+      - spec: krb5@99
+        prefix: /usr
+    # Use the system ssh, otherwise the configuration for the provided ssh will likely be
+    # different and things like ssh using kerberos won't work (by extension authentication
+    # for git with ssh with kerberos)
+    openssh:
+      buildable: False
+      externals:
+      - spec: openssh@99
+        prefix: /usr
 
     all:
       target: [x86_64]
-      variants: build_type=Debug cxxstd=17
+      variants: build_type=Debug cxxstd=20
       buildable: true
       providers:
         gl: [mesa]
