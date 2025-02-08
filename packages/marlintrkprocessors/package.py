@@ -5,7 +5,7 @@
 
 
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
-
+from spack.package import *
 
 class Marlintrkprocessors(CMakePackage, MCIlcsoftpackage):
     """A collection of Tracking Relelated Processors Based on MarlinTrk"""

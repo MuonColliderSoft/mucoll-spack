@@ -5,7 +5,7 @@
 
 
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
-
+from spack.package import *
 
 class Conformaltracking(CMakePackage, MCIlcsoftpackage):
     """Package for running pattern recognition based on conformal mapping

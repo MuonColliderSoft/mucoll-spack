@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
-
+from spack.package import *
 
 class Lctuple(CMakePackage, MCIlcsoftpackage):
     """Marlin package that creates a ROOT TTree with a column wise ntuple from LCIO collections."""

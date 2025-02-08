@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
-
+from spack.package import *
 
 class Actstracking(CMakePackage, MCIlcsoftpackage):
     """Marlin package for track reconstructions using the ACTS library"""

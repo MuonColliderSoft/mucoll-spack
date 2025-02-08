@@ -1,9 +1,3 @@
-# py-onnx: add a patch for the standard, remove after 1.15.0
-git cherry-pick bbd205543b09139f2f57f21099eb366c9f183d76 -X theirs --no-commit
-
-# add gaudi 39
-git cherry-pick 5ebf45861f688337dddcdee2242d4f479a832d06 -X theirs --no-commit
-
 # openloops: Fix application of cmodel to compilation for aarch64.
 git cherry-pick a14f10e8825fd25e0615095feaa548b1938fffac -X theirs --no-commit
 git cherry-pick e76f8fda2d959fdf7a262eb539a4002a6a0c900f -X theirs --no-commit

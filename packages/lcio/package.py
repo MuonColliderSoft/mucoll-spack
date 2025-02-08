@@ -7,7 +7,6 @@
 from spack.package import *
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
 
-
 class Lcio(CMakePackage, MCIlcsoftpackage):
     """HEP Library for Linear Collider Input/Output"""
 
@@ -20,7 +19,8 @@ class Lcio(CMakePackage, MCIlcsoftpackage):
     maintainers = ['gianelle', 'pandreetto']
 
     version("master",  branch="master")
-    version('2.22', sha256='2ae4361c0c67f7dffb24a06525ef909e97a18545d1cef4e36887e220b2420e4b', preferred=True)
+    version('2.22.4', sha256='2c2bd66cb8c5b58ab27ab7d36f16df3bed3f0bcefd880e69b9d3f5a8d01ffb0b', preferred=True)
+    version('2.22', sha256='2ae4361c0c67f7dffb24a06525ef909e97a18545d1cef4e36887e220b2420e4b')
     version('2.19.1', sha256='ae2c417381025bbebeef9c9806ab104c3404474ab555569f64c5dabd5c69b5d5')
     version('2.17',    sha256='b04422eaf224a0e64d5410bedc47bf0259912990fda136ec3dcdaee8c79e6b86')
     version('2.16.1',  sha256='e5319053c1f8fe7be40fb250e3694c926595533b13e108a08cb718a04bef137e')

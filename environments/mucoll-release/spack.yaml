@@ -16,8 +16,6 @@ spack:
     root:
       require: '@6.32: +davix+fftw+gsl+math+minuit+mlp+opengl~postgres~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+threads+tmva+tmva-cpu+unuran+vc+vdt+x+xml+xrootd cxxstd=20'
 
-    geant4:
-      require: '@11.2.2: +opengl+qt~vecgeom cxxstd=20'
     dd4hep:
       require: '@1.30: +edm4hep+lcio+xercesc+hepmc3'
 
@@ -26,7 +24,7 @@ spack:
     lcgeo:
       require: '@0.20'
     lcio:
-      require: '@2.22'
+      require: '@2.22.4'
     forwardtracking:
       require: '@1.14.2'
     conformaltracking:
@@ -36,7 +34,7 @@ spack:
     actstracking:
       require: '@1.3.1'
     muoncvxddigitiser:
-      require: '@0.2.0'
+      require: '@0.2.1'
 
     # Use the system OpenGL as recommended by spack
     # See https://github.com/key4hep/key4hep-spack/issues/318 and
@@ -90,6 +88,8 @@ spack:
 
   concretizer:
     unify: true
+
+  view: false
 
   specs:
   - mucoll-stack

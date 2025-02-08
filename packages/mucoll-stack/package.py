@@ -9,6 +9,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from mucoll_utils import *
 
+from spack.package import *
 from spack.pkg.k4.key4hep_stack import Key4hepPackage, install_setup_script
 
 
@@ -126,7 +127,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # Python tools
         depends_on('py-h5py')
         depends_on('py-ipython')
-        depends_on('py-jupytext')
+        # depends_on('py-jupytext') # this requires rust and node-js which take too long to compile
         depends_on('py-matplotlib')
         depends_on('py-pandas')
         depends_on('py-particle')

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
-
+from spack.package import *
 
 class Overlay(CMakePackage, MCIlcsoftpackage):
     """The package Overlay provides code for event overlay with Marlin."""

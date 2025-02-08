@@ -3,9 +3,7 @@
 #  Tag:        ${VERSION}-alma9
 ###############################################################################
 
-ARG VERSION=master
-ARG REPOSITORY=madbaron
-FROM ${REPOSITORY}/mucoll-externals:${VERSION}-alma9
+FROM ghcr.io/key4hep/key4hep-externals:main
 
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=kkrizka/mucoll-spack
@@ -52,8 +50,8 @@ RUN source ${HOME}/setup_env.sh && \
     spack clean -a
 
 RUN source ${HOME}/setup_env.sh && \
-    echo "source ${SPACK_ENV}/.spack-env/view/setup.sh" > /opt/setup_mucoll.sh && \
-    echo "alias setup_mucoll=\"source /opt/setup_mucoll.sh\"" >> /etc/profile.d/aliases.sh
+    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack) && \
+    echo "alias setup_mucoll=\"source ${MUCOLL_STACK_PATH}/setup.sh\"" >> /etc/profile.d/aliases.sh
 
 # Setting up users to be used for the local environment setup
 RUN useradd --shell /bin/bash --create-home mucoll
