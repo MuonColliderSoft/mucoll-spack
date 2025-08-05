@@ -28,6 +28,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     version(datetime.today().strftime('%Y-%m-%d'))
 
     version("master", branch="master")
+    version("full_gaudi_test", branch="full_gaudi_test")
 
     ### stable build
     # to install exact specified version for every dependecy
