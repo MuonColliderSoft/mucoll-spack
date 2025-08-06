@@ -8,11 +8,9 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from mucoll_utils import *
-from spack.pkg.k4.key4hep_stack.common import *
 
 from spack.package import *
-from spack.pkg.k4.key4hep_stack import Key4hepPackage, install_setup_script
-
+from spack.pkg.k4.key4hep_stack import *
 
 class MucollStack(BundlePackage, Key4hepPackage):
     """Bundle package to install Muon Collider Software Stack"""
