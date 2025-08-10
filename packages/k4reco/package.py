@@ -24,6 +24,7 @@ class K4reco(CMakePackage, Key4hepPackage):
     depends_on("gaudi")
     depends_on("k4fwcore")
     depends_on("k4simgeant4")
+    depends_on("k4geo")
     depends_on("root")
 
     depends_on("lcio", when="+conformal_tracking")
