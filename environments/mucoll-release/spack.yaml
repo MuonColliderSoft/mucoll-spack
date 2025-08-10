@@ -89,7 +89,6 @@ spack:
         - build_type=RelWithDebInfo
         - 'cxxstd=20'
       buildable: true
-      compiler: []
       providers:
         gl: [mesa]
         glu: [mesa]
