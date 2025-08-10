@@ -25,6 +25,9 @@ class K4gaudipandora(CMakePackage, Key4hepPackage):
     depends_on("lccontent")
     depends_on("pandorasdk")
     depends_on("root")
+    depends_on("gsl")
+    depends_on("marlintrk")
+    depends_on("lcio")
 
     # Used in the tests
     depends_on("k4geo")

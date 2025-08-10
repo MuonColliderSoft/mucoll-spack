@@ -16,8 +16,8 @@ spack:
 
     k4geo:
       require: '@main'
-    #k4gaudipandora:
-    #  require: '@main'
+    k4gaudipandora:
+      require: '@main'
     #k4reco:
     #  require: '@main'
     k4actstracking:
