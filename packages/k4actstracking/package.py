@@ -20,5 +20,9 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     depends_on("k4fwcore")
     depends_on("acts-dd4hep")
 
+    def setup_run_environment(self, env):
+        env.prepend_path("LD_LIBRARY_PATH", self.spec["k4actstracking"].prefix.lib)
+        env.prepend_path("PYTHONPATH", self.spec["k4actstracking"].prefix.lib)
+
     def cmake_args(self):
         return []
