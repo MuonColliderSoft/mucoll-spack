@@ -18,8 +18,8 @@ spack:
       require: '@main'
     k4gaudipandora:
       require: '@main'
-    #k4reco:
-    #  require: '@main'
+    k4reco:
+      require: '@main'
     k4actstracking:
       require: '@main'
     edm4hep:
