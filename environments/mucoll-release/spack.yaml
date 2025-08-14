@@ -22,8 +22,6 @@ spack:
       require: '@main'
     k4actstracking:
       require: '@main'
-    edm4hep:
-      require: '@0.99.2'
 
     forwardtracking:
       require: '@1.14.2'
