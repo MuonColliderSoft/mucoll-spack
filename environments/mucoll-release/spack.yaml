@@ -8,9 +8,6 @@ spack:
     mucoll-stack:
       require: '@full_gaudi_test: +devtools+pytools' #+ml'
 
-    #py-setuptools:
-    #  require: "@69"
-
     dd4hep:
       require: '+edm4hep+lcio+xercesc+hepmc3'
 
