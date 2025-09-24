@@ -58,7 +58,8 @@ RUN . ${HOME}/setup_env.sh && \
     export onnxruntime_ENABLE_AVX512_VNNI=OFF && \
     spack spec -NIt && \
     spack install ${SPACK_INSTALL_OPTS} && \
-    spack clean -a
+    spack clean -a && \
+    spack mirror remove local-buildcache
 
 RUN . ${HOME}/setup_env.sh && \
     MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack) && \
