@@ -59,7 +59,7 @@ RUN . ${HOME}/setup_env.sh && \
     spack spec -NIt && \
     spack install ${SPACK_INSTALL_OPTS} && \
     spack clean -a && \
-    spack mirror remove local-buildcache
+    spack mirror remove local-buildcache || true
 
 RUN . ${HOME}/setup_env.sh && \
     MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack) && \
