@@ -53,7 +53,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-sim-${{ inputs.os }}
-          flavor: latest=true
+          flavor: latest=${{ github.ref == 'refs/heads/master' }}
       - name: Change string case for amd64
         id: lowercase-amd64
         uses: Entepotenz/change-string-case-action-min-dependencies@v1
