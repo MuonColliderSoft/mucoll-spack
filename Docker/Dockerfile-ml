@@ -7,6 +7,8 @@ ARG OS=alma9
 ARG BRANCH=main
 FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:${BRANCH}
 
+USER root
+
 # Reconnect to build cache
 ARG SPACK_BUILDCACHE
 ARG OCI_USERNAME
@@ -46,3 +48,6 @@ RUN . ${HOME}/setup_env.sh && \
     MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack) && \
     MUCOLL_STACK_PATH_CLEANED=$(echo ${MUCOLL_STACK_PATH} | sed -E 's/\x1b\[[0-9;]*m//g') && \
     echo "alias setup_mucoll_ml=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" >> /etc/profile.d/aliases.sh
+
+USER mucoll
+WORKDIR /home/mucoll
