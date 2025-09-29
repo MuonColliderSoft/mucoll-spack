@@ -1,6 +1,6 @@
-name: Publish mucoll-sim image
+name: Publish Docker Image
 description: |
-  Loads a mucoll-release stack from spack cache.
+  Loads a mucoll stack from spack cache.
   This workflow builds a multi-arch image and pushes it to the registry.
 
 on:
@@ -12,6 +12,10 @@ on:
       registry:
         required: true
         type: string
+      image-type:
+        required: false
+        type: string
+        default: sim
 
 permissions:
   contents: read
@@ -27,6 +31,7 @@ jobs:
       runner: ubuntu-latest
       platform: amd64
       registry: ${{ inputs.registry }}
+      image-type: ${{ inputs.image-type }}
   
   build-linux-arm64:
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -35,7 +40,8 @@ jobs:
       runner: ubuntu-24.04-arm
       platform: arm64
       registry: ${{ inputs.registry }}
-  
+      image-type: ${{ inputs.image-type }}
+
   publish-multiarch:
     needs:
       - build-linux-amd64
@@ -52,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-sim-${{ inputs.os }}
+          images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
           flavor: latest=${{ github.ref == 'refs/heads/main' }}
       - name: Change string case for amd64
         id: lowercase-amd64
