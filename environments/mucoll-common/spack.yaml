@@ -1,3 +1,0 @@
-spack:
-  include:
-  - packages.yaml
