@@ -129,6 +129,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
+        depends_on("py-torch")
 
     with when('+pytools'):
         # Python tools
