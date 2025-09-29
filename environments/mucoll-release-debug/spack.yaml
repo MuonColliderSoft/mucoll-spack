@@ -1,84 +1,24 @@
 spack:
   packages:
-    clhep:
-      require: '@2.4.7.1 ~cms~ipo'
-    acts:
-      require: '@32.1.0'
-    k4simdelphes:
-      require: '@00-06-02 ~delphes_hepmc'
-    mucoll-stack:
-      require: '@2.9 +devtools+pytools+ml'
-
-    geant4:
-      require: +opengl+qt~vecgeom cxxstd=20
-
-    overlay:
-      require: '@0.25'
-    lcgeo:
-      require: '@0.20'
-    lcio:
-      require: '@2.22'
-    forwardtracking:
-      require: '@1.14.2'
-    conformaltracking:
-      require: '@1.12.1'
-    marlintrkprocessors:
-      require: '@2.15.2'
-    actstracking:
-      require: '@1.2.2'
-    muoncvxddigitiser:
-      require: '@0.2'
-
-    ilcutil:
-      require: '@1.7.2'
-
-    # Use the system OpenGL as recommended by spack
-    # See https://github.com/key4hep/key4hep-spack/issues/318 and
-    # https://github.com/key4hep/key4hep-spack/issues/516
-    # A version is needed and we set it to 99 so that spack thinks it's the latest
-    # (it may not work if the versions in the current system are not what's required
-    # but that hasn't happened yet)
-    opengl:
-      buildable: False
-      externals:
-      - spec: opengl@99
-        prefix: /usr
-    openglu:
-      buildable: False
-      externals:
-      - spec: openglu@99
-        prefix: /usr
-    mesa:
-      buildable: False
-      externals:
-      - spec: mesa@99
-        prefix: /usr
-    mesa-glu:
-      buildable: False
-      externals:
-      - spec: mesa-glu@99
-        prefix: /usr
-    # Use the system kerberos, otherwise the tickets obtained at login with the
-    # system version don't appear for the spack kerberos (happening on lxplus at least)
-    krb5:
-      buildable: False
-      externals:
-      - spec: krb5@99
-        prefix: /usr
-    # Use the system ssh, otherwise the configuration for the provided ssh will likely be
-    # different and things like ssh using kerberos won't work (by extension authentication
-    # for git with ssh with kerberos)
-    openssh:
-      buildable: False
-      externals:
-      - spec: openssh@99
-        prefix: /usr
-
     all:
-      target: []
-      variants: build_type=Debug cxxstd=20
+      target: [x86_64, aarch64]
+      variants: 
+        - build_type=Debug
+        - 'cxxstd=20'
       buildable: true
       providers:
         gl: [mesa]
         glu: [mesa]
 
+  concretizer:
+    unify: true
+    targets:
+      host_compatible: true
+
+  view: false
+
+  include:
+  - ../mucoll-common/packages.yaml
+
+  specs:
+  - mucoll-stack+devtools+pytools
