@@ -18,4 +18,4 @@ class Acorn(PythonPackage):
     # FIXME: Add proper versions and checksums here.
     version("dev-lukas", branch="dev-lukas", preferred=True)
 
-    depends_on("py-yaml")
+    #depends_on("py-yaml")
