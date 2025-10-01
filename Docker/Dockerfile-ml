@@ -9,6 +9,14 @@ FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:full_gaudi_test
 
 USER root
 
+# Update MuColl repo
+RUN . /opt/setup_spack.sh && \
+    REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
+    cd ${REPOPATH} && \
+    git pull && \
+    git checkout acorn_integration && \
+    cd -
+
 # Reconnect to build cache
 ARG SPACK_BUILDCACHE
 ARG OCI_USERNAME
