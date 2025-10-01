@@ -13,7 +13,7 @@ USER root
 RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
     cd ${REPOPATH} && \
-    git pull && \
+    git fetch && \
     git checkout acorn_integration && \
     cd -
 
