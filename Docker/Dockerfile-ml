@@ -49,4 +49,5 @@ RUN . ${HOME}/setup_env.sh && \
     MUCOLL_STACK_PATH_CLEANED=$(echo ${MUCOLL_STACK_PATH} | sed -E 's/\x1b\[[0-9;]*m//g') && \
     echo "alias setup_mucoll_ml=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" >> /etc/profile.d/aliases.sh
 
-USER root
+USER mucoll
+WORKDIR /home/mucoll

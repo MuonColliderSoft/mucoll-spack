@@ -3,11 +3,11 @@ from spack.package import *
 
 
 class Acorn(PythonPackage):
-    """FIXME: Put a proper description of your package here."""
+    """Framework used for developing, testing and presenting the GNN-based 
+    ITk track reconstruction project GNN4ITk."""
 
-    # FIXME: Add a proper url for your package's homepage here.
     homepage = "https://gitlab.cern.ch/gnn4itkteam/acorn"
-    url = "https://gitlab.cern.ch/lbauckha/acorn.git"
+    git = "https://gitlab.cern.ch/lbauckha/acorn.git"
 
     # FIXME: Add a list of GitHub accounts to
     # notify when the package is updated.
@@ -16,6 +16,6 @@ class Acorn(PythonPackage):
     license("Apache-2.0")
 
     # FIXME: Add proper versions and checksums here.
-    version('dev-lukas')
+    version('dev-lukas', branch='dev-lukas')
 
-    #depends_on("py-yaml")
+    depends_on("py-setuptools")
