@@ -28,6 +28,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
 
     version("master", branch="master")
     version("full_gaudi_test", branch="full_gaudi_test")
+    version("acorn_integration", branch="acorn_integration")
 
     ### stable build
     # to install exact specified version for every dependecy
