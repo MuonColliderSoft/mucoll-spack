@@ -16,6 +16,6 @@ class Acorn(PythonPackage):
     license("Apache-2.0")
 
     # FIXME: Add proper versions and checksums here.
-    version("dev-lukas", branch="dev-lukas", preferred=True)
+    version('dev-lukas')
 
     #depends_on("py-yaml")
