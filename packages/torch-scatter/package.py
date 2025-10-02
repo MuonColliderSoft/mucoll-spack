@@ -1,7 +1,7 @@
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack.package import *
 
-class PytorchScatter(CMakePackage):
+class TorchScatter(CMakePackage):
     """FIXME: Put a proper description of your package here."""
 
     # FIXME: Add a proper url for your package's homepage here.
@@ -26,6 +26,7 @@ class PytorchScatter(CMakePackage):
     version("2.0.3", sha256="ff2ca1468cb4e49b65bea8f889971f196f209231fbee0cc8bd1615ecb367400b")
 
     #depends_on("cxx", type="build")
+    depends_on("py-torch")
 
     # FIXME: Add dependencies if required.
     # depends_on("foo")
