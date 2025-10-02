@@ -365,6 +365,7 @@ class Acts(CMakePackage, CudaPackage):
     depends_on("dd4hep")
     depends_on("nlohmann-json")
     depends_on("edm4hep")
+    depends_on("py-torch")
     
     def cmake_args(self):
         spec = self.spec
