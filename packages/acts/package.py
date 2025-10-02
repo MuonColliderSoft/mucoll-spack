@@ -479,7 +479,7 @@ class Acts(CMakePackage, CudaPackage):
         args.append("-DACTS_BUILD_PLUGIN_DD4HEP=ON")
         args.append("-DACTS_BUILD_PLUGIN_JSON=ON")
         args.append("-DACTS_USE_SYSTEM_NLOHMANN_JSON=ON")
-
-        args.append(self.define_from_variant("CMAKE_CXX_STANDARD", "cxxstd"))
+        args.append("-DCMAKE_CXX_STANDARD=20")
+        args.append("-DCMAKE_BUILD_TYPE=RelWithDebInfo")
 
         return args
