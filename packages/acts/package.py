@@ -359,7 +359,8 @@ class Acts(CMakePackage, CudaPackage):
     # Build dependencies
     depends_on("c", type="build", when="+dd4hep")  # DD4hep requires C
     depends_on("cxx", type="build")
-
+    depends_on("boost")
+    depends_on("cmake")
 
     def cmake_args(self):
         spec = self.spec
@@ -436,42 +437,6 @@ class Acts(CMakePackage, CudaPackage):
 
         log_failure_threshold = spec.variants["log_failure_threshold"].value
         args.append(f"-DACTS_LOG_FAILURE_THRESHOLD={log_failure_threshold}")
-        if spec.satisfies("@19.4.0:"):
-            args.append("-DACTS_ENABLE_LOG_FAILURE_THRESHOLD=ON")
-
-        # Use dependencies provided by spack
-        if spec.satisfies("@20.3:"):
-            args.append("-DACTS_USE_SYSTEM_LIBS=ON")
-            if spec.satisfies("@35.1:36.0"):
-                args.append("-DACTS_USE_SYSTEM_DFELIBS=OFF")
-        else:
-            if spec.satisfies("+autodiff"):
-                args.append("-DACTS_USE_SYSTEM_AUTODIFF=ON")
-
-            if spec.satisfies("@19:20.2 +dd4hep"):
-                args.append("-DACTS_USE_SYSTEM_ACTSDD4HEP=ON")
-
-            if spec.satisfies("@0.33: +json"):
-                args.append("-DACTS_USE_SYSTEM_NLOHMANN_JSON=ON")
-            elif spec.satisfies("@0.14.0:0.32 +json"):
-                args.append("-DACTS_USE_BUNDLED_NLOHMANN_JSON=OFF")
-
-            if spec.satisfies("@18: +python"):
-                args.append("-DACTS_USE_SYSTEM_PYBIND11=ON")
-
-            if spec.satisfies("@20.1: +svg"):
-                args.append("-DACTS_USE_SYSTEM_ACTSVG=ON")
-
-            if spec.satisfies("@14: +vecmem"):
-                args.append("-DACTS_USE_SYSTEM_VECMEM=ON")
-
-        if spec.satisfies("+cuda"):
-            cuda_arch = spec.variants["cuda_arch"].value
-            if cuda_arch != "none":
-                args.append(f"-DCUDA_FLAGS=-arch=sm_{cuda_arch[0]}")
-                arch_str = ";".join(self.spec.variants["cuda_arch"].value)
-                args.append(self.define("CMAKE_CUDA_ARCHITECTURES", arch_str))
-
         args.append("-DACTS_BUILD_PLUGIN_GNN=ON")
         args.append("-DACTS_GNN_ENABLE_CUDA=OFF")
         args.append("-DACTS_GNN_ENABLE_ONNX=ON")
