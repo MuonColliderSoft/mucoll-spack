@@ -568,8 +568,11 @@ class Acts(CMakePackage, CudaPackage):
         args.append("-DACTS_BUILD_PLUGIN_GNN=ON")
         args.append("-DACTS_GNN_ENABLE_CUDA=OFF")
         args.append("-DACTS_GNN_ENABLE_ONNX=ON")
-        args.append("-DACTS_GNN_ENABLE_TORCH=ON")
-        
+        args.append("-DACTS_GNN_ENABLE_TORCH=ON") 
+        args.append("-DACTS_BUILD_PLUGIN_DD4HEP=ON")
+        args.append("-DACTS_BUILD_PLUGIN_JSON=ON")
+        args.append("-DACTS_USE_SYSTEM_NLOHMANN_JSON=ON")
+
         args.append(self.define_from_variant("CMAKE_CXX_STANDARD", "cxxstd"))
 
         return args

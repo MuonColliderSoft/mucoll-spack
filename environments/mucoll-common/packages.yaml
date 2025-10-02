@@ -53,7 +53,7 @@ packages:
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
-    require: '@build-gnn-plugin-no-cuda+onnx+json+dd4hep'
+    require: '@build-gnn-plugin-no-cuda'
   k4geo:
     require: '@main'
   k4gaudipandora:
