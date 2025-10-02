@@ -362,7 +362,10 @@ class Acts(CMakePackage, CudaPackage):
     depends_on("boost")
     depends_on("cmake")
     depends_on("eigen")
-
+    depends_on("dd4hep")
+    depends_on("nlohmann-json")
+    depends_on("edm4hep")
+    
     def cmake_args(self):
         spec = self.spec
 
