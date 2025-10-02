@@ -42,7 +42,7 @@ class Acts(CMakePackage, CudaPackage):
 
     # Supported Acts versions
     version("main", branch="main")
-    version("build-gnn-plugin-no-cuda", branch="build-gnn-plugin-no-cuda")
+    version("build-gnn-plugin-no-cuda", branch="build-gnn-plugin-no-cuda", submodules=True, preferred=True)
     version("master", branch="main", deprecated=True)  # For compatibility
     version("39.2.0", commit="94cf48783efd713f38106b18211d1c59f4e8cdec", submodules=True)
     version("39.1.0", commit="09225b0d0bba24d57a696e347e3027b39404bb75", submodules=True)
