@@ -361,6 +361,7 @@ class Acts(CMakePackage, CudaPackage):
     depends_on("cxx", type="build")
     depends_on("boost")
     depends_on("cmake")
+    depends_on("eigen")
 
     def cmake_args(self):
         spec = self.spec
