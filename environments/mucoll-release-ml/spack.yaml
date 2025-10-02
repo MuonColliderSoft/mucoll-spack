@@ -31,4 +31,3 @@ spack:
 
   specs:
   - mucoll-stack@acorn_integration+devtools+pytools+ml
-  - pytorch-scatter
