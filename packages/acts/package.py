@@ -216,6 +216,7 @@ class Acts(CMakePackage, CudaPackage):
     }
     variant("cxxstd", default="17", when="@:35", **_cxxstd_common)
     variant("cxxstd", default="20", when="@36:", **_cxxstd_common)
+    variant("cxxstd", default="20", when="@build-gnn-plugin-no-cuda", **_cxxstd_common)
     variant(
         "examples",
         default=False,
@@ -450,7 +451,7 @@ class Acts(CMakePackage, CudaPackage):
         args.append("-DACTS_BUILD_PLUGIN_DD4HEP=ON")
         args.append("-DACTS_BUILD_PLUGIN_JSON=ON")
         args.append("-DACTS_USE_SYSTEM_NLOHMANN_JSON=ON")
-        args.append("-DCMAKE_CXX_STANDARD=20")
+        args.append(self.define_from_variant("CMAKE_CXX_STANDARD", "cxxstd"))
         args.append("-DCMAKE_BUILD_TYPE=RelWithDebInfo")
 
         return args
