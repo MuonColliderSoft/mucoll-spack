@@ -76,3 +76,6 @@ packages:
     require: +monitoring
   lccontent:
     require: +monitoring
+
+  py-onnx:
+    require: '@1.14.1'
