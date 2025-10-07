@@ -19,7 +19,7 @@ RUN . /opt/setup_spack.sh && \
 # Apply our patches to spack
 RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
-    cd /opt/spack && \
+    cd /opt/spack-packages && \
     . ${REPOPATH}/.cherry-pick
 
 # Add the package repositories
