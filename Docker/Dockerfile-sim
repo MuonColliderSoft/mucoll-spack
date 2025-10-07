@@ -4,7 +4,7 @@
 ###############################################################################
 
 ARG OS=alma9
-FROM ghcr.io/key4hep/key4hep-externals-${OS}:2025-09-08-mucoll
+FROM ghcr.io/key4hep/key4hep-externals-${OS}:2025-10-07
 
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=muoncollidersoft/mucoll-spack
@@ -14,15 +14,13 @@ RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
     git clone https://github.com/${GITHUB_REPOSITORY} ${REPOPATH} && \
     cd ${REPOPATH} && \
-    git checkout ${MUCOLL_SHA} && \
-    cd -
+    git checkout ${MUCOLL_SHA}
 
 # Apply our patches to spack
 RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
     cd /opt/spack && \
-    . ${REPOPATH}/.cherry-pick && \
-    cd -
+    . ${REPOPATH}/.cherry-pick
 
 # Add the package repositories
 ARG SPACK_BUILDCACHE

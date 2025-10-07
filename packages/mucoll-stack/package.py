@@ -60,6 +60,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('k4marlinwrapper')
     depends_on('k4simdelphes')
     depends_on('k4simgeant4')
+    depends_on('k4geo')
     depends_on('delphes')
 
     ############################### ILCSoft ###############
@@ -98,7 +99,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ############## modified ILCSoft packages ##############
     #######################################################
     depends_on('lcio')
-    depends_on('lcgeo')
     depends_on('lctuple')
     depends_on('overlay')
     depends_on('marlintrkprocessors')
