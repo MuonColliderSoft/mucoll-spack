@@ -1,6 +1,3 @@
 # openloops: Fix application of cmodel to compilation for aarch64.
 git cherry-pick a14f10e8825fd25e0615095feaa548b1938fffac -X theirs --no-commit
 git cherry-pick e76f8fda2d959fdf7a262eb539a4002a6a0c900f -X theirs --no-commit
-
-# LCIO 2.22.5
-git cherry-pick dd16f451fcf1f5d11559ee76221c9c086dcb4e10 -X theirs --no-commit  
