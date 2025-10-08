@@ -33,6 +33,7 @@ jobs:
         run: |
           . /opt/setup_spack.sh
           spack --version
+          spack repo add /opt/spack/var/key4hep-spack
           spack repo add mucoll-spack
           spack repo list
           spack env activate mucoll-spack/environments/mucoll-${{ inputs.target }}
