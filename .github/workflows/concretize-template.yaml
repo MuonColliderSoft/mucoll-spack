@@ -34,8 +34,9 @@ jobs:
           . /opt/setup_spack.sh
           spack --version
           spack repo add mucoll-spack
+          spack repo list
           spack env activate mucoll-spack/environments/mucoll-${{ inputs.target }}
-          spack concretize --reuse
+          spack -ddd concretize --reuse
           spack spec -Nt > ${GITHUB_WORKSPACE}/spec-${{ inputs.target }}.log
       - name: Store artifacts
         uses: actions/upload-artifact@v4
