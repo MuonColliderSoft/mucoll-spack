@@ -157,6 +157,11 @@ class MucollStack(BundlePackage, Key4hepPackage):
         env.set('MUCOLL_STACK', os.path.join(self.spec.prefix, 'setup.sh'))
         env.set('MUCOLL_RELEASE_VERSION', self.spec.version)
 
+        # Set MUCOLL_GEO for backward compatibility.
+        # This now points to the geometry directory provided by k4geo.
+        # If you previously used MUCOLL_GEO, please update your scripts to use k4geo configuration directly.
+        if "k4geo" in self.spec:
+            env.set("MUCOLL_GEO", os.path.join(self.spec["k4geo"].prefix.share))
         # ROOT needs to be in LD_LIBRARY_PATH to prevent using system installations
         env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib)
         env.prepend_path("PYTHONPATH", self.spec["root"].prefix.lib)
