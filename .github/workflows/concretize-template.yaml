@@ -26,7 +26,7 @@ jobs:
       - name: Apply Patches
         run: |
           whereami=$(pwd)
-          cd /opt/spack 
+          cd /opt/spack-packages
           . ${whereami}/mucoll-spack/.cherry-pick
           cd -
       - name: Load env and concretize
