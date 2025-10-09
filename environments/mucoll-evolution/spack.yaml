@@ -1,0 +1,44 @@
+spack:
+  packages:
+    all:
+      target: [x86_64, aarch64]
+      variants: 
+        - build_type=RelWithDebInfo
+        - 'cxxstd=20'
+      buildable: true
+      providers:
+        gl: [mesa]
+        glu: [mesa]
+
+    dd4hep:
+      require: '+edm4hep+lcio+xercesc+hepmc3'
+    acts:
+      require: '@42.0.0'
+    overlay:
+      require: '@0.26'
+    k4geo:
+      require: '@main'
+    forwardtracking:
+      require: '@1.14.2'
+    conformaltracking:
+      require: '@1.12.1'
+    marlintrkprocessors:
+      require: '@2.17.1'
+    marlinacts:
+      require: '@1.0.3'
+    muoncvxddigitiser:
+      require: '@0.2.2'
+    ddmarlinpandora:
+      require: +monitoring
+    lccontent:
+      require: +monitoring
+
+  concretizer:
+    unify: true
+    targets:
+      host_compatible: true
+
+  view: false
+
+  specs:
+  - mucoll-stack+devtools+pytools
