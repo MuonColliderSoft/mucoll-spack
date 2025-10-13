@@ -15,7 +15,7 @@ spack:
     acts:
       require: '@42.0.0'
     overlay:
-      require: '@0.26'
+      require: '@evo'
     k4geo:
       require: '@main'
     forwardtracking:
@@ -29,7 +29,7 @@ spack:
     muoncvxddigitiser:
       require: '@0.2.2'
     ddmarlinpandora:
-      require: +monitoring
+      require: '@evo+monitoring'
     lccontent:
       require: +monitoring
 
