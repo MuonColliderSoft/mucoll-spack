@@ -23,7 +23,7 @@ spack:
     conformaltracking:
       require: '@1.12.1'
     marlintrkprocessors:
-      require: '@2.17.1'
+      require: '@evo'
     marlinacts:
       require: '@1.0.3'
     muoncvxddigitiser:
