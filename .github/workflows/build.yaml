@@ -3,7 +3,10 @@ description: |
   Publish mucoll software stack docker image.
   This workflow relies on a spack cache.
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
