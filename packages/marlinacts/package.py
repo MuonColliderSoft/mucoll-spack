@@ -25,9 +25,10 @@ class Marlinacts(CMakePackage, MCIlcsoftpackage):
     
     def setup_run_environment(self, spack_env):
         spack_env.prepend_path('MARLIN_DLL', self.prefix.lib + "/libMarlinACTS.so")
-        spack_env.set('MarlinACTS_DATA', self.prefix.share.Marlinacts.data)
-        spack_env.set("ACTS_TGeoFile", self.prefix.share.Marlinacts.data + "/MuSIC_v2.root")
-        spack_env.set("ACTS_MatFile", self.prefix.share.Marlinacts.data + "/material-maps.json")
+        spack_env.set('MarlinACTS_DATA', self.prefix.share + "/MarlinACTS/data")
+        spack_env.set("ACTS_TGeoFile", self.prefix.share + "/MarlinACTS/data/MuSIC_v2.root")
+        spack_env.set("ACTS_MatFile", self.prefix.share + "/MarlinACTS/data/material-maps.json")
+        spack_env.set("ACTS_DescrFile", self.prefix.share + "/MarlinACTS/data/MuSIC_v2.json")
 
     def cmake_args(self):
         return []
