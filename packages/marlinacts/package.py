@@ -21,10 +21,7 @@ class Marlinacts(CMakePackage, MCIlcsoftpackage):
     depends_on('root')
     depends_on('tbb')
     depends_on('lua')
-
-    # Building in parallel may fail
-    parallel = False
-
+    depends_on('eigen')
     
     def setup_run_environment(self, spack_env):
         spack_env.prepend_path('MARLIN_DLL', self.prefix.lib + "/libMarlinACTS.so")
@@ -33,7 +30,4 @@ class Marlinacts(CMakePackage, MCIlcsoftpackage):
         spack_env.set("ACTS_MatFile", self.prefix.share.Marlinacts.data + "/material-maps.json")
 
     def cmake_args(self):
-        # C++ Standard
-        return [
-            '-DCMAKE_CXX_STANDARD=%s' % self.spec['root'].variants['cxxstd'].value
-        ]
+        return []
