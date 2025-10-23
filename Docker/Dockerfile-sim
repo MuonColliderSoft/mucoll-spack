@@ -28,7 +28,6 @@ ARG OCI_USERNAME
 RUN . /opt/setup_spack.sh && \
     spack repo add ${SPACK_ROOT}/var/mucoll-spack && \
     if [ -n "${SPACK_BUILDCACHE}" ]; then \
-        spack mirror remove local-buildcache || true; \
         spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}";\
     fi
 

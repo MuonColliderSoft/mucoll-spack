@@ -26,13 +26,10 @@ class MucollStack(BundlePackage, Key4hepPackage):
     # should use `environments/mucoll-common/packages.yaml`
     version(datetime.today().strftime('%Y-%m-%d'))
 
-    version("master", branch="master")
-    version("full_gaudi_test", branch="full_gaudi_test")
-
     ### stable build
     # to install exact specified version for every dependecy
     # should use `environments/mucoll-release/packages.yaml`
-    version('2.9')
+    version('3.0')
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase
