@@ -21,4 +21,4 @@ spack:
   - ../mucoll-common/packages.yaml
 
   specs:
-  - mucoll-stack+devtools
+  - mucoll-stack@full_gaudi_test+devtools

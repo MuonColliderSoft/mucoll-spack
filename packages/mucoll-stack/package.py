@@ -10,8 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from mucoll_utils import *
 
 from spack.package import *
-from spack.pkg.k4.key4hep_stack import Key4hepPackage, install_setup_script
-
+from spack.pkg.k4.key4hep_stack import *
 
 class MucollStack(BundlePackage, Key4hepPackage):
     """Bundle package to install Muon Collider Software Stack"""
@@ -28,6 +27,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     version(datetime.today().strftime('%Y-%m-%d'))
 
     version("master", branch="master")
+    version("full_gaudi_test", branch="full_gaudi_test")
 
     ### stable build
     # to install exact specified version for every dependecy
@@ -61,6 +61,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('k4simdelphes')
     depends_on('k4simgeant4')
     depends_on('k4geo')
+    depends_on('k4reco')
+    depends_on('k4gaudipandora')
+    depends_on('k4actstracking')
     depends_on('delphes')
 
     ############################### ILCSoft ###############
@@ -100,7 +103,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     #######################################################
     depends_on('lcio')
     depends_on('lctuple')
-    depends_on('overlay')
     depends_on('marlintrkprocessors')
     depends_on('forwardtracking')
     depends_on('conformaltracking')
@@ -108,7 +110,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
 
     ############ custom Muon Collider packages ############
     #######################################################
-    depends_on('actstracking')
     depends_on('muoncvxddigitiser')
 
 
@@ -128,6 +129,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
+        depends_on("py-torch")
+        #depends_on('acorn')
 
     with when('+pytools'):
         # Python tools
@@ -171,6 +174,16 @@ class MucollStack(BundlePackage, Key4hepPackage):
             env.prepend_path("CPATH", self.spec["vdt"].prefix.include)
             # When building podio with +rntuple there are warnings constantly without this
             env.prepend_path("LD_LIBRARY_PATH", self.spec["vdt"].libs.directories[0])
+
+        # Add the correct path in pytorch to CMAKE_PREFIX_PATH
+        # This could be deleted (to be tested) once https://github.com/spack/spack/pull/49267 is merged
+        if "py-torch" in self.spec:
+            env.prepend_path(
+                "CMAKE_PREFIX_PATH",
+                join_path(
+                    self["py-torch"].module.python_platlib, "torch", "share", "cmake"
+                ),
+            )
 
     def install(self, spec, prefix):
         return install_setup_script(self, spec, prefix, 'MUCOLL_LATEST_SETUP_PATH')
