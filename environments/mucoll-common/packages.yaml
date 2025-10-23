@@ -54,8 +54,6 @@ packages:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
     require: '@32.1.0'
-  overlay:
-    require: '@0.26'
   k4geo:
     require: '@0.23'
   k4gaudipandora:
@@ -65,10 +63,6 @@ packages:
   k4actstracking:
     require: '@main'
 
-  forwardtracking:
-    require: '@1.14.2'
-  conformaltracking:
-    require: '@1.12.1'
   marlintrkprocessors:
     require: '@2.17.1'
 
