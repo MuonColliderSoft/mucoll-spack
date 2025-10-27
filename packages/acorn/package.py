@@ -9,10 +9,6 @@ class Acorn(PythonPackage):
     homepage = "https://gitlab.cern.ch/gnn4itkteam/acorn"
     git = "https://gitlab.cern.ch/lbauckha/acorn.git"
 
-    # FIXME: Add a list of GitHub accounts to
-    # notify when the package is updated.
-    # maintainers("github_user1", "github_user2")
-
     license("Apache-2.0")
 
     # FIXME: Add proper versions and checksums here.
