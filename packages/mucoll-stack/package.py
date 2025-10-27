@@ -61,7 +61,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('k4reco')
     depends_on('k4gaudipandora')
     depends_on('k4actstracking')
-    depends_on('delphes')
+    depends_on('k4marlinwrapper')
 
     ############################### ILCSoft ###############
     #######################################################
@@ -71,7 +71,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('ced')
     depends_on('cedviewer')
     depends_on('garlic')
-    depends_on('k4marlinwrapper')
     depends_on('generalbrokenlines')
     depends_on('gear')
     depends_on('ilcutil')
@@ -103,6 +102,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
     #######################################################
     depends_on('muoncvxddigitiser')
 
+    ############ generic packages ############
+    #######################################################
+    depends_on('delphes')
 
     ##################### developer tools #################
     #######################################################

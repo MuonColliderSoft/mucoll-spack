@@ -68,8 +68,6 @@ packages:
 
   muoncvxddigitiser:
     require: '@0.2.2'
-  ddmarlinpandora:
-    require: +monitoring
   lccontent:
     require: +monitoring
 
