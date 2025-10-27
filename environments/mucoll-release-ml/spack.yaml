@@ -30,4 +30,4 @@ spack:
   - ../mucoll-common/packages.yaml
 
   specs:
-  - mucoll-stack@acorn_integration+devtools+pytools+ml
+  - mucoll-stack+devtools+pytools+ml

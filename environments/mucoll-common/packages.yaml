@@ -55,7 +55,7 @@ packages:
   acts:
     require: '@build-gnn-plugin-no-cuda'
   k4geo:
-    require: '@main'
+    require: '@0.23'
   k4gaudipandora:
     require: '@main'
   k4reco:
@@ -63,10 +63,6 @@ packages:
   k4actstracking:
     require: '@main'
 
-  forwardtracking:
-    require: '@1.14.2'
-  conformaltracking:
-    require: '@1.12.1'
   marlintrkprocessors:
     require: '@2.17.1'
 

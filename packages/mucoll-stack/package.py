@@ -26,13 +26,10 @@ class MucollStack(BundlePackage, Key4hepPackage):
     # should use `environments/mucoll-common/packages.yaml`
     version(datetime.today().strftime('%Y-%m-%d'))
 
-    version("master", branch="master")
-    version("acorn_integration", branch="acorn_integration")
-
     ### stable build
     # to install exact specified version for every dependecy
     # should use `environments/mucoll-release/packages.yaml`
-    version('2.9')
+    version('3.0')
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase
@@ -98,16 +95,10 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('pandorapfa')
     depends_on('clicperformance')
 
-
     ############## modified ILCSoft packages ##############
     #######################################################
-    depends_on('lcio')
-    depends_on('lctuple')
     depends_on('marlintrkprocessors')
-    depends_on('forwardtracking')
-    depends_on('conformaltracking')
-    depends_on('ddmarlinpandora')
-
+    
     ############ custom Muon Collider packages ############
     #######################################################
     depends_on('muoncvxddigitiser')
@@ -161,9 +152,17 @@ class MucollStack(BundlePackage, Key4hepPackage):
         env.set('MUCOLL_STACK', os.path.join(self.spec.prefix, 'setup.sh'))
         env.set('MUCOLL_RELEASE_VERSION', self.spec.version)
 
-        # ROOT needs to be in LD_LIBRARY_PATH to prevent using system installations
-        env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib)
-        env.prepend_path("PYTHONPATH", self.spec["root"].prefix.lib)
+        # Set MUCOLL_GEO for backward compatibility.
+        # This now points to the geometry directory provided by k4geo.
+        # If you previously used MUCOLL_GEO, please update your scripts to use k4geo configuration directly.
+        if "k4geo" in self.spec:
+            env.set("MUCOLL_GEO", os.path.join(self.spec["k4geo"].prefix.share))
+
+        # ROOT needs to be in LD_LIBRARY_PATH to find cxxmodules
+        env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
+
+        # See https://github.com/root-project/root/issues/18949
+        env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
 
         # set vdt, needed for root, see https://github.com/spack/spack/pull/37278
         if "vdt" in self.spec:
