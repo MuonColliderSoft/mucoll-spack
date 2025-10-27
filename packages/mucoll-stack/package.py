@@ -162,9 +162,12 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # If you previously used MUCOLL_GEO, please update your scripts to use k4geo configuration directly.
         if "k4geo" in self.spec:
             env.set("MUCOLL_GEO", os.path.join(self.spec["k4geo"].prefix.share))
-        # ROOT needs to be in LD_LIBRARY_PATH to prevent using system installations
-        env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib)
-        env.prepend_path("PYTHONPATH", self.spec["root"].prefix.lib)
+
+        # ROOT needs to be in LD_LIBRARY_PATH to find cxxmodules
+        env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
+
+        # See https://github.com/root-project/root/issues/18949
+        env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
 
         # set vdt, needed for root, see https://github.com/spack/spack/pull/37278
         if "vdt" in self.spec:
