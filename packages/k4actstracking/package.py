@@ -1,28 +1,28 @@
 from spack.package import *
-from spack.pkg.mucoll.mucoll_stack import Key4hepPackage
+from spack.pkg.k4.key4hep_stack import Key4hepPackage
 
 
 class K4actstracking(CMakePackage, Key4hepPackage):
     """Acts tracking components for the key4hep project"""
 
-    url = "https://github.com/MuonColliderSoft/k4ActsTracking/archive/v00-11.tar.gz"
-    homepage = "https://github.com/MuonColliderSoft/k4ActsTracking"
-    git = "https://github.com/MuonColliderSoft/k4ActsTracking.git"
+    homepage = "https://github.com/key4hep/k4ActsTracking"
+    # todo
+    # url = "https://github.com/key4hep/k4ActsTracking"
+    git = "https://github.com/key4hep/k4ActsTracking.git"
 
     maintainers("vvolkl")
 
     version("main", branch="main")
 
-    depends_on("acts+dd4hep+tgeo+json")
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
+
+    depends_on("acts")
     depends_on("gaudi")
     depends_on("root")
     depends_on("edm4hep")
     depends_on("k4fwcore")
-    depends_on("acts-dd4hep")
-
-    def setup_run_environment(self, env):
-        env.prepend_path("LD_LIBRARY_PATH", self.spec["k4actstracking"].prefix.lib)
-        env.prepend_path("PYTHONPATH", self.prefix.python)
+    depends_on("opendatadetector", type="test")
 
     def cmake_args(self):
         return []
