@@ -62,6 +62,8 @@ packages:
     require: '@main'
   k4actstracking:
     require: '@main'
+  k4fwcore:
+    require: '@main'
 
   marlintrkprocessors:
     require: '@2.17.1'
