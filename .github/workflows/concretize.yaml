@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [alma9, ubuntu24]
+        os: [ubuntu24]
         target: [release, release-debug, release-ml]
     uses: ./.github/workflows/concretize-template.yaml
     with:
