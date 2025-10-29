@@ -6,13 +6,14 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     """Acts tracking components for the key4hep project"""
 
     homepage = "https://github.com/MuonColliderSoft/k4ActsTracking.git"
-    # todo
-    # url = "https://github.com/MuonColliderSoft/k4ActsTracking"
     git = "https://github.com/MuonColliderSoft/k4ActsTracking.git"
+    url = "https://github.com/MuonColliderSoft/k4ActsTracking/archive/refs/tags/v00-01.tar.gz"
 
     maintainers("vvolkl")
 
     version("main", branch="main")
+
+    version("0.1", sha256="e214a0bff098ba306490f6dbd68fb3b19c1f3c6d7dc32cf3506bf9de104fb012")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
