@@ -61,7 +61,7 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
-    require: '@0.1'
+    require: '@main'
   k4fwcore:
     require: '@main'
 
