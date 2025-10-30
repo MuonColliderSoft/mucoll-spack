@@ -53,7 +53,7 @@ packages:
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
-    require: '@build-gnn-plugin-no-cuda'
+    require: '@32.1.0+dd4hep+json'
   k4geo:
     require: '@0.23'
   k4gaudipandora:
@@ -61,6 +61,8 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
+    require: '@0.1'
+  k4fwcore:
     require: '@main'
 
   marlintrkprocessors:
@@ -68,8 +70,6 @@ packages:
 
   muoncvxddigitiser:
     require: '@0.2.2'
-  ddmarlinpandora:
-    require: +monitoring
   lccontent:
     require: +monitoring
 

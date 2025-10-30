@@ -34,6 +34,7 @@ class K4gaudipandora(CMakePackage, Key4hepPackage):
 
     def setup_run_environment(self, env):
         env.prepend_path("LD_LIBRARY_PATH", self.spec["k4gaudipandora"].prefix.lib)
+        env.prepend_path("LD_LIBRARY_PATH", self.spec["k4gaudipandora"].prefix.lib64)
         env.prepend_path("PYTHONPATH", self.prefix.python)
 
     def cmake_args(self):
