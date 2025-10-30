@@ -102,6 +102,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ############ generic packages ############
     #######################################################
     depends_on('delphes')
+    depends_on('libcurl')
 
     ##################### developer tools #################
     #######################################################
