@@ -50,7 +50,9 @@ packages:
   binutils:
     require: +gas
   gdb:
-    require: +python+tui+source-highlight~debuginfod    
+    require: +python+tui+source-highlight~debuginfod
+  py-pandas:
+    require: ~excel~parquet~performance
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
