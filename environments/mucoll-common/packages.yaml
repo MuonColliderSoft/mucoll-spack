@@ -30,21 +30,6 @@ packages:
     externals:
     - spec: mesa-glu@99
       prefix: /usr
-  # Use the system kerberos, otherwise the tickets obtained at login with the
-  # system version don't appear for the spack kerberos (happening on lxplus at least)
-  krb5:
-    buildable: False
-    externals:
-    - spec: krb5@99
-      prefix: /usr
-  # Use the system ssh, otherwise the configuration for the provided ssh will likely be
-  # different and things like ssh using kerberos won't work (by extension authentication
-  # for git with ssh with kerberos)
-  openssh:
-    buildable: False
-    externals:
-    - spec: openssh@99
-      prefix: /usr
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
