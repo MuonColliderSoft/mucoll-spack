@@ -54,6 +54,9 @@ packages:
   py-pandas:
     require: ~excel~parquet~performance
 
+  torch-scatter:
+    require: '@copilot'
+
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
