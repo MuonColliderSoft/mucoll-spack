@@ -120,8 +120,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
         depends_on("py-torch")
-        #depends_on('acorn')
-        #depends_on('torch-scatter')
+        depends_on('acorn')
+        depends_on('torch-scatter')
+        depends_on('py-torch-scatter')
 
     with when('+pytools'):
         # Python tools
