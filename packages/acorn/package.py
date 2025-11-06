@@ -22,7 +22,7 @@ class Acorn(PythonPackage):
     #depends_on("py-seaborn")
     depends_on("py-pyyaml")
     #depends_on("py-ipykernel")
-    depends_on("py-lightning@2.4.0")
+    depends_on("py-lightning")
     depends_on("py-torch-geometric")
     #depends_on("py-pytest")
     #depends_on("py-pytest-cov")
