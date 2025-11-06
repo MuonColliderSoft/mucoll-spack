@@ -31,6 +31,7 @@ class TorchScatter(PythonPackage):
 
     depends_on("cxx", type="build")
     depends_on("c", type="build")
+    depends_on("cmake", type="build")
 
     depends_on("py-setuptools", type="build")
     depends_on("py-torch")
