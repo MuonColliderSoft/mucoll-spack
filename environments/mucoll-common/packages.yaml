@@ -55,7 +55,7 @@ packages:
     require: ~excel~parquet~performance
 
   torch-scatter:
-    require: '@copilot'
+    require: '@master'
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'

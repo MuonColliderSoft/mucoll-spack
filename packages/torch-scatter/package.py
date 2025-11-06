@@ -15,8 +15,7 @@ class TorchScatter(CMakePackage):
 
     license("MIT")
 
-    version("master", branch="master")
-    version("copilot", branch="copilot/adapt-setuptools-installation")
+    version("master", branch="copilot/adapt-setuptools-installation")
     version("2.1.2", sha256="6f375dbc9cfe03f330aa29ea553e9c7432e9b040d039b041f08bf05df1a8bf37")
     version("2.1.1", sha256="ea4f4ac4210a983d878df29e82190f60a7e6e9a791adbe0c0d635040e6256c4d")
     version("2.1.0", sha256="c587ddf7ffaf8e4ddc31d8016d7f445d5896ce491209574800166a9f85c29377")
