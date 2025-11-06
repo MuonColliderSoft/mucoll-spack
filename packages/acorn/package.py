@@ -19,7 +19,7 @@ class Acorn(PythonPackage):
     #depends_on("py-numba")
     depends_on("py-tqdm")
     depends_on("py-networkx")
-    #depends_on("py-seaborn")
+    depends_on("py-seaborn")
     depends_on("py-pyyaml")
     #depends_on("py-ipykernel")
     depends_on("py-lightning")
