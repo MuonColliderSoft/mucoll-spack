@@ -36,7 +36,7 @@ class TorchScatter(CMakePackage):
     depends_on("py-torch")
     depends_on("py-torch +cuda", when="+cuda")
 
-    #conflicts("py-torch@2.1:", when="@:2.1.2")
+    conflicts("py-torch@2.1:", when="@:2.1.2")
 
     def cmake_args(self):
         args = [
