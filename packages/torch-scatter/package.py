@@ -34,8 +34,8 @@ class TorchScatter(PythonPackage):
     depends_on("cmake", type="build")
 
     depends_on("py-setuptools", type="build")
-    depends_on("py-torch")
-    depends_on("py-torch +cuda", when="+cuda")
+    depends_on("py-torch", type=("build", "link", "run"))
+    depends_on("py-torch +cuda", type=("build", "link", "run"), when="+cuda")
 
     conflicts("py-torch@2.1:", when="@:2.1.2")
 
@@ -43,5 +43,9 @@ class TorchScatter(PythonPackage):
         """Set environment variables for the build."""
         if "+cuda" in self.spec:
             env.set("FORCE_CUDA", "1")
+            env.set("FORCE_ONLY_CUDA", "0")
+            env.set("FORCE_ONLY_CPU", "0")
         else:
+            env.set("FORCE_CUDA", "0")
+            env.set("FORCE_ONLY_CUDA", "0")
             env.set("FORCE_ONLY_CPU", "1")
