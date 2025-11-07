@@ -32,12 +32,19 @@ class TorchScatter(PythonPackage):
     depends_on("cxx", type="build")
     depends_on("c", type="build")
     depends_on("cmake", type="build")
+    depends_on("gmake", type="build")
 
     depends_on("py-setuptools", type="build")
+    depends_on("py-pip", type="build")
     depends_on("py-torch", type=("build", "link", "run"))
     depends_on("py-torch +cuda", type=("build", "link", "run"), when="+cuda")
 
     conflicts("py-torch@2.1:", when="@:2.1.2")
+
+    def install(self, spec, prefix):
+        """Install using pip with no build isolation to ensure torch is available."""
+        pip = which("pip")
+        pip("install", "--no-build-isolation", "--no-deps", "-v", ".")
 
     def setup_build_environment(self, env):
         """Set environment variables for the build."""
