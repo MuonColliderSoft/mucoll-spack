@@ -1,6 +1,7 @@
 from spack_repo.builtin.build_systems.python import PythonPackage
 
 from spack.package import *
+from spack.util.executable import which
 
 
 class TorchScatter(PythonPackage):
@@ -44,7 +45,7 @@ class TorchScatter(PythonPackage):
     def install(self, spec, prefix):
         """Install using pip with no build isolation to ensure torch is available."""
         pip = which("pip")
-        pip("install", "--no-build-isolation", "--no-deps", "-v", ".")
+        pip("install", "--no-build-isolation", "--no-deps", "-v", "--prefix", prefix, ".")
 
     def setup_build_environment(self, env):
         """Set environment variables for the build."""
