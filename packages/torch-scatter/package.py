@@ -44,7 +44,8 @@ class TorchScatter(PythonPackage):
     def install(self, spec, prefix):
         """Install using pip with no build isolation to ensure torch is available."""
         pip = spec["py-pip"].command
-        pip("install", "--no-build-isolation", "--no-deps", "-v", "--prefix", prefix, ".")
+        pip("install", "--no-build-isolation", "--no-deps", "--no-cache-dir", 
+            "-v", "--prefix", prefix, ".")
 
     def setup_build_environment(self, env):
         """Set environment variables for the build."""
