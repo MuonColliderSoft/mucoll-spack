@@ -1,12 +1,12 @@
-from spack_repo.builtin.build_systems.python import PythonPackage
+from spack_repo.builtin.build_systems.cmake import CMakePackage
 
 from spack.package import *
 
 
-class TorchScatter(PythonPackage):
+class TorchScatter(CMakePackage):
     """Torch Extension Library of Optimized Scatter Operations.
 
-    This version of the package installs the Python library using setuptools.
+    This version of the package is consumable by downstream users via CMake
     """
 
     homepage = "https://github.com/madbaron/pytorch_scatter"
@@ -31,29 +31,16 @@ class TorchScatter(PythonPackage):
 
     depends_on("cxx", type="build")
     depends_on("c", type="build")
-    depends_on("cmake", type="build")
-    depends_on("gmake", type="build")
 
-    depends_on("py-setuptools", type="build")
-    depends_on("py-pip", type="build")
-    depends_on("py-torch", type=("build", "link", "run"))
-    depends_on("py-torch +cuda", type=("build", "link", "run"), when="+cuda")
+    depends_on("py-torch")
+    depends_on("py-torch +cuda", when="+cuda")
 
     conflicts("py-torch@2.1:", when="@:2.1.2")
 
-    def install(self, spec, prefix):
-        """Install using pip with no build isolation to ensure torch is available."""
-        pip = spec["py-pip"].command
-        pip("install", "--no-build-isolation", "--no-deps", "--no-cache-dir", 
-            "-v", "--prefix", prefix, ".")
-
-    def setup_build_environment(self, env):
-        """Set environment variables for the build."""
-        if "+cuda" in self.spec:
-            env.set("FORCE_CUDA", "1")
-            env.set("FORCE_ONLY_CUDA", "0")
-            env.set("FORCE_ONLY_CPU", "0")
-        else:
-            env.set("FORCE_CUDA", "0")
-            env.set("FORCE_ONLY_CUDA", "0")
-            env.set("FORCE_ONLY_CPU", "1")
+    def cmake_args(self):
+        args = [
+            self.define_from_variant("WITH_CUDA", "cuda"),
+            self.define("CMAKE_CXX_STANDARD", "20"),
+            self.define("WITH_PYTHON", True),
+        ]
+        return args
