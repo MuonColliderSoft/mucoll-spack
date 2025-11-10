@@ -14,7 +14,7 @@ RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
     cd ${REPOPATH} && \
     git fetch && \
-    git checkout copilot/edit-package-py-torch-scatter && \
+    git checkout acorn_integration && \
     cd -
 
 # Reconnect to build cache
