@@ -72,6 +72,3 @@ packages:
     require: '@0.2.2'
   lccontent:
     require: +monitoring
-
-  py-onnx:
-    require: '@1.14.1'
