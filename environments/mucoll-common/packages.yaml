@@ -63,7 +63,7 @@ packages:
   conformaltracking:
     require: '@1.12.1'
   marlintrkprocessors:
-    require: '@2.17.1'
+    require: '@2.18'
   actstracking:
     require: '@1.3.2'
   muoncvxddigitiser:
