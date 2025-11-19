@@ -93,10 +93,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('pandoraanalysis')
     depends_on('pandorapfa')
     depends_on('clicperformance')
-
-    ############## modified ILCSoft packages ##############
-    #######################################################
-    depends_on('marlintrkprocessors')
     
     ############ custom Muon Collider packages ############
     #######################################################
