@@ -3,10 +3,10 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
+from spack.pkg.k4.key4hep_stack import Key4hepPackage
 from spack.package import *
 
-class Mybibutils(CMakePackage, MCIlcsoftpackage):
+class Mybibutils(CMakePackage, Key4hepPackage):
     """A collection of legacy BIB-related Processors used in some MAIA studies"""
 
     homepage = "https://github.com/madbaron/MyBIBUtils"

@@ -3,10 +3,10 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
+from spack.pkg.k4.key4hep_stack import Key4hepPackage
 from spack.package import *
 
-class Marlinmuonid(CMakePackage, MCIlcsoftpackage):
+class Marlinmuonid(CMakePackage, Key4hepPackage):
     """Marlin-based processor for muon identification"""
 
     homepage = "https://github.com/MuonColliderSoft/MarlinMuonID"
