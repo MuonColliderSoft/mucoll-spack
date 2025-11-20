@@ -4,7 +4,7 @@
 ###############################################################################
 
 ARG OS=alma9
-FROM ghcr.io/key4hep/key4hep-externals-${OS}:2025-10-07
+FROM ghcr.io/key4hep/key4hep-externals-${OS}:latest
 
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=muoncollidersoft/mucoll-spack
