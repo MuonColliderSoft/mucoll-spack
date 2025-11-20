@@ -60,7 +60,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('k4geo')
     depends_on('k4reco')
     depends_on('k4gaudipandora')
-    depends_on('k4actstracking')
+    #depends_on('k4actstracking')
     depends_on('k4marlinwrapper')
 
     ############################### ILCSoft ###############
