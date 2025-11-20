@@ -95,6 +95,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('pandorapfa')
     depends_on('clicperformance')
     depends_on('marlinmuonid')
+    depends_on('mybibutils')
 
 
     ############## modified ILCSoft packages ##############

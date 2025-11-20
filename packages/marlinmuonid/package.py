@@ -6,8 +6,8 @@
 from spack.pkg.mucoll.mucoll_stack import MCIlcsoftpackage
 from spack.package import *
 
-class Marlintrkprocessors(CMakePackage, MCIlcsoftpackage):
-    """A collection of Tracking Relelated Processors Based on MarlinTrk"""
+class Marlinmuonid(CMakePackage, MCIlcsoftpackage):
+    """Marlin-based processor for muon identification"""
 
     homepage = "https://github.com/MuonColliderSoft/MarlinMuonID"
     git      = "https://github.com/MuonColliderSoft/MarlinMuonID.git"
