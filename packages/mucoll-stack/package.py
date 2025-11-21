@@ -154,7 +154,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # If you previously used MUCOLL_GEO, please update your scripts to use k4geo configuration directly.
         if "k4geo" in self.spec:
             env.set("MUCOLL_GEO", os.path.join(self.spec["k4geo"].prefix.share))
-        
         if "k4actstracking" in self.spec:
             env.set("ACTSTRACKING_DATA", os.path.join(self.spec["k4actstracking"].prefix.share))
 
