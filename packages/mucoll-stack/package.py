@@ -93,7 +93,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('pandoraanalysis')
     depends_on('pandorapfa')
     depends_on('clicperformance')
-    
     ############ custom Muon Collider packages ############
     #######################################################
     depends_on('muoncvxddigitiser')
