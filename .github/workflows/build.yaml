@@ -20,14 +20,14 @@ jobs:
       os: ${{ matrix.os }}
       registry: ghcr.io
   #build-ml-image:
-    #needs: build-sim-image
-    #uses: ./.github/workflows/image-template.yaml
-    #strategy:
-    #  fail-fast: false
-    #  matrix:
-    #    #os: [alma9, ubuntu24]
-    #    os: [ubuntu24]
-    #with:
-    #  os: ${{ matrix.os }}
-    #  registry: ghcr.io
-    #  image-type: ml
+  #needs: build-sim-image
+  #uses: ./.github/workflows/image-template.yaml
+  #strategy:
+  #  fail-fast: false
+  #  matrix:
+  #    #os: [alma9, ubuntu24]
+  #    os: [ubuntu24]
+  #with:
+  #  os: ${{ matrix.os }}
+  #  registry: ghcr.io
+  #  image-type: ml
