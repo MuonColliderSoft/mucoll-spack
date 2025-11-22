@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: endersonmenezes/free-disk-space@v2
+        uses: endersonmenezes/free-disk-space@v3
         with:
           remove_android: true
           remove_dotnet: true
@@ -40,15 +40,13 @@ jobs:
         run: |
           echo '#Test env concretisation' > ${GITHUB_WORKSPACE}/concretize.sh
           cat << 'EOF' >> ${GITHUB_WORKSPACE}/concretize.sh
-          whereami=$(pwd)
           cd /opt/spack-packages
-          . ${whereami}/mucoll-spack/.cherry-pick
+          . /packages/mucoll-spack/.cherry-pick
           cd -
           . /opt/setup_spack.sh
           spack --version
-          spack repo add /opt/spack/var/key4hep-spack
-          spack repo add mucoll-spack
-          spack env activate mucoll-spack/environments/mucoll-${{ inputs.target }}
+          spack repo add /packages/mucoll-spack
+          spack env activate /packages/mucoll-spack/environments/mucoll-${{ inputs.target }}
           spack concretize --reuse
           spack spec -Nt > /packages/spec-${{ inputs.target }}.log
           EOF
@@ -56,7 +54,7 @@ jobs:
           chmod +x ${GITHUB_WORKSPACE}/concretize.sh
           docker exec ci_container /bin/bash -c "/packages/concretize.sh"
       - name: Store artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: spec-list
           path: ${GITHUB_WORKSPACE}/spec-${{ inputs.target }}.log
