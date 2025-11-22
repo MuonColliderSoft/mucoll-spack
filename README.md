@@ -1,5 +1,7 @@
 # [Spack](https://github.com/spack/spack) package repository for Muon Collider software stack
 
+### Note: the main branch is now used for the 3.x release series.
+
 This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack. It is built on top of the key4hep-dev-external environment from the [key4hep-stack](https://github.com/key4hep/key4hep-spack) repository, which is required for installation.
 
 After installing [Spack](https://github.com/key4hep/spack) and downloading the [key4hep-spack](https://github.com/key4hep/key4hep-spack) and [mucoll-spack](https://github.com/MuonColliderSoft/mucoll-spack) repositories, the whole software stack can be installed using the following commands:
@@ -131,15 +133,5 @@ spack env deactivate
 # Activate the default environment (if in a Docker container)
 spack env activate sim
 ```
-
-## Build Docker Images
-
-The `Dockerfile`s used to build the official releases are provided in this repository. To build a local release, run the following script. The arguments are used to create the image tags.
-
-```shell
-cd AlmaLinux9
-./build.sh REPOSITORY VERSION
-```
-
 The stack image will be created:
 - `${REPOSITORY}/mucoll-sim:${VERSION}-alma9`: Contains the full Muon Collider Spack environment.
