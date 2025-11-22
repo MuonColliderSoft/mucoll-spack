@@ -65,10 +65,11 @@ RUN . ${HOME}/setup_env.sh && \
     echo "source ${MUCOLL_STACK_PATH_CLEANED}/setup.sh" > /opt/setup_mucoll.sh && \
     echo "alias setup_mucoll=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" >> /etc/profile.d/aliases.sh
 
+# Create entrypoint script to source setup and exec command
+RUN echo '#!/bin/bash\nsource /opt/setup_mucoll.sh\nexec "$@"' > /opt/entrypoint.sh && chmod +x /opt/entrypoint.sh
+
 # Setting up users to be used for the local environment setup
 RUN useradd --shell /bin/bash --create-home mucoll
 USER mucoll
 WORKDIR /home/mucoll
-# Create entrypoint script to source setup and exec command
-RUN echo '#!/bin/bash\nsource /opt/setup_mucoll.sh\nexec "$@"' > /opt/entrypoint.sh && chmod +x /opt/entrypoint.sh
 ENTRYPOINT ["/opt/entrypoint.sh"]
