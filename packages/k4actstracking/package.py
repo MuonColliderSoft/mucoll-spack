@@ -12,7 +12,6 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     maintainers("vvolkl")
 
     version("main", branch="main")
-    version("acts_44", branch="acts_44")
 
     version("0.1", sha256="e214a0bff098ba306490f6dbd68fb3b19c1f3c6d7dc32cf3506bf9de104fb012")
 
