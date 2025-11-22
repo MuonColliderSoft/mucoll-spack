@@ -13,31 +13,48 @@ on:
 jobs:
   concretize:
     runs-on: ubuntu-latest
-    container: ghcr.io/key4hep/key4hep-externals-${{inputs.os}}:main
     strategy:
       fail-fast: false
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: endersonmenezes/free-disk-space@v2
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_swap: true
+          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages_one_command: true
+          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/share/glade* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
+          testing: false      
       - name: Checkout Mucoll Spack
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          path: mucoll-spack
           ref:  ${{ github.sha }}
-      - name: Apply Patches
+      - name: Launch Container
         run: |
+          docker run -it --name ci_container --privileged -v ${GITHUB_WORKSPACE}:/packages -d ghcr.io/key4hep/key4hep-externals-${{inputs.os}}:main
+      - name: Load env and concretize
+        run: |
+          echo '#Test env concretisation' > ${GITHUB_WORKSPACE}/concretize.sh
+          cat << 'EOF' >> ${GITHUB_WORKSPACE}/concretize.sh
           whereami=$(pwd)
           cd /opt/spack-packages
           . ${whereami}/mucoll-spack/.cherry-pick
           cd -
-      - name: Load env and concretize
-        run: |
           . /opt/setup_spack.sh
           spack --version
           spack repo add /opt/spack/var/key4hep-spack
           spack repo add mucoll-spack
           spack env activate mucoll-spack/environments/mucoll-${{ inputs.target }}
           spack concretize --reuse
-          spack spec -Nt > ${GITHUB_WORKSPACE}/spec-${{ inputs.target }}.log
+          spack spec -Nt > /packages/spec-${{ inputs.target }}.log
+          EOF
+
+          chmod +x ${GITHUB_WORKSPACE}/concretize.sh
+          docker exec ci_container /bin/bash -c "/packages/concretize.sh"
       - name: Store artifacts
         uses: actions/upload-artifact@v4
         with:
