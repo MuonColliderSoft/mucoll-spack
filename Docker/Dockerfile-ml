@@ -5,7 +5,7 @@
 
 ARG OS=alma9
 ARG BRANCH=main
-FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:full_gaudi_test
+FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:${BRANCH}
 
 USER root
 
@@ -14,7 +14,7 @@ RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
     cd ${REPOPATH} && \
     git fetch && \
-    git checkout acorn_integration && \
+    git checkout ${BRANCH} && \
     cd -
 
 # Reconnect to build cache
