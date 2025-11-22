@@ -9,6 +9,14 @@ FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:${BRANCH}
 
 USER root
 
+# Update MuColl repo
+RUN . /opt/setup_spack.sh && \
+    REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
+    cd ${REPOPATH} && \
+    git fetch && \
+    git checkout ${BRANCH} && \
+    cd -
+
 # Reconnect to build cache
 ARG SPACK_BUILDCACHE
 ARG OCI_USERNAME

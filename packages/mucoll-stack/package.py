@@ -10,8 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from mucoll_utils import *
 
 from spack.package import *
-from spack.pkg.k4.key4hep_stack import Key4hepPackage, install_setup_script
-
+from spack.pkg.k4.key4hep_stack import *
 
 class MucollStack(BundlePackage, Key4hepPackage):
     """Bundle package to install Muon Collider Software Stack"""
@@ -27,12 +26,10 @@ class MucollStack(BundlePackage, Key4hepPackage):
     # should use `environments/mucoll-common/packages.yaml`
     version(datetime.today().strftime('%Y-%m-%d'))
 
-    version("master", branch="master")
-
     ### stable build
     # to install exact specified version for every dependecy
     # should use `environments/mucoll-release/packages.yaml`
-    version('2.9')
+    version('3.0')
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase
@@ -61,7 +58,10 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('k4simdelphes')
     depends_on('k4simgeant4')
     depends_on('k4geo')
-    depends_on('delphes')
+    depends_on('k4reco')
+    depends_on('k4gaudipandora')
+    depends_on('k4actstracking')
+    depends_on('k4marlinwrapper')
 
     ############################### ILCSoft ###############
     #######################################################
@@ -71,7 +71,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('ced')
     depends_on('cedviewer')
     depends_on('garlic')
-    depends_on('k4marlinwrapper')
     depends_on('generalbrokenlines')
     depends_on('gear')
     depends_on('ilcutil')
@@ -94,25 +93,15 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('pandoraanalysis')
     depends_on('pandorapfa')
     depends_on('clicperformance')
-    depends_on('marlinmuonid')
-    depends_on('mybibutils')
-
-
-    ############## modified ILCSoft packages ##############
-    #######################################################
-    depends_on('lcio')
-    depends_on('lctuple')
-    depends_on('overlay')
-    depends_on('marlintrkprocessors')
-    depends_on('forwardtracking')
-    depends_on('conformaltracking')
-    depends_on('ddmarlinpandora')
 
     ############ custom Muon Collider packages ############
     #######################################################
-    depends_on('actstracking')
     depends_on('muoncvxddigitiser')
-
+    depends_on('mybibutils')
+    
+    ############ generic packages ############
+    #######################################################
+    depends_on('delphes')
 
     ##################### developer tools #################
     #######################################################
@@ -130,6 +119,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
+        depends_on("py-torch")
+        #depends_on('acorn')
+        #depends_on('torch-scatter')
 
     with when('+pytools'):
         # Python tools
@@ -164,6 +156,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # If you previously used MUCOLL_GEO, please update your scripts to use k4geo configuration directly.
         if "k4geo" in self.spec:
             env.set("MUCOLL_GEO", os.path.join(self.spec["k4geo"].prefix.share))
+        if "k4actstracking" in self.spec:
+            env.set("ACTSTRACKING_DATA", os.path.join(self.spec["k4actstracking"].prefix.share))
 
         # ROOT needs to be in LD_LIBRARY_PATH to find cxxmodules
         env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
@@ -176,6 +170,16 @@ class MucollStack(BundlePackage, Key4hepPackage):
             env.prepend_path("CPATH", self.spec["vdt"].prefix.include)
             # When building podio with +rntuple there are warnings constantly without this
             env.prepend_path("LD_LIBRARY_PATH", self.spec["vdt"].libs.directories[0])
+
+        # Add the correct path in pytorch to CMAKE_PREFIX_PATH
+        # This could be deleted (to be tested) once https://github.com/spack/spack/pull/49267 is merged
+        if "py-torch" in self.spec:
+            env.prepend_path(
+                "CMAKE_PREFIX_PATH",
+                join_path(
+                    self["py-torch"].module.python_platlib, "torch", "share", "cmake"
+                ),
+            )
 
     def install(self, spec, prefix):
         return install_setup_script(self, spec, prefix, 'MUCOLL_LATEST_SETUP_PATH')

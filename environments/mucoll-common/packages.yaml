@@ -49,27 +49,26 @@ packages:
   # needed by Alma9 to support AVX2 instructions
   binutils:
     require: +gas
+  gdb:
+    require: +python+tui+source-highlight~debuginfod
+  py-pandas:
+    require: ~excel~parquet~performance
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
-    require: '@32.1.0'
-  overlay:
-    require: '@0.26'
+    require: '@44.1.0+dd4hep+json cxxstd=20'
   k4geo:
     require: '@0.23'
-  forwardtracking:
-    require: '@1.14.2'
-  conformaltracking:
-    require: '@1.12.1'
-  marlintrkprocessors:
-    require: '@2.18.2'
-  actstracking:
-    require: '@1.3.2'
+  k4gaudipandora:
+    require: '@main'
+  k4reco:
+    require: '@main'
+  k4actstracking:
+    require: '@main'
+
   muoncvxddigitiser:
     require: '@0.2.2'
-  ddmarlinpandora:
-    require: +monitoring
   lccontent:
     require: +monitoring
 
