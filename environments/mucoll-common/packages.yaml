@@ -65,7 +65,7 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
-    require: '@acts_44'
+    require: '@main'
   k4fwcore:
     require: '@main'
 
@@ -73,3 +73,9 @@ packages:
     require: '@0.2.2'
   lccontent:
     require: +monitoring
+
+  #required to fix issue with recent Gaudi. 
+  #Remove when a new tag including https://github.com/key4hep/k4FWCore/commit/1364cd8ecc7da5f0719a1c2beeb03d8a032747aa
+  #is available
+  k4fwcore:
+    require: '@main'
