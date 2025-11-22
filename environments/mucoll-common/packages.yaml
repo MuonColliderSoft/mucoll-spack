@@ -66,8 +66,6 @@ packages:
     require: '@main'
   k4actstracking:
     require: '@main'
-  k4fwcore:
-    require: '@main'
 
   muoncvxddigitiser:
     require: '@0.2.2'
