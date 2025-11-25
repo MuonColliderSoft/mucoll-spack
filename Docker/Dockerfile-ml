@@ -5,7 +5,7 @@
 
 ARG OS=alma9
 ARG BRANCH=main
-FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:${BRANCH}
+FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:latest
 
 USER root
 
