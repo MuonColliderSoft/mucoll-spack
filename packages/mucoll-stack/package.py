@@ -98,7 +98,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     #######################################################
     depends_on('muoncvxddigitiser')
     depends_on('mybibutils')
-    depends_on("k4mltracking")
     
     ############ generic packages ############
     #######################################################
@@ -115,6 +114,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('llvm', when='+llvm')
 
     with when('+ml'):
+        depends_on("k4mltracking")
         # ML tools
         depends_on('onnx')
         depends_on('xgboost')
