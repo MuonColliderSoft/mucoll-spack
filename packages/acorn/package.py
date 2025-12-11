@@ -29,5 +29,5 @@ class Acorn(PythonPackage):
     depends_on("py-uproot")
     depends_on("py-numpy")
     depends_on("py-scikit-learn")
-    deopends_on("py-trackml")
+    depends_on("py-trackml")
     #depends_on("py-black")
