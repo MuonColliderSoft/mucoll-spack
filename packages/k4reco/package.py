@@ -10,11 +10,7 @@ class K4reco(CMakePackage, Key4hepPackage):
     git = "https://github.com/MuonColliderSoft/k4Reco.git"
 
     version("main", branch="main")
-
-    version(
-        "0.1.0",
-        sha256="6309de6cb083f1d263c40b99f06b47b774d485dc5361f98dad2f6e111376d69e",
-    )
+    version("0.1", sha256="b0fa2c7decfa140159e09e271074ba03ba49eeccfcbb2bfb1c464e719d8373c3", preferred=True)
 
     variant("conformal_tracking", default=True, description="Build Conformal Tracking")
 

@@ -13,6 +13,7 @@ class K4actstracking(CMakePackage, Key4hepPackage):
 
     version("main", branch="main")
 
+    version("0.2", sha256="f805d292529409c9460627d533ec787567811340a1dedb6ad64b793e974aeb72", preferred=True)
     version("0.1", sha256="e214a0bff098ba306490f6dbd68fb3b19c1f3c6d7dc32cf3506bf9de104fb012")
 
     depends_on("c", type="build")

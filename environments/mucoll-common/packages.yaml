@@ -63,9 +63,9 @@ packages:
   k4gaudipandora:
     require: '@main'
   k4reco:
-    require: '@main'
+    require: '@0.1'
   k4actstracking:
-    require: '@main'
+    require: '@0.2'
 
   muoncvxddigitiser:
     require: '@0.2.2'
