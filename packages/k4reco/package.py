@@ -22,6 +22,7 @@ class K4reco(CMakePackage, Key4hepPackage):
     depends_on("k4simgeant4")
     depends_on("k4geo")
     depends_on("root")
+    depends_on("fastjet") 
 
     depends_on("lcio", when="+conformal_tracking")
     depends_on("ilcutil", when="+conformal_tracking")
