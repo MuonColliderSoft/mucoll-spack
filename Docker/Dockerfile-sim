@@ -72,4 +72,6 @@ RUN echo '#!/bin/bash\nsource /opt/setup_mucoll.sh\nexec "$@"' > /opt/entrypoint
 RUN useradd --shell /bin/bash --create-home mucoll
 USER mucoll
 WORKDIR /home/mucoll
-ENTRYPOINT ["/opt/entrypoint.sh"]
+
+# ENTRYPOINT ["/opt/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "source /opt/setup_mucoll.sh && exec /bin/bash"]
