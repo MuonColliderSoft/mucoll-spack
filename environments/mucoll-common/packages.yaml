@@ -59,13 +59,13 @@ packages:
   acts:
     require: '@44.1.0+dd4hep+json cxxstd=20'
   k4geo:
-    require: '@0.23'
+    require: '@main'
   k4gaudipandora:
     require: '@main'
   k4reco:
     require: '@0.1'
   k4actstracking:
-    require: '@0.2'
+    require: '@0.3'
 
   muoncvxddigitiser:
     require: '@0.2.2'
