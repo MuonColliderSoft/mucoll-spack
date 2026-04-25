@@ -58,7 +58,7 @@ packages:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
     #require: '@44.1.0+dd4hep+json cxxstd=20'
-    require: +dd4hep cxxstd=20 +json
+    require: '@main +dd4hep cxxstd=20 +json'
   k4geo:
     require: '@main'
   k4gaudipandora:
