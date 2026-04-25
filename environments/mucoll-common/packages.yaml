@@ -64,7 +64,7 @@ packages:
   k4gaudipandora:
     require: '@main'
   k4reco:
-    require: '@0.1'
+    require: '@main'
   k4actstracking:
     require: '@0.3'
   k4simgeant4:
