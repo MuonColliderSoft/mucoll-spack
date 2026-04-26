@@ -10,5 +10,8 @@ class PyTrackml(PythonPackage):
 
     version('v2', branch='v2')
 
+    depends_on("py-setuptools", type="build")
+    depends_on("py-wheel", type="build")
+
     depends_on("py-numpy")
     depends_on("py-pandas")
