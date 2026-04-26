@@ -3,7 +3,7 @@
 #  Tag:        ${VERSION}-alma9
 ###############################################################################
 
-ARG OS=alma9
+ARG OS=ubuntu24
 ARG BRANCH=main
 FROM ghcr.io/muoncollidersoft/mucoll-sim-${OS}:latest
 
@@ -17,14 +17,6 @@ RUN . /opt/setup_spack.sh && \
     git checkout acorn_integration && \
     cd -
 
-# Reconnect to build cache
-ARG SPACK_BUILDCACHE
-ARG OCI_USERNAME
-RUN . /opt/setup_spack.sh && \
-    if [ -n "${SPACK_BUILDCACHE}" ]; then \
-        spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}";\
-    fi
-
 # Get Rust
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y && \
     echo ". $HOME/.cargo/env" > ${HOME}/setup_env.sh
@@ -34,12 +26,20 @@ RUN apt-get update && \
     apt-get install -y lsb-release wget software-properties-common gnupg && \
     bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
+# Reconnect to build cache
+ARG SPACK_BUILDCACHE
+ARG OCI_USERNAME
+RUN . /opt/setup_spack.sh && \
+    if [ -n "${SPACK_BUILDCACHE}" ]; then \
+        spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}";\
+    fi
+
 # Create the release environment
 RUN . /opt/setup_spack.sh && \
     cd ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release-ml && \
     spack env activate . && \
     cd - && \
-    echo ". /opt/setup_spack.sh" > ${HOME}/setup_env.sh && \
+    echo ". /opt/setup_spack.sh" >> ${HOME}/setup_env.sh && \
     echo "cd ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release-ml" >> ${HOME}/setup_env.sh && \
     echo "spack env activate ." >> ${HOME}/setup_env.sh && \
     echo "cd -" >> ${HOME}/setup_env.sh && \
