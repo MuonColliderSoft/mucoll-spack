@@ -4,8 +4,7 @@
 ###############################################################################
 
 ARG OS=alma9
-FROM ghcr.io/key4hep/key4hep-externals-${OS}:latest
-# Need to switch to tagged image when tag more recent than Oct 2025 is available
+FROM ghcr.io/key4hep/key4hep-externals-${OS}:2026-04-23
 
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=muoncollidersoft/mucoll-spack
@@ -72,4 +71,6 @@ RUN echo '#!/bin/bash\nsource /opt/setup_mucoll.sh\nexec "$@"' > /opt/entrypoint
 RUN useradd --shell /bin/bash --create-home mucoll
 USER mucoll
 WORKDIR /home/mucoll
-ENTRYPOINT ["/opt/entrypoint.sh"]
+
+# ENTRYPOINT ["/opt/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "source /opt/setup_mucoll.sh && exec /bin/bash"]

@@ -60,14 +60,16 @@ packages:
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
-    require: '@44.1.0+dd4hep+json+gnn cxxstd=20'
+    require: '@main+dd4hep+json+gnn cxxstd=20'
   k4geo:
-    require: '@0.23'
+    require: '@main'
   k4gaudipandora:
     require: '@main'
   k4reco:
     require: '@main'
   k4actstracking:
+    require: '@0.3'
+  k4simgeant4:
     require: '@main'
 
   muoncvxddigitiser:
