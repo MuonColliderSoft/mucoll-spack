@@ -20,7 +20,6 @@ class K4mltracking(CMakePackage, Key4hepPackage):
 
     depends_on("k4fwcore@1.3:")
     depends_on("edm4hep@0.99:")
-    depends_on("k4actstracking")
     depends_on("dd4hep")
     depends_on("acts +gnn")
     depends_on("py-torch")
