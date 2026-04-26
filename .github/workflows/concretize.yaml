@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu24]
-        target: [release, release-debug]
+        target: [release, release-debug, release-ml]
     uses: ./.github/workflows/concretize-template.yaml
     with:
       target: ${{ matrix.target }}

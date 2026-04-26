@@ -30,7 +30,7 @@ packages:
     externals:
     - spec: mesa-glu@99
       prefix: /usr
-  # Use the system kerberos, otherwise the tickets obtained at login with the
+ # Use the system kerberos, otherwise the tickets obtained at login with the
   # system version don't appear for the spack kerberos (happening on lxplus at least)
   krb5:
     buildable: False
@@ -54,11 +54,13 @@ packages:
   py-pandas:
     require: ~excel~parquet~performance
 
+  torch-scatter:
+    require: '@master'
+
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
-    #require: '@44.1.0+dd4hep+json cxxstd=20'
-    require: '@main +dd4hep cxxstd=20 +json'
+    require: '@main+dd4hep+json+gnn cxxstd=20'
   k4geo:
     require: '@main'
   k4gaudipandora:
