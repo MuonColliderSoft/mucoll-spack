@@ -43,7 +43,6 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     depends_on("opendatadetector", type="test")
     depends_on("py-torch")
     depends_on("py-onnxruntime")
-    depends_on("onnxruntime")
 
     def cmake_args(self):
         return []
