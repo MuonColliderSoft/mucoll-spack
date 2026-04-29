@@ -68,7 +68,7 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
-    require: '@0.3'
+    require: '@gnn'
   k4simgeant4:
     require: '@main'
 
