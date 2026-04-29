@@ -73,7 +73,7 @@ packages:
   k4reco:
     require: '@0.2'
   k4actstracking:
-    require: '@gnn'
+    require: 'mucoll.k4actstracking@gnn'
   k4simgeant4:
     require: '@main'
 
