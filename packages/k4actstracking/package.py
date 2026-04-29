@@ -35,12 +35,14 @@ class K4actstracking(CMakePackage, Key4hepPackage):
 
     depends_on("cxx", type="build")
 
-    depends_on("acts+dd4hep+json")
+    depends_on("acts+dd4hep+json+gnn")
     depends_on("gaudi")
     depends_on("root")
     depends_on("edm4hep")
     depends_on("k4fwcore")
     depends_on("opendatadetector", type="test")
+    depends_on("py-torch")
+    depends_on("py-onnxruntime")
 
     def cmake_args(self):
         return []
