@@ -14,6 +14,7 @@ class K4actstracking(CMakePackage, Key4hepPackage):
 
     version("main", branch="main")
     version("calosurface-extrapolation", branch="calosurface-extrapolation")
+    version("gnn", branch="gnn-tracking-pipeiline-and-gen3-geo-tracking")
 
     version(
         "00-04",
