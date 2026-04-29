@@ -22,3 +22,4 @@ spack:
 
   specs:
   - mucoll-stack+devtools+pytools+ml
+  - mucoll.k4actstracking
