@@ -71,6 +71,8 @@ packages:
     require: '@gnn'
   k4simgeant4:
     require: '@main'
+  pyatlasify:
+    require: '@master'
 
   muoncvxddigitiser:
     require: '@0.2.2'
