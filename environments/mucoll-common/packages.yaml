@@ -74,8 +74,6 @@ packages:
   lccontent:
     require: +monitoring
 
-  #required to fix issue with recent Gaudi. 
-  #Remove when a new tag including https://github.com/key4hep/k4FWCore/commit/1364cd8ecc7da5f0719a1c2beeb03d8a032747aa
-  #is available
+  #required to fix issue with ctests
   k4fwcore:
     require: '@main'
