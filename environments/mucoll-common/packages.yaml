@@ -60,7 +60,7 @@ packages:
     require: +python+tui+source-highlight~debuginfod
   # Build LLVM as a shared library to avoid OOM during static linking on aarch64
   llvm:
-    variants: '+llvm_dylib'
+    require: '+llvm_dylib'
 
   py-pandas:
     require: ~excel~parquet~performance
