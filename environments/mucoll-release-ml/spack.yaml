@@ -1,7 +1,5 @@
 spack:
   packages:
-    llvm:
-      build_jobs: 1
     all:
       target: [x86_64, aarch64]
       variants:
