@@ -21,10 +21,28 @@ RUN . /opt/setup_spack.sh && \
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y && \
     echo ". $HOME/.cargo/env" > ${HOME}/setup_env.sh
 
-# Install llvm and other dependencies
-#RUN apt-get update && \
-#    apt-get install -y lsb-release wget software-properties-common gnupg && \
-#    bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+# Install pre-compiled LLVM binaries to avoid expensive source builds in CI.
+ARG LLVM_VERSION=16.0.6
+ARG LLVM_UBUNTU_BUILD=22.04
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl xz-utils; \
+    rm -rf /var/lib/apt/lists/*; \
+    ARCH="$(uname -m)"; \
+    if [ "${ARCH}" = "x86_64" ]; then \
+        LLVM_TARBALL="clang+llvm-${LLVM_VERSION}-x86_64-linux-gnu-ubuntu-${LLVM_UBUNTU_BUILD}.tar.xz"; \
+    elif [ "${ARCH}" = "aarch64" ]; then \
+        LLVM_TARBALL="clang+llvm-${LLVM_VERSION}-aarch64-linux-gnu.tar.xz"; \
+    else \
+        echo "Unsupported architecture for prebuilt LLVM: ${ARCH}"; \
+        exit 1; \
+    fi; \
+    LLVM_URL="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/${LLVM_TARBALL}"; \
+    curl -fL --retry 5 --retry-delay 5 "${LLVM_URL}" -o /tmp/llvm.tar.xz; \
+    mkdir -p /opt/llvm-${LLVM_VERSION}; \
+    tar -xJf /tmp/llvm.tar.xz -C /opt/llvm-${LLVM_VERSION} --strip-components=1; \
+    ln -sfn /opt/llvm-${LLVM_VERSION} /opt/llvm; \
+    rm -f /tmp/llvm.tar.xz
 
 # Reconnect to build cache
 ARG SPACK_BUILDCACHE
@@ -48,11 +66,15 @@ RUN . /opt/setup_spack.sh && \
 # Concretizing the MuColl stack reusing system packages as external
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
+    export PATH=/opt/llvm/bin:${PATH} && \
+    spack compiler find /opt/llvm/bin && \
+    spack config add 'packages:llvm:externals:[{spec:"llvm@16.0.6 +clang +lld",prefix:/opt/llvm}]' && \
+    spack config add 'packages:llvm:buildable:false' && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
 # Installing fragments of dependency tree in separate layers for cached debugging
-ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast -j1"
+ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
 
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
