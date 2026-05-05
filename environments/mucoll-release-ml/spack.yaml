@@ -9,6 +9,12 @@ spack:
       providers:
         gl: [mesa]
         glu: [mesa]
+        
+    llvm:
+      buildable: False
+      externals:
+      - spec: llvm@16.0.6 +clang +lld
+        prefix: /usr/lib/llvm-16
 
   concretizer:
     unify: true
