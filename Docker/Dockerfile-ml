@@ -53,7 +53,6 @@ RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     export PATH=/usr/lib/llvm-16/bin:${PATH} && \
     spack compiler find /usr/lib/llvm-16/bin && \
-    spack config add ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release-ml/llvm-external.yaml && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
