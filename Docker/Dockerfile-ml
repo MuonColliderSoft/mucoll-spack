@@ -53,10 +53,17 @@ RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     export PATH=/usr/lib/llvm-16/bin:${PATH} && \
     spack compiler find /usr/lib/llvm-16/bin && \
-    spack config add "packages:llvm:externals:0:spec=llvm@16.0.6+clang+lld" && \
-    spack config add "packages:llvm:externals:0:prefix=/usr/lib/llvm-16" && \
+    cat >/tmp/packages-llvm-external.yaml <<'YAML' && \
+packages:
+  llvm:
+    externals:
+    - spec: llvm@16.0.6 +clang +lld
+      prefix: /usr/lib/llvm-16
+    buildable: false
+YAML
+    spack config add /tmp/packages-llvm-external.yaml && \
     #spack config add "packages:llvm:externals:[{spec: 'llvm@16.0.6 +clang +lld', prefix: '/usr/lib/llvm-16'}]" && \
-    spack config add "packages:llvm:buildable:false" && \
+    #spack config add "packages:llvm:buildable:false" && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
