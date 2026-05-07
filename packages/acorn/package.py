@@ -32,3 +32,4 @@ class Acorn(PythonPackage):
     depends_on("py-trackml")
     #depends_on("py-black")
     depends_on("py-atlasify")
+    depends_on("py-class-resolver")
