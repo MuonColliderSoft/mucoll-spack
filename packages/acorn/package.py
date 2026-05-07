@@ -34,5 +34,5 @@ class Acorn(PythonPackage):
     depends_on("py-atlasify")
     depends_on("py-class-resolver")
     depends_on("py-pytorch-cluster")
-    depends_on("py-pytorch-sparse")
-    depends_on("py-pytorch-spline-conv")
+    #depends_on("py-pytorch-sparse")
+    #depends_on("py-pytorch-spline-conv")
