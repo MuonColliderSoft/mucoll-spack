@@ -32,13 +32,22 @@ class PyTorchSplineConv(PythonPackage):
 
     depends_on("python@3.7:", type=("build", "run"))
     depends_on("py-setuptools", type="build")
-    depends_on("py-pybind11")
+    depends_on("py-pybind11", type="build")
 
     # torch must be present at setup.py execution time
     depends_on("py-torch+cuda", when="+cuda", type=("build", "run"))
     depends_on("py-torch~cuda", when="~cuda", type=("build", "run"))
 
     def setup_build_environment(self, env):
+        # Set pybind11 include path directly for the compiler
+        pybind11_prefix = self.spec["py-pybind11"].prefix
+        py_version = self.spec["python"].version.up_to(2)
+        pybind11_include = pybind11_prefix.join("lib/python{}/site-packages/pybind11/include".format(py_version))
+        
+        # setuptools uses these environment variables
+        env.prepend_path("CPLUS_INCLUDE_PATH", str(pybind11_include))
+        env.prepend_path("C_INCLUDE_PATH", str(pybind11_include))
+
         if "+cuda" in self.spec:
             torch = self.spec["py-torch"]
             env.set(
