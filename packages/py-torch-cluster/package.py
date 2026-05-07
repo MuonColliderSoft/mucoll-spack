@@ -33,7 +33,7 @@ class PyTorchCluster(PythonPackage):
     # Python requirement raised to 3.8 in 1.6.x
     depends_on("python@3.8:", type=("build", "run"), when="@1.6:")
     depends_on("python@3.6:", type=("build", "run"), when="@:1.5")
-
+    depends_on("py-pybind11", type=("build", "link"))
     depends_on("py-setuptools", type="build")
 
     # torch is imported at setup time; must be present before build
