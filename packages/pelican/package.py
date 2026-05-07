@@ -21,9 +21,9 @@ class Pelican(GoPackage):
 
     maintainers("turetske", "jhiemstrawisc", "joereuss12")
 
-    version("7.24.3", sha256="TODO-run-spack-checksum-to-fill-this-in")
-    version("7.24.2", sha256="TODO-run-spack-checksum-to-fill-this-in")
-    version("7.23.3", sha256="TODO-run-spack-checksum-to-fill-this-in")
+    version("7.24.3", sha256="fd73d4c9193f3a25d82c696e7269d10f84f4941786e957c8dffa1562d4b605a0")
+    version("7.24.2", sha256="fbb92fc3d515317be7c6763f51061628d8a8140b758e3f8c253479b69208fa7d")
+    version("7.23.3", sha256="e485038633aa03c149bcc76311f2f4a4d9d9e89faccd87a304377384f5f94930")
 
     # Pelican is a pure-Go binary; no C/C++ compiler needed at runtime.
     # The Go toolchain must be >= 1.21 (required by go.mod as of v7.x).
