@@ -98,6 +98,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     #######################################################
     depends_on('muoncvxddigitiser')
     depends_on('mybibutils')
+    depends_on('pelican')
     
     ############ generic packages ############
     #######################################################
