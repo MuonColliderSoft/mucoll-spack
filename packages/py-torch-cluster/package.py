@@ -33,7 +33,7 @@ class PyTorchCluster(PythonPackage):
     # Python requirement raised to 3.8 in 1.6.x
     depends_on("python@3.8:", type=("build", "run"), when="@1.6:")
     depends_on("python@3.6:", type=("build", "run"), when="@:1.5")
-    depends_on("py-pybind11")
+    depends_on("py-pybind11", type="build")
     depends_on("py-setuptools", type="build")
 
     # torch is imported at setup time; must be present before build
@@ -44,6 +44,15 @@ class PyTorchCluster(PythonPackage):
     depends_on("py-scipy", type=("build", "run"), when="@:1.5")
 
     def setup_build_environment(self, env):
+        # Set pybind11 include path directly for the compiler
+        pybind11_prefix = self.spec["py-pybind11"].prefix
+        py_version = self.spec["python"].version.up_to(2)
+        pybind11_include = pybind11_prefix.join("lib/python{}/site-packages/pybind11/include".format(py_version))
+        
+        # setuptools uses these environment variables
+        env.prepend_path("CPLUS_INCLUDE_PATH", str(pybind11_include))
+        env.prepend_path("C_INCLUDE_PATH", str(pybind11_include))
+        
         if "+cuda" in self.spec:
             torch = self.spec["py-torch"]
             env.set("TORCH_CUDA_ARCH_LIST", " ".join(
