@@ -52,8 +52,6 @@ class Pelican(GoPackage):
         env.append_flags(
             "GOFLAGS",
             "-ldflags=-s -w"
-            f" -X {version_pkg}.version={self.spec.version}"
-            " -X github.com/pelicanplatform/pelican/version.builtBy=spack",
         )
         # Disable CGO: the Pelican client binary is built with CGO_ENABLED=0
         # by upstream (see .goreleaser.yaml).
