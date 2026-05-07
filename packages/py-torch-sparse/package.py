@@ -47,8 +47,7 @@ class PyTorchSparse(PythonPackage):
     depends_on("py-torch~cuda", when="~cuda", type=("build", "run"))
 
     # torch-scatter is a required runtime dependency
-    depends_on("py-torch-scatter+cuda", when="+cuda", type=("build", "run"))
-    depends_on("py-torch-scatter~cuda", when="~cuda", type=("build", "run"))
+    depends_on("py-torch-scatter", type=("build", "run"))
 
     # scipy is a persistent runtime dependency across all 0.6.x versions
     depends_on("py-scipy", type=("build", "run"))
