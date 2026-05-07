@@ -32,7 +32,7 @@ class PyTorchSplineConv(PythonPackage):
 
     depends_on("python@3.7:", type=("build", "run"))
     depends_on("py-setuptools", type="build")
-    depends_on("py-pybind11", type=("build", "link"))
+    depends_on("py-pybind11")
 
     # torch must be present at setup.py execution time
     depends_on("py-torch+cuda", when="+cuda", type=("build", "run"))
