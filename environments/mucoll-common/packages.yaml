@@ -51,8 +51,6 @@ packages:
     require: +gas
   gdb:
     require: +python+tui+source-highlight~debuginfod
-  py-pandas:
-    require: ~excel~parquet~performance
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
@@ -73,7 +71,3 @@ packages:
     require: '@0.2.2'
   lccontent:
     require: +monitoring
-
-  #required to fix issue with ctests
-  k4fwcore:
-    require: '@main'
