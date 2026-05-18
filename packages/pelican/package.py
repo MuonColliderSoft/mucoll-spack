@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import os
+
 from spack_repo.builtin.build_systems.go import GoPackage
 from spack.package import *
 
@@ -32,18 +34,21 @@ class Pelican(GoPackage):
     # git is used by `go build` to resolve module replacements and for
     # the `develop` version fetched directly from the repository.
     depends_on("git", type="build")
+    depends_on("node-js@20", type="build")
+    depends_on("npm", type="build")
 
     # -----------------------------------------------------------------------
     # Build
     # -----------------------------------------------------------------------
 
-    # GoPackage sets GOPATH, GOBIN, etc. automatically.
-    # The default install() calls `go install ./...`, which is correct for
-    # most Go projects.  Pelican's main entry point lives in ./cmd/pelican,
-    # so we override build_targets / install_targets accordingly.
-
-    build_targets = ["./cmd/pelican"]
-    install_targets = ["./cmd/pelican"]
+    # GoPackage builds from the module root by default.
+    # Pelican's main package lives in ./cmd, so append it to the
+    # go build arguments for this Spack Go builder implementation.
+    @property
+    def build_args(self):
+        args = super().build_args
+        args.append("./cmd")
+        return args
 
     def setup_build_environment(self, env):
         super().setup_build_environment(env)
@@ -56,6 +61,19 @@ class Pelican(GoPackage):
         # Disable CGO: the Pelican client binary is built with CGO_ENABLED=0
         # by upstream (see .goreleaser.yaml).
         env.set("CGO_ENABLED", "0")
+
+    @run_before("build")
+    def build_web_ui(self):
+        metadata = "web_ui/frontend/public/data/parameters.json"
+        mkdirp(os.path.dirname(metadata))
+        with open(metadata, "w", encoding="utf-8") as f:
+            # Keep frontend build working in source tarballs that omit generated metadata.
+            f.write("[]\n")
+
+        npm = which("npm", required=True)
+        with working_dir("web_ui/frontend"):
+            npm("ci")
+            npm("run", "build")
 
     # -----------------------------------------------------------------------
     # Tests (run with `spack test run pelican`)
