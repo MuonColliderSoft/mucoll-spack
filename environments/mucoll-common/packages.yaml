@@ -73,7 +73,7 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
-    require: '@main'
+    require: '@gen3'
   k4simgeant4:
     require: '@main'
 
