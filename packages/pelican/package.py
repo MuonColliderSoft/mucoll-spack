@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 import os
+import shutil
 
 from spack_repo.builtin.build_systems.go import GoPackage
 from spack.package import *
@@ -69,6 +70,13 @@ class Pelican(GoPackage):
         with open(metadata, "w", encoding="utf-8") as f:
             # Keep frontend build working in source tarballs that omit generated metadata.
             f.write("[]\n")
+
+        # The frontend prerender step expects this file in app/api/docs.
+        # Source tarballs keep it in ./swagger instead.
+        swagger_src = "swagger/pelican-swagger.yaml"
+        swagger_dst = "web_ui/frontend/app/api/docs/pelican-swagger.yaml"
+        mkdirp(os.path.dirname(swagger_dst))
+        shutil.copyfile(swagger_src, swagger_dst)
 
         npm = which("npm", required=True)
         with working_dir("web_ui/frontend"):
