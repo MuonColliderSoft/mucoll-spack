@@ -1,0 +1,45 @@
+from spack.package import *
+from spack.pkg.k4.key4hep_stack import Key4hepPackage
+
+
+class K4actstracking(CMakePackage, Key4hepPackage):
+    """Acts tracking components for the key4hep project"""
+
+    homepage = "https://github.com/tmadlener/k4ActsTracking"
+    # todo
+    url = "https://github.com/tmadlener/k4ActsTracking/archive/refs/tags/v00-01.tar.gz"
+    git = "https://github.com/tmadlener/k4ActsTracking.git"
+
+    maintainers("vvolkl")
+
+    version("main", branch="main")
+    version("gen3", branch="dd4hep-gen3-ckf-tests")
+
+    version(
+        "00-03",
+        sha256="3beaf4b8196fb952ba4708afb14f71690b849e4aeacef3e5a2497843ec91d98f",
+    )
+    version(
+        "00-02",
+        sha256="789d4a8cd5ac6fa9150d4f010c80e491d71c794163eeb194bcfd20f5c37568b1",
+    )
+    version(
+        "00-01",
+        sha256="05901153900064673417b559d4a4a5d9ebc6e783367130a5b20abe1c83bc39eb",
+    )
+
+    depends_on("cxx", type="build")
+
+    depends_on("acts+dd4hep+json")
+    depends_on("gaudi")
+    depends_on("root")
+    depends_on("edm4hep")
+    depends_on("k4fwcore")
+    depends_on("opendatadetector", type="test")
+
+    def cmake_args(self):
+        return []
+
+    def setup_run_environment(self, env):
+        env.prepend_path("PYTHONPATH", self.prefix.python)
+        env.prepend_path("GAUDI_PLUGIN_PATH", self.spec["k4actstracking"].prefix.lib)

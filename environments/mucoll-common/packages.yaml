@@ -46,18 +46,26 @@ packages:
     - spec: openssh@99
       prefix: /usr
 
+  # Take external llvm as it won't compile within 6 hours limit 
+  llvm:
+    buildable: False
+    externals:
+    - spec: llvm@16.0.6 +clang +lld
+      prefix: /usr/lib/llvm-16
+
   # needed by Alma9 to support AVX2 instructions
   binutils:
     require: +gas
   gdb:
     require: +python+tui+source-highlight~debuginfod
-  py-pandas:
-    require: ~excel~parquet~performance
+
+  k4fwcore:
+    require: '@main'
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json+gnn cxxstd=20'
+    require: '@main+dd4hep+json cxxstd=20'
   k4geo:
     require: '@main'
   k4gaudipandora:
@@ -65,7 +73,7 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
-    require: '@main'
+    require: '@gen3'
   k4simgeant4:
     require: '@main'
 
@@ -73,7 +81,3 @@ packages:
     require: '@0.2.2'
   lccontent:
     require: +monitoring
-
-  #required to fix issue with ctests
-  k4fwcore:
-    require: '@main'

@@ -36,7 +36,7 @@ jobs:
           ref:  ${{ github.sha }}
       - name: Launch Container
         run: |
-          docker run -it --name ci_container --privileged -v ${GITHUB_WORKSPACE}:/packages -d ghcr.io/key4hep/key4hep-externals-${{inputs.os}}:main
+          docker run -it --name ci_container --privileged -v ${GITHUB_WORKSPACE}:/packages -d ghcr.io/key4hep/key4hep-externals-${{inputs.os}}:latest
       - name: Load env and concretize
         run: |
           echo '#Test env concretisation' > ${GITHUB_WORKSPACE}/concretize.sh
