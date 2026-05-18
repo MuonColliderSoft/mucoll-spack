@@ -49,14 +49,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ inputs.registry }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker Meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
           flavor: latest=${{ github.ref == 'refs/heads/main' }}
