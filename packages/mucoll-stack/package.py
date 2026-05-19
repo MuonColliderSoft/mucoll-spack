@@ -32,7 +32,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ### stable build
     # to install exact specified version for every dependecy
     # should use `environments/mucoll-release/packages.yaml`
-    version('2.9')
+    version('2.12')
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase
@@ -130,6 +130,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
+        depends_on('py-xgboost')
 
     with when('+pytools'):
         # Python tools
@@ -143,7 +144,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('py-scikit-learn')
         depends_on('py-scipy')
         depends_on('py-uproot')
-        depends_on('py-xgboost')
 
     ##################### conflicts #######################
     #######################################################
