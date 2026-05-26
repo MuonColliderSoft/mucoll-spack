@@ -78,6 +78,6 @@ packages:
     require: '@main'
 
   muoncvxddigitiser:
-    require: '@main'
+    require: '@0.2.2'
   lccontent:
     require: +monitoring
