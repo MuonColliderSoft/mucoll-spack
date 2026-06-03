@@ -5,16 +5,19 @@ from spack.pkg.k4.key4hep_stack import Key4hepPackage
 class K4actstracking(CMakePackage, Key4hepPackage):
     """Acts tracking components for the key4hep project"""
 
-    homepage = "https://github.com/tmadlener/k4ActsTracking"
+    homepage = "https://github.com/key4hep/k4ActsTracking"
     # todo
-    url = "https://github.com/tmadlener/k4ActsTracking/archive/refs/tags/v00-01.tar.gz"
-    git = "https://github.com/tmadlener/k4ActsTracking.git"
+    url = "https://github.com/key4hep/k4ActsTracking/archive/refs/tags/v00-01.tar.gz"
+    git = "https://github.com/key4hep/k4ActsTracking.git"
 
     maintainers("vvolkl")
 
     version("main", branch="main")
-    version("gen3", branch="dd4hep-gen3-ckf-tests")
 
+    version(
+        "00-04",
+        sha256="2e048b488b1f5b2ba8b64de42987c8f8972859beda689a8fc249604b85a4f29a",
+    )
     version(
         "00-03",
         sha256="3beaf4b8196fb952ba4708afb14f71690b849e4aeacef3e5a2497843ec91d98f",
