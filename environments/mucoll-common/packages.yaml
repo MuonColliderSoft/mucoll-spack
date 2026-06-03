@@ -73,7 +73,7 @@ packages:
   k4reco:
     require: '@main'
   k4actstracking:
-    require: '@00-04'
+    require: '@calosurface-extrapolation'
   k4simgeant4:
     require: '@main'
 
