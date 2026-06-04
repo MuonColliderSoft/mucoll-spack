@@ -6,3 +6,10 @@
 *~
 packages_nightlies.yaml
 .vscode/
+
+# AI tools
+.claude/
+.codex/
+
+# OS junk
+.DS_Store

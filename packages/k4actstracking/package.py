@@ -13,6 +13,7 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     maintainers("vvolkl")
 
     version("main", branch="main")
+    version("calosurface-extrapolation", branch="calosurface-extrapolation")
 
     version(
         "00-04",
