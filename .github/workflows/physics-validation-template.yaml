@@ -5,8 +5,6 @@ description: |
   time budget), forwarding the output of each stage to the next as an artifact.
   The gen/sim/digi/reco chain is identical for every particle; the final "plot"
   job is the only per-study step (see validation/make_plots.sh).
-  NOTE: performance plotting is not implemented yet (TrackPerfHistAlg is not
-  available in the image); the plot step writes a placeholder for now.
 
   The mucoll-sim image is large, so jobs do NOT use a job-level `container:`
   (which pulls before any step runs and exhausts the runner disk). Instead each
@@ -295,6 +293,10 @@ jobs:
           rmz_version: "3.1.1"
           testing: false
       - uses: actions/checkout@v6
+      - name: Clone benchmarks
+        run: |
+          git clone "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks checkout "${BENCHMARKS_SHA}"
       - uses: actions/download-artifact@v8
         with:
           name: reco-${{ needs.meta.outputs.particle }}
@@ -304,9 +306,18 @@ jobs:
         run: |
           docker run -d --name ci --privileged --entrypoint tail \
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
-      - name: Make tracking-performance plots
+      - name: Make tracking plots
         run: |
           docker exec -w /work \
+            -e BM=/work/benchmarks \
+            -e GEOM="${{ inputs.geometry }}" \
+            -e NEV="${{ inputs.n-events }}" \
+            -e PPE="${{ inputs.particles-per-event }}" \
+            -e PDG="${{ inputs.pdg }}" \
+            -e PTMIN="${{ inputs.pt-min }}" \
+            -e PTMAX="${{ inputs.pt-max }}" \
+            -e THMIN="${{ inputs.theta-min }}" \
+            -e THMAX="${{ inputs.theta-max }}" \
             ci /bin/bash /work/validation/make_plots.sh "${{ needs.meta.outputs.particle }}"
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v7
