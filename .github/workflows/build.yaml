@@ -21,7 +21,9 @@ jobs:
       registry: ghcr.io
 
   physics-validation:
-    needs: build-sim-image
+    # TESTING: decoupled from build-sim-image; pulls the latest published image.
+    # Restore `needs: build-sim-image` + `image: ${{ needs.build-sim-image.outputs.image }}`
+    # to run against the freshly-built image.
     strategy:
       fail-fast: false
       matrix:
@@ -34,7 +36,7 @@ jobs:
           # - { particle: neutron,  pdg: "2112" }  # neutral: needs calo/PFO plots
     uses: ./.github/workflows/physics-validation-template.yaml
     with:
-      image: ${{ needs.build-sim-image.outputs.image }}
+      image: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest
       particle: ${{ matrix.particle }}
       pdg: ${{ matrix.pdg }}
     secrets: inherit
