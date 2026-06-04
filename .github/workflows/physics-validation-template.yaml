@@ -2,10 +2,11 @@ name: Physics validation (tracking chain)
 description: |
   Reusable per-particle physics-validation pipeline.
   Runs gen -> sim -> digi -> reco as independent jobs (each gets a fresh runner
-  time budget), forwarding the output of each stage to the next as an artifact,
-  then plots the TrackPerf histograms produced by the reconstruction.
-  NOTE: tracking-performance plotting is currently disabled (DO_TRACK_PERF=0) until
-  TrackPerfHistAlg is available in the image; the plot step writes a placeholder.
+  time budget), forwarding the output of each stage to the next as an artifact.
+  The gen/sim/digi/reco chain is identical for every particle; the final "plot"
+  job is the only per-study step (see validation/make_plots.sh).
+  NOTE: performance plotting is not implemented yet (TrackPerfHistAlg is not
+  available in the image); the plot step writes a placeholder for now.
 
   The mucoll-sim image is large, so jobs do NOT use a job-level `container:`
   (which pulls before any step runs and exhausts the runner disk). Instead each
@@ -165,7 +166,7 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: gen-${{ needs.meta.outputs.particle }}
           path: .
@@ -210,7 +211,7 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: sim-${{ needs.meta.outputs.particle }}
           path: .
@@ -254,7 +255,7 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: digi-${{ needs.meta.outputs.particle }}
           path: .
@@ -272,12 +273,8 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: reco-${{ needs.meta.outputs.particle }}
-          # reco_histograms.root is only produced when --doTrackPerf is enabled
-          # (DO_TRACK_PERF=1), which requires TrackPerfHistAlg in the image.
-          path: |
-            reco.edm4hep.root
-            reco_histograms.root
-          if-no-files-found: warn
+          path: reco.edm4hep.root
+          if-no-files-found: error
 
   plot:
     needs: [meta, reco]
@@ -298,7 +295,7 @@ jobs:
           rmz_version: "3.1.1"
           testing: false
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: reco-${{ needs.meta.outputs.particle }}
           path: .
