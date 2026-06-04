@@ -10,15 +10,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-sim-image:
-    uses: ./.github/workflows/image-template.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu24]
-    with:
-      os: ${{ matrix.os }}
-      registry: ghcr.io
+  # TESTING: image build disabled to save CI resources while iterating on
+  # physics-validation. Re-enable this job (and restore physics-validation's
+  # `needs`/`image` wiring) when done testing.
+  # build-sim-image:
+  #   uses: ./.github/workflows/image-template.yaml
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu24]
+  #   with:
+  #     os: ${{ matrix.os }}
+  #     registry: ghcr.io
 
   physics-validation:
     # TESTING: decoupled from build-sim-image; pulls the latest published image.
