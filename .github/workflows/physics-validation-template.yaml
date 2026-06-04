@@ -100,7 +100,7 @@ jobs:
           THMIN: ${{ inputs.theta-min }}
           THMAX: ${{ inputs.theta-max }}
         run: bash validation/run_chain.sh gen
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: gen-${{ inputs.particle }}
           path: gen.edm4hep.root
@@ -131,7 +131,7 @@ jobs:
           GEOM: ${{ inputs.geometry }}
           NEV: ${{ inputs.n-events }}
         run: bash validation/run_chain.sh sim
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: sim-${{ inputs.particle }}
           path: sim.edm4hep.root
@@ -161,7 +161,7 @@ jobs:
           BM: ${{ github.workspace }}/benchmarks
           GEOM: ${{ inputs.geometry }}
         run: bash validation/run_chain.sh digi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: digi-${{ inputs.particle }}
           path: digi.edm4hep.root
@@ -191,7 +191,7 @@ jobs:
           BM: ${{ github.workspace }}/benchmarks
           GEOM: ${{ inputs.geometry }}
         run: bash validation/run_chain.sh reco
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: reco-${{ inputs.particle }}
           # reco_histograms.root is only produced when --doTrackPerf is enabled
@@ -237,7 +237,7 @@ jobs:
             } > "public/${{ inputs.particle }}/index.html"
           fi
       - name: Upload plots (per-particle Pages fragment)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-${{ inputs.particle }}
           path: public
