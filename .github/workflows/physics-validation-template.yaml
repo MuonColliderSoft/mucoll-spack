@@ -33,7 +33,7 @@ on:
         description: "Number of events"
         required: false
         type: string
-        default: "100"
+        default: "1000"
       particles-per-event:
         description: "Particles generated per event"
         required: false
@@ -48,7 +48,7 @@ on:
         description: "Maximum transverse momentum [GeV]"
         required: false
         type: string
-        default: "100"
+        default: "10"
       theta-min:
         description: "Minimum polar angle [deg]"
         required: false
