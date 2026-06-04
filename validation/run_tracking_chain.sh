@@ -30,6 +30,11 @@
 #   PTMAX  max transverse momentum [GeV]   (default 100)
 #   THMIN  min polar angle [deg]           (default 10)
 #   THMAX  max polar angle [deg]           (default 170)
+#   DO_TRACK_PERF  run TrackPerfHistAlg in reco (0/1, default 0)
+#
+# NOTE: DO_TRACK_PERF is off by default because the Gaudi TrackPerfHistAlg that
+# reco_steer.py --doTrackPerf relies on is not yet available in the image. Set
+# DO_TRACK_PERF=1 once that algorithm ships to produce reco_histograms.root.
 ###############################################################################
 set -euo pipefail
 
@@ -44,6 +49,7 @@ PTMIN="${PTMIN:-1}"
 PTMAX="${PTMAX:-100}"
 THMIN="${THMIN:-10}"
 THMAX="${THMAX:-170}"
+DO_TRACK_PERF="${DO_TRACK_PERF:-0}"
 
 # --- Stack runtime -----------------------------------------------------------
 # setup_mucoll.sh references unset variables (e.g. ACLOCAL_PATH) and is not
@@ -104,10 +110,17 @@ case "${STAGE}" in
   reco)
     # PandoraSettings are resolved relative to the working directory by reco_steer.py
     cp -r "${BM}/reconstruction/PandoraSettings" ./
-    k4run "${BM}/reconstruction/reco_steer.py" \
-      --IOSvc.Input digi.edm4hep.root \
-      --IOSvc.Output reco.edm4hep.root \
-      --doTrackPerf
+    reco_args=(--IOSvc.Input digi.edm4hep.root --IOSvc.Output reco.edm4hep.root)
+    case "${DO_TRACK_PERF}" in
+      1|true|TRUE|yes|on)
+        # Produces reco_histograms.root (requires TrackPerfHistAlg in the image)
+        reco_args+=(--doTrackPerf)
+        ;;
+      *)
+        echo "DO_TRACK_PERF=${DO_TRACK_PERF}: skipping --doTrackPerf (TrackPerfHistAlg not available)"
+        ;;
+    esac
+    k4run "${BM}/reconstruction/reco_steer.py" "${reco_args[@]}"
     ;;
 
   *)

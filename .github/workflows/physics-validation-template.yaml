@@ -4,6 +4,8 @@ description: |
   Runs gen -> sim -> digi -> reco as independent jobs (each gets a fresh runner
   time budget), forwarding the output of each stage to the next as an artifact,
   then plots the TrackPerf histograms produced by the reconstruction.
+  NOTE: tracking-performance plotting is currently disabled (DO_TRACK_PERF=0) until
+  TrackPerfHistAlg is available in the image; the plot step writes a placeholder.
 
 on:
   workflow_call:
@@ -192,10 +194,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: reco-${{ inputs.particle }}
+          # reco_histograms.root is only produced when --doTrackPerf is enabled
+          # (DO_TRACK_PERF=1), which requires TrackPerfHistAlg in the image.
           path: |
             reco.edm4hep.root
             reco_histograms.root
-          if-no-files-found: error
+          if-no-files-found: warn
 
   plot:
     needs: reco
@@ -216,9 +220,22 @@ jobs:
         run: |
           source /opt/setup_mucoll.sh
           mkdir -p "public/${{ inputs.particle }}"
-          python validation/plot_tracking_perf.py \
-            reco_histograms.root "public/${{ inputs.particle }}" \
-            --particle "${{ inputs.particle }}"
+          if [ -f reco_histograms.root ]; then
+            python validation/plot_tracking_perf.py \
+              reco_histograms.root "public/${{ inputs.particle }}" \
+              --particle "${{ inputs.particle }}"
+          else
+            echo "reco_histograms.root not produced (--doTrackPerf disabled: TrackPerfHistAlg unavailable). Writing placeholder."
+            {
+              echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+              echo "<title>${{ inputs.particle }} — tracking performance</title></head><body>"
+              echo "<h1>${{ inputs.particle }}: tracking performance (currently disabled)</h1>"
+              echo '<p>gen → sim → digi → reco ran successfully, but no plots were produced:'
+              echo '<code>reco_histograms.root</code> requires <code>TrackPerfHistAlg</code>,'
+              echo 'which is not yet available in the image (<code>--doTrackPerf</code> is off).</p>'
+              echo '</body></html>'
+            } > "public/${{ inputs.particle }}/index.html"
+          fi
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v4
         with:
