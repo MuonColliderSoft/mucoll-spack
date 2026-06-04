@@ -124,6 +124,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('acorn')
         depends_on('torch-scatter')
         depends_on('py-torch-scatter')
+        depends_on('py-scikit-learn')
+        depends_on('py-xgboost')
 
     with when('+pytools'):
         # Python tools
@@ -134,10 +136,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('py-pandas')
         depends_on('py-particle')
         depends_on('py-pip')
-        depends_on('py-scikit-learn')
         depends_on('py-scipy')
         depends_on('py-uproot')
-        depends_on('py-xgboost')
 
     ##################### conflicts #######################
     #######################################################
