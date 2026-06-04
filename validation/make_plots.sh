@@ -8,9 +8,15 @@
 # Output: public/<particle>/ with the ROOT plot files, PNGs, and an index.html.
 #
 # This is the ONLY per-study step: the gen/sim/digi/reco chain (run_chain.sh) is
-# identical for every particle, and the analysis/plotting that differs lives here.
+# identical for every particle, and the analysis/plotting lives here.
 #
-# The plotting implementation lives in mucoll-benchmarks:
+# Both analyses are run for EVERY particle (all plots are produced regardless of
+# the gun type), and land in the same per-particle gallery:
+#   - tracking plots: RunAnalysis.C -> PlotAll.C (below)
+#   - photon study:   mucoll-benchmarks/analysis/python/edm4hep/study_photons.py
+#                     (efficiency + energy-resolution plots)
+#
+# The tracking plotting implementation lives in mucoll-benchmarks:
 #   plotting/TrackingPlots/PlottingScripts/RunAnalysis.C
 #   plotting/TrackingPlots/PlottingScripts/PlotAll.C
 #
@@ -30,17 +36,13 @@ PARTICLE="${1:?usage: make_plots.sh <particle-label>}"
 
 GEOM="${GEOM:-MAIA_v0}"
 NEV="${NEV:-100}"
-PPE="${PPE:-1}"
 PDG="${PDG:--13}"
-PTMIN="${PTMIN:-1}"
-PTMAX="${PTMAX:-100}"
-THMIN="${THMIN:-10}"
-THMAX="${THMAX:-170}"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CONF="${PLOT_CONF:-${HERE}/RunAnalysis.conf}"
 PLOT_SUFFIX="${PLOT_SUFFIX:-png}"
 PLOT_SCRIPTS="${BM}/plotting/TrackingPlots/PlottingScripts"
+PHOTON_SCRIPT="${BM}/analysis/python/edm4hep/study_photons.py"
 RECO_PREFIX="$(pwd)/reco.edm4hep"
 
 resolve_dir() {
@@ -80,7 +82,7 @@ settings_tag() {
   track_hits_min="$(conf_value track.nHitsMin 0)"
 
   sanitize_tag \
-    "geom-${GEOM}_nev-${NEV}_ppe-${PPE}_pdg-${PDG}_pt-${PTMIN}-${PTMAX}_theta-${THMIN}-${THMAX}_evtEta-${event_eta_min}-${event_eta_max}_trkPt-${track_pt_min}_chi2-${track_chi2_max}_hits-${track_hits_min}"
+    "geom-${GEOM}_nev-${NEV}_pdg-${PDG}_evtEta-${event_eta_min}-${event_eta_max}_trkPt-${track_pt_min}_chi2-${track_chi2_max}_hits-${track_hits_min}"
 }
 
 write_analysis_config() {
@@ -126,7 +128,7 @@ write_index() {
   {
     echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
     echo '<meta name="viewport" content="width=device-width, initial-scale=1">'
-    echo "<title>${particle} tracking plots</title>"
+    echo "<title>${particle} performance plots</title>"
     echo '<style>'
     echo 'body{font-family:system-ui,sans-serif;margin:1.5rem;background:#fafafa;color:#222}'
     echo 'h1{font-size:1.4rem;margin:0 0 1rem}'
@@ -135,7 +137,7 @@ write_index() {
     echo 'img{display:block;width:100%;height:auto}'
     echo 'figcaption{font-size:.8rem;color:#444;word-break:break-all;margin-top:.35rem}'
     echo '</style></head><body>'
-    echo "<h1>${particle} tracking plots</h1>"
+    echo "<h1>${particle} performance plots</h1>"
     echo "<p>${#plots[@]} plots generated from <code>reco.edm4hep.root</code>.</p>"
     echo '<div class="grid">'
     local plot name
@@ -166,6 +168,11 @@ fi
 
 if [ ! -f "${PLOT_SCRIPTS}/RunAnalysis.C" ] || [ ! -f "${PLOT_SCRIPTS}/PlotAll.C" ]; then
   echo "ERROR: plotting scripts not found under ${PLOT_SCRIPTS}" >&2
+  exit 1
+fi
+
+if [ ! -f "${PHOTON_SCRIPT}" ]; then
+  echo "ERROR: photon study not found: ${PHOTON_SCRIPT}" >&2
   exit 1
 fi
 
@@ -203,6 +210,11 @@ for ntuple in tracks_ntuple.root seeds_ntuple.root hits_ntuple.root; do
 done
 
 root -l -q "${PLOT_SCRIPTS}/PlotAll.C(\"${RUN_DIR}/\", \"${OUT}/\", \"${PLOT_SUFFIX}\")"
+
+# Photon performance study (efficiency + energy resolution) into the same gallery.
+# Run for every particle so all plots are produced regardless of the gun type.
+echo "=== photon study (study_photons.py) ==="
+python "${PHOTON_SCRIPT}" -i reco.edm4hep.root -o "${OUT}/histos_photon.root" -d "${OUT}"
 
 write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
 

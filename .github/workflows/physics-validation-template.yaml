@@ -1,10 +1,12 @@
 name: Physics validation (tracking chain)
 description: |
   Reusable per-particle physics-validation pipeline.
-  Runs gen -> sim -> digi -> reco as independent jobs (each gets a fresh runner
-  time budget), forwarding the output of each stage to the next as an artifact.
-  The gen/sim/digi/reco chain is identical for every particle; the final "plot"
-  job is the only per-study step (see validation/make_plots.sh).
+  Runs sim -> digi -> reco as independent jobs (each gets a fresh runner time
+  budget), forwarding the output of each stage to the next as an artifact. The
+  generator-level input is not produced here (the gun exercises no release code):
+  sim downloads a pre-generated per-particle file. The sim/digi/reco chain is
+  identical for every particle; the final "plot" job is the only per-study step
+  (see validation/make_plots.sh).
 
   The mucoll-sim image is large, so jobs do NOT use a job-level `container:`
   (which pulls before any step runs and exhausts the runner disk). Instead each
@@ -28,35 +30,10 @@ on:
         type: string
         default: MAIA_v0
       n-events:
-        description: "Number of events"
+        description: "Number of events to simulate (ddsim --numberOfEvents)"
         required: false
         type: string
         default: "1000"
-      particles-per-event:
-        description: "Particles generated per event"
-        required: false
-        type: string
-        default: "1"
-      pt-min:
-        description: "Minimum transverse momentum [GeV]"
-        required: false
-        type: string
-        default: "1"
-      pt-max:
-        description: "Maximum transverse momentum [GeV]"
-        required: false
-        type: string
-        default: "10"
-      theta-min:
-        description: "Minimum polar angle [deg]"
-        required: false
-        type: string
-        default: "10"
-      theta-max:
-        description: "Maximum polar angle [deg]"
-        required: false
-        type: string
-        default: "170"
 
 permissions:
   contents: read
@@ -94,7 +71,7 @@ jobs:
           echo "Mapped PDG ${PDG} -> ${name}"
           echo "particle=${name}" >> "$GITHUB_OUTPUT"
 
-  gen:
+  sim:
     needs: meta
     runs-on: ubuntu-latest
     steps:
@@ -117,57 +94,13 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
-      - name: Launch container
-        # The mucoll-sim image is a public GHCR package, so no docker login is needed.
+          git -C benchmarks submodule update --init --recursive
+      - name: Download generated input
+        # Pre-generated particle-gun file (the trivial gen step exercises no
+        # release code). One file per particle label inferred from the PDG id.
         run: |
-          docker run -d --name ci --privileged --entrypoint tail \
-            -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
-      - name: Generation
-        run: |
-          docker exec -w /work \
-            -e BM=/work/benchmarks \
-            -e GEOM="${{ inputs.geometry }}" \
-            -e NEV="${{ inputs.n-events }}" \
-            -e PPE="${{ inputs.particles-per-event }}" \
-            -e PDG="${{ inputs.pdg }}" \
-            -e PTMIN="${{ inputs.pt-min }}" \
-            -e PTMAX="${{ inputs.pt-max }}" \
-            -e THMIN="${{ inputs.theta-min }}" \
-            -e THMAX="${{ inputs.theta-max }}" \
-            ci /bin/bash /work/validation/run_chain.sh gen
-      - uses: actions/upload-artifact@v7
-        with:
-          name: gen-${{ needs.meta.outputs.particle }}
-          path: gen.edm4hep.root
-          if-no-files-found: error
-
-  sim:
-    needs: [meta, gen]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Free Disk Space (Ubuntu)
-        uses: endersonmenezes/free-disk-space@v3
-        with:
-          remove_android: true
-          remove_dotnet: true
-          remove_haskell: true
-          remove_tool_cache: true
-          remove_swap: true
-          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
-          remove_packages_one_command: true
-          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle"
-          rm_cmd: "rmz"
-          rmz_version: "3.1.1"
-          testing: false
-      - uses: actions/checkout@v6
-      - name: Clone benchmarks
-        run: |
-          git clone "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks checkout "${BENCHMARKS_SHA}"
-      - uses: actions/download-artifact@v8
-        with:
-          name: gen-${{ needs.meta.outputs.particle }}
-          path: .
+          curl -fSL --retry 3 -o gen.edm4hep.root \
+            "https://desy.de/~fmeloni/resources/mucoll-spack-phys-val/gen-${{ needs.meta.outputs.particle }}.edm4hep.root"
       - name: Launch container
         # The mucoll-sim image is a public GHCR package, so no docker login is needed.
         run: |
@@ -209,6 +142,7 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
+          git -C benchmarks submodule update --init --recursive
       - uses: actions/download-artifact@v8
         with:
           name: sim-${{ needs.meta.outputs.particle }}
@@ -253,6 +187,7 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
+          git -C benchmarks submodule update --init --recursive
       - uses: actions/download-artifact@v8
         with:
           name: digi-${{ needs.meta.outputs.particle }}
@@ -297,6 +232,7 @@ jobs:
         run: |
           git clone "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
+          git -C benchmarks submodule update --init --recursive
       - uses: actions/download-artifact@v8
         with:
           name: reco-${{ needs.meta.outputs.particle }}
@@ -312,12 +248,7 @@ jobs:
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
             -e NEV="${{ inputs.n-events }}" \
-            -e PPE="${{ inputs.particles-per-event }}" \
             -e PDG="${{ inputs.pdg }}" \
-            -e PTMIN="${{ inputs.pt-min }}" \
-            -e PTMAX="${{ inputs.pt-max }}" \
-            -e THMIN="${{ inputs.theta-min }}" \
-            -e THMAX="${{ inputs.theta-max }}" \
             ci /bin/bash /work/validation/make_plots.sh "${{ needs.meta.outputs.particle }}"
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v7

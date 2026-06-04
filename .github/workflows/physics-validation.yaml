@@ -1,8 +1,8 @@
 name: Physics validation (manual)
 description: |
   Manually trigger the per-particle physics-validation chain
-  (gen -> sim -> digi -> reco -> plot) against a chosen image, via the
-  reusable physics-validation-template workflow.
+  (sim -> digi -> reco -> plot; the gun input is pre-generated and downloaded)
+  against a chosen image, via the reusable physics-validation-template workflow.
 
 on:
   workflow_dispatch:
@@ -26,29 +26,9 @@ on:
         type: string
         default: MAIA_v0
       n-events:
-        description: "Number of events"
+        description: "Number of events to simulate"
         type: string
         default: "1000"
-      particles-per-event:
-        description: "Particles generated per event"
-        type: string
-        default: "1"
-      pt-min:
-        description: "Minimum transverse momentum [GeV]"
-        type: string
-        default: "1"
-      pt-max:
-        description: "Maximum transverse momentum [GeV]"
-        type: string
-        default: "10"
-      theta-min:
-        description: "Minimum polar angle [deg]"
-        type: string
-        default: "10"
-      theta-max:
-        description: "Maximum polar angle [deg]"
-        type: string
-        default: "170"
 
 permissions:
   contents: read
@@ -61,8 +41,3 @@ jobs:
       pdg: ${{ inputs.pdg }}
       geometry: ${{ inputs.geometry }}
       n-events: ${{ inputs.n-events }}
-      particles-per-event: ${{ inputs.particles-per-event }}
-      pt-min: ${{ inputs.pt-min }}
-      pt-max: ${{ inputs.pt-max }}
-      theta-min: ${{ inputs.theta-min }}
-      theta-max: ${{ inputs.theta-max }}
