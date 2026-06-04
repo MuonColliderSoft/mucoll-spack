@@ -97,10 +97,11 @@ jobs:
           git -C benchmarks submodule update --init --recursive
       - name: Download generated input
         # Pre-generated particle-gun file (the trivial gen step exercises no
-        # release code). One file per particle label inferred from the PDG id.
+        # release code). Stored as assets on the 'phys-val-inputs' release; one
+        # file per particle label inferred from the PDG id.
         run: |
           curl -fSL --retry 3 -o gen.edm4hep.root \
-            "https://desy.de/~fmeloni/resources/mucoll-spack-phys-val/gen-${{ needs.meta.outputs.particle }}.edm4hep.root"
+            "https://github.com/${{ github.repository }}/releases/download/phys-val-inputs/gen-${{ needs.meta.outputs.particle }}.edm4hep.root"
       - name: Launch container
         # The mucoll-sim image is a public GHCR package, so no docker login is needed.
         run: |
