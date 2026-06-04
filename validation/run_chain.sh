@@ -29,7 +29,7 @@
 #   GEOM   detector geometry name          (default MAIA_v0)
 #   NEV    number of events                (default 100)
 #   PPE    particles per event             (default 1)
-#   PDG    PDG id of the gun particle      (default -13, mu+)
+#   PDG    PDG id of the gun particle      (default -13, mu)
 #   PTMIN  min transverse momentum [GeV]   (default 1)
 #   PTMAX  max transverse momentum [GeV]   (default 100)
 #   THMIN  min polar angle [deg]           (default 10)
@@ -67,35 +67,21 @@ set -euo pipefail
 # (reco_steer.py does `from reco_components...`, `from muc_mt...`, etc.)
 export PYTHONPATH="${BM}/digitization:${BM}/reconstruction:${BM}/common:${PYTHONPATH:-}"
 
-# --- Geometry / tracking files ----------------------------------------------
-# The stack exports per-package locations:
-#   k4geo_DIR        -> <k4geo prefix>/share/k4geo
-#   ACTSTRACKING_DATA -> <k4actstracking prefix>/share
-# Prefer those; fall back to globbing the install tree (arch-independent) if unset.
+# --- Geometry ----------------------------------------------------------------
+# Only the DD4hep compact description is needed: k4geo exports its location as
+# k4geo_DIR (-> <k4geo prefix>/share/k4geo); fall back to globbing if unset.
+# MUCOLL_GEOM_NAME selects the reco tracking path; for MAIA_v0 the CKF builds the
+# ACTS geometry from the compact, so the prebuilt material/TGeo files
+# (MUCOLL_MATMAP / MUCOLL_TGEO / MUCOLL_TGEO_DESC) are NOT required. Non-MAIA
+# geometries would need those re-added.
 resolve_one() { ls -d $1 2>/dev/null | head -n 1; }
 K4GEO_SHARE="${k4geo_DIR:-$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4geo-*/share/k4geo")}"
-if [ -n "${ACTSTRACKING_DATA:-}" ]; then
-  ACTS_DATA="${ACTSTRACKING_DATA}/k4ActsTracking/data"
-else
-  ACTS_DATA=$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4actstracking-*/share/k4ActsTracking/data")
-fi
 
 export MUCOLL_GEOM_NAME="${GEOM}"
 export MUCOLL_GEO=$(resolve_one "${K4GEO_SHARE}/MuColl/*/compact/${GEOM}/${GEOM}.xml")
-# MAIA ships a per-geometry material map; others use a generic one.
-if [ -f "${ACTS_DATA}/${GEOM}_material.json" ]; then
-  export MUCOLL_MATMAP="${ACTS_DATA}/${GEOM}_material.json"
-else
-  export MUCOLL_MATMAP="${ACTS_DATA}/material-maps.json"
-fi
-export MUCOLL_TGEO="${ACTS_DATA}/${GEOM}.root"
-export MUCOLL_TGEO_DESC="${ACTS_DATA}/${GEOM}.json"
 
 echo "=== stage=${STAGE} BM=${BM} GEOM=${GEOM} NEV=${NEV} PPE=${PPE} PDG=${PDG} pt=[${PTMIN},${PTMAX}] theta=[${THMIN},${THMAX}] ==="
 echo "    MUCOLL_GEO=${MUCOLL_GEO:-<unset>}"
-echo "    MUCOLL_MATMAP=${MUCOLL_MATMAP:-<unset>}"
-echo "    MUCOLL_TGEO=${MUCOLL_TGEO:-<unset>}"
-echo "    MUCOLL_TGEO_DESC=${MUCOLL_TGEO_DESC:-<unset>}"
 
 case "${STAGE}" in
   gen)
