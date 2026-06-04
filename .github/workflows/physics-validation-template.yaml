@@ -14,13 +14,8 @@ on:
         description: "Image to run the chain in (registry/owner/name:tag)"
         required: true
         type: string
-      particle:
-        description: "Particle label (used for artifact names and the Pages subdir)"
-        required: false
-        type: string
-        default: muon
       pdg:
-        description: "PDG id of the gun particle"
+        description: "PDG id of the gun particle (the particle label is inferred from this)"
         required: false
         type: string
         default: "-13"
@@ -74,7 +69,31 @@ defaults:
     shell: bash
 
 jobs:
+  # Infer the particle label from the PDG id. Runs directly on the runner (no
+  # container) so it adds no image pull. Used for artifact names + Pages subdir.
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      particle: ${{ steps.map.outputs.particle }}
+    steps:
+      - id: map
+        env:
+          PDG: ${{ inputs.pdg }}
+        run: |
+          apdg=${PDG#-}   # drop sign: particle == antiparticle for labelling
+          case "$apdg" in
+            11)   name=electron ;;
+            13)   name=muon ;;
+            211)  name=pion ;;
+            22)   name=photon ;;
+            2112) name=neutron ;;
+            *)    name="pdg${PDG}" ;;
+          esac
+          echo "Mapped PDG ${PDG} -> ${name}"
+          echo "particle=${name}" >> "$GITHUB_OUTPUT"
+
   gen:
+    needs: meta
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.image }}
@@ -102,12 +121,12 @@ jobs:
         run: bash validation/run_chain.sh gen
       - uses: actions/upload-artifact@v7
         with:
-          name: gen-${{ inputs.particle }}
+          name: gen-${{ needs.meta.outputs.particle }}
           path: gen.edm4hep.root
           if-no-files-found: error
 
   sim:
-    needs: gen
+    needs: [meta, gen]
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.image }}
@@ -123,7 +142,7 @@ jobs:
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
       - uses: actions/download-artifact@v4
         with:
-          name: gen-${{ inputs.particle }}
+          name: gen-${{ needs.meta.outputs.particle }}
           path: .
       - name: Simulation
         env:
@@ -133,12 +152,12 @@ jobs:
         run: bash validation/run_chain.sh sim
       - uses: actions/upload-artifact@v7
         with:
-          name: sim-${{ inputs.particle }}
+          name: sim-${{ needs.meta.outputs.particle }}
           path: sim.edm4hep.root
           if-no-files-found: error
 
   digi:
-    needs: sim
+    needs: [meta, sim]
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.image }}
@@ -154,7 +173,7 @@ jobs:
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
       - uses: actions/download-artifact@v4
         with:
-          name: sim-${{ inputs.particle }}
+          name: sim-${{ needs.meta.outputs.particle }}
           path: .
       - name: Digitisation
         env:
@@ -163,12 +182,12 @@ jobs:
         run: bash validation/run_chain.sh digi
       - uses: actions/upload-artifact@v7
         with:
-          name: digi-${{ inputs.particle }}
+          name: digi-${{ needs.meta.outputs.particle }}
           path: digi.edm4hep.root
           if-no-files-found: error
 
   reco:
-    needs: digi
+    needs: [meta, digi]
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.image }}
@@ -184,7 +203,7 @@ jobs:
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
       - uses: actions/download-artifact@v4
         with:
-          name: digi-${{ inputs.particle }}
+          name: digi-${{ needs.meta.outputs.particle }}
           path: .
       - name: Reconstruction
         env:
@@ -193,7 +212,7 @@ jobs:
         run: bash validation/run_chain.sh reco
       - uses: actions/upload-artifact@v7
         with:
-          name: reco-${{ inputs.particle }}
+          name: reco-${{ needs.meta.outputs.particle }}
           # reco_histograms.root is only produced when --doTrackPerf is enabled
           # (DO_TRACK_PERF=1), which requires TrackPerfHistAlg in the image.
           path: |
@@ -202,7 +221,7 @@ jobs:
           if-no-files-found: warn
 
   plot:
-    needs: reco
+    needs: [meta, reco]
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.image }}
@@ -214,31 +233,31 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with:
-          name: reco-${{ inputs.particle }}
+          name: reco-${{ needs.meta.outputs.particle }}
           path: .
       - name: Make tracking-performance plots
         run: |
           source /opt/setup_mucoll.sh
-          mkdir -p "public/${{ inputs.particle }}"
+          mkdir -p "public/${{ needs.meta.outputs.particle }}"
           if [ -f reco_histograms.root ]; then
             python validation/plot_tracking_perf.py \
-              reco_histograms.root "public/${{ inputs.particle }}" \
-              --particle "${{ inputs.particle }}"
+              reco_histograms.root "public/${{ needs.meta.outputs.particle }}" \
+              --particle "${{ needs.meta.outputs.particle }}"
           else
             echo "reco_histograms.root not produced (--doTrackPerf disabled: TrackPerfHistAlg unavailable). Writing placeholder."
             {
               echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
-              echo "<title>${{ inputs.particle }} — tracking performance</title></head><body>"
-              echo "<h1>${{ inputs.particle }}: tracking performance (currently disabled)</h1>"
+              echo "<title>${{ needs.meta.outputs.particle }} — tracking performance</title></head><body>"
+              echo "<h1>${{ needs.meta.outputs.particle }}: tracking performance (currently disabled)</h1>"
               echo '<p>gen → sim → digi → reco ran successfully, but no plots were produced:'
               echo '<code>reco_histograms.root</code> requires <code>TrackPerfHistAlg</code>,'
               echo 'which is not yet available in the image (<code>--doTrackPerf</code> is off).</p>'
               echo '</body></html>'
-            } > "public/${{ inputs.particle }}/index.html"
+            } > "public/${{ needs.meta.outputs.particle }}/index.html"
           fi
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v7
         with:
-          name: pages-${{ inputs.particle }}
+          name: pages-${{ needs.meta.outputs.particle }}
           path: public
           if-no-files-found: error

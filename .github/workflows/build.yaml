@@ -30,17 +30,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - { particle: muon, pdg: "-13" }
+        # Particle label is inferred from the PDG id in the template.
+        pdg:
+          - "-13"    # muon
           # future particle guns:
-          # - { particle: electron, pdg: "11" }
-          # - { particle: pion,     pdg: "211" }
-          # - { particle: photon,   pdg: "22" }    # neutral: needs calo/PFO plots
-          # - { particle: neutron,  pdg: "2112" }  # neutral: needs calo/PFO plots
+          # - "11"   # electron
+          # - "211"  # pion
+          # - "22"   # photon  (neutral: needs calo/PFO plots)
+          # - "2112" # neutron (neutral: needs calo/PFO plots)
     uses: ./.github/workflows/physics-validation-template.yaml
     with:
       image: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest
-      particle: ${{ matrix.particle }}
       pdg: ${{ matrix.pdg }}
     secrets: inherit
 
