@@ -1,8 +1,12 @@
 #!/bin/bash
 ###############################################################################
-# Single-stage runner for the physics-validation tracking chain.
+# Single-stage runner for the physics-validation production chain.
 #
-# Usage: run_tracking_chain.sh <gen|sim|digi|reco>
+# Runs one stage of the generic gen -> sim -> digi -> reco chain. This chain is
+# the same for every particle gun; only the downstream performance analysis and
+# plotting (e.g. plot_tracking_perf.py) differ per study.
+#
+# Usage: run_chain.sh <gen|sim|digi|reco>
 #
 # Each stage is run independently (one GitHub job each) so every stage gets a
 # fresh runner time budget and failures localise to a stage. Outputs are
@@ -38,7 +42,7 @@
 ###############################################################################
 set -euo pipefail
 
-STAGE="${1:?usage: run_tracking_chain.sh <gen|sim|digi|reco>}"
+STAGE="${1:?usage: run_chain.sh <gen|sim|digi|reco>}"
 
 : "${BM:?BM (mucoll-benchmarks dir) must be set}"
 GEOM="${GEOM:-MAIA_v0}"
@@ -64,21 +68,28 @@ set -euo pipefail
 export PYTHONPATH="${BM}/digitization:${BM}/reconstruction:${BM}/common:${PYTHONPATH:-}"
 
 # --- Geometry / tracking files ----------------------------------------------
-# Resolved by globbing the spack install tree (arch-independent: linux-*).
+# The stack exports per-package locations:
+#   k4geo_DIR        -> <k4geo prefix>/share/k4geo
+#   ACTSTRACKING_DATA -> <k4actstracking prefix>/share
+# Prefer those; fall back to globbing the install tree (arch-independent) if unset.
 resolve_one() { ls -d $1 2>/dev/null | head -n 1; }
-K4GEO_SHARE=$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4geo-*/share/k4geo")
-K4ATS_DATA=$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4actstracking-*/share/k4ActsTracking/data")
+K4GEO_SHARE="${k4geo_DIR:-$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4geo-*/share/k4geo")}"
+if [ -n "${ACTSTRACKING_DATA:-}" ]; then
+  ACTS_DATA="${ACTSTRACKING_DATA}/k4ActsTracking/data"
+else
+  ACTS_DATA=$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4actstracking-*/share/k4ActsTracking/data")
+fi
 
 export MUCOLL_GEOM_NAME="${GEOM}"
 export MUCOLL_GEO=$(resolve_one "${K4GEO_SHARE}/MuColl/*/compact/${GEOM}/${GEOM}.xml")
 # MAIA ships a per-geometry material map; others use a generic one.
-if [ -f "${K4ATS_DATA}/${GEOM}_material.json" ]; then
-  export MUCOLL_MATMAP="${K4ATS_DATA}/${GEOM}_material.json"
+if [ -f "${ACTS_DATA}/${GEOM}_material.json" ]; then
+  export MUCOLL_MATMAP="${ACTS_DATA}/${GEOM}_material.json"
 else
-  export MUCOLL_MATMAP="${K4ATS_DATA}/material-maps.json"
+  export MUCOLL_MATMAP="${ACTS_DATA}/material-maps.json"
 fi
-export MUCOLL_TGEO="${K4ATS_DATA}/${GEOM}.root"
-export MUCOLL_TGEO_DESC="${K4ATS_DATA}/${GEOM}.json"
+export MUCOLL_TGEO="${ACTS_DATA}/${GEOM}.root"
+export MUCOLL_TGEO_DESC="${ACTS_DATA}/${GEOM}.json"
 
 echo "=== stage=${STAGE} BM=${BM} GEOM=${GEOM} NEV=${NEV} PPE=${PPE} PDG=${PDG} pt=[${PTMIN},${PTMAX}] theta=[${THMIN},${THMAX}] ==="
 echo "    MUCOLL_GEO=${MUCOLL_GEO:-<unset>}"
