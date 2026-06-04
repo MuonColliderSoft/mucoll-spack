@@ -34,8 +34,8 @@ jobs:
         pdg:
           - "-13"    # muon
           # future particle guns:
-          # - "11"   # electron
-          # - "211"  # pion
+          # - "-11"   # electron
+          # - "-211"  # pion
           # - "22"   # photon  (neutral: needs calo/PFO plots)
           # - "2112" # neutron (neutral: needs calo/PFO plots)
     uses: ./.github/workflows/physics-validation-template.yaml

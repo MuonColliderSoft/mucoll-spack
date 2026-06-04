@@ -125,7 +125,7 @@ jobs:
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
       - name: Generation
         run: |
-          docker exec -u root -w /work \
+          docker exec -w /work \
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
             -e NEV="${{ inputs.n-events }}" \
@@ -176,7 +176,7 @@ jobs:
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
       - name: Simulation
         run: |
-          docker exec -u root -w /work \
+          docker exec -w /work \
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
             -e NEV="${{ inputs.n-events }}" \
@@ -221,7 +221,7 @@ jobs:
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
       - name: Digitisation
         run: |
-          docker exec -u root -w /work \
+          docker exec -w /work \
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
             ci /bin/bash /work/validation/run_chain.sh digi
@@ -265,7 +265,7 @@ jobs:
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
       - name: Reconstruction
         run: |
-          docker exec -u root -w /work \
+          docker exec -w /work \
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
             ci /bin/bash /work/validation/run_chain.sh reco
@@ -309,7 +309,7 @@ jobs:
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
       - name: Make tracking-performance plots
         run: |
-          docker exec -u root -w /work \
+          docker exec -w /work \
             ci /bin/bash /work/validation/make_plots.sh "${{ needs.meta.outputs.particle }}"
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v7
