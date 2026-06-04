@@ -16,6 +16,10 @@ on:
         required: false
         type: string
         default: sim
+    outputs:
+      image:
+        description: "Reference of the published multi-arch image (registry/owner/name:version)"
+        value: ${{ jobs.publish-multiarch.outputs.image }}
 
 permissions:
   contents: read
@@ -47,6 +51,8 @@ jobs:
       - build-linux-amd64
       - build-linux-arm64
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
     steps:
       - name: Login to DockerHub
         uses: docker/login-action@v4

@@ -19,3 +19,58 @@ jobs:
     with:
       os: ${{ matrix.os }}
       registry: ghcr.io
+
+  physics-validation:
+    needs: build-sim-image
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { particle: muon, pdg: "-13" }
+          # future particle guns:
+          # - { particle: electron, pdg: "11" }
+          # - { particle: pion,     pdg: "211" }
+          # - { particle: photon,   pdg: "22" }    # neutral: needs calo/PFO plots
+          # - { particle: neutron,  pdg: "2112" }  # neutral: needs calo/PFO plots
+    uses: ./.github/workflows/physics-validation-template.yaml
+    with:
+      image: ${{ needs.build-sim-image.outputs.image }}
+      particle: ${{ matrix.particle }}
+      pdg: ${{ matrix.pdg }}
+    secrets: inherit
+
+  deploy-pages:
+    needs: physics-validation
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Collect per-particle plot fragments
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pages-*
+          path: public
+          merge-multiple: true
+      - name: Generate landing page
+        run: |
+          cd public
+          {
+            echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+            echo '<title>MuColl physics validation</title></head><body>'
+            echo '<h1>MuColl physics validation</h1><ul>'
+            for d in */ ; do [ -d "$d" ] && echo "<li><a href=\"${d}\">${d%/}</a></li>"; done
+            echo '</ul></body></html>'
+          } > index.html
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

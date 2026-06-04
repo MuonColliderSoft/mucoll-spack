@@ -1,0 +1,235 @@
+name: Physics validation (tracking chain)
+description: |
+  Reusable per-particle physics-validation pipeline.
+  Runs gen -> sim -> digi -> reco as independent jobs (each gets a fresh runner
+  time budget), forwarding the output of each stage to the next as an artifact,
+  then plots the TrackPerf histograms produced by the reconstruction.
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: "Image to run the chain in (registry/owner/name:tag)"
+        required: true
+        type: string
+      particle:
+        description: "Particle label (used for artifact names and the Pages subdir)"
+        required: false
+        type: string
+        default: muon
+      pdg:
+        description: "PDG id of the gun particle"
+        required: false
+        type: string
+        default: "-13"
+      geometry:
+        description: "Detector geometry name passed to setup_digireco.sh"
+        required: false
+        type: string
+        default: MAIA_v0
+      n-events:
+        description: "Number of events"
+        required: false
+        type: string
+        default: "100"
+      particles-per-event:
+        description: "Particles generated per event"
+        required: false
+        type: string
+        default: "1"
+      pt-min:
+        description: "Minimum transverse momentum [GeV]"
+        required: false
+        type: string
+        default: "1"
+      pt-max:
+        description: "Maximum transverse momentum [GeV]"
+        required: false
+        type: string
+        default: "100"
+      theta-min:
+        description: "Minimum polar angle [deg]"
+        required: false
+        type: string
+        default: "10"
+      theta-max:
+        description: "Maximum polar angle [deg]"
+        required: false
+        type: string
+        default: "170"
+
+permissions:
+  contents: read
+  packages: read
+
+# Pinned mucoll-benchmarks (samf25 fork, k4MuC-gen3 branch).
+env:
+  BENCHMARKS_REPO: https://github.com/samf25/mucoll-benchmarks.git
+  BENCHMARKS_SHA: d05aeba93a1b194764fba3091b18a912e1b0db57
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v6
+      - name: Clone benchmarks
+        run: |
+          git clone "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks checkout "${BENCHMARKS_SHA}"
+      - name: Generation
+        env:
+          BM: ${{ github.workspace }}/benchmarks
+          NEV: ${{ inputs.n-events }}
+          PPE: ${{ inputs.particles-per-event }}
+          PDG: ${{ inputs.pdg }}
+          PTMIN: ${{ inputs.pt-min }}
+          PTMAX: ${{ inputs.pt-max }}
+          THMIN: ${{ inputs.theta-min }}
+          THMAX: ${{ inputs.theta-max }}
+        run: |
+          source /opt/setup_mucoll.sh
+          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
+          bash validation/run_tracking_chain.sh gen
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gen-${{ inputs.particle }}
+          path: gen.edm4hep.root
+          if-no-files-found: error
+
+  sim:
+    needs: gen
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v6
+      - name: Clone benchmarks
+        run: |
+          git clone "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks checkout "${BENCHMARKS_SHA}"
+      - uses: actions/download-artifact@v4
+        with:
+          name: gen-${{ inputs.particle }}
+          path: .
+      - name: Simulation
+        env:
+          BM: ${{ github.workspace }}/benchmarks
+          NEV: ${{ inputs.n-events }}
+        run: |
+          source /opt/setup_mucoll.sh
+          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
+          bash validation/run_tracking_chain.sh sim
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-${{ inputs.particle }}
+          path: sim.edm4hep.root
+          if-no-files-found: error
+
+  digi:
+    needs: sim
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v6
+      - name: Clone benchmarks
+        run: |
+          git clone "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks checkout "${BENCHMARKS_SHA}"
+      - uses: actions/download-artifact@v4
+        with:
+          name: sim-${{ inputs.particle }}
+          path: .
+      - name: Digitisation
+        env:
+          BM: ${{ github.workspace }}/benchmarks
+        run: |
+          source /opt/setup_mucoll.sh
+          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
+          bash validation/run_tracking_chain.sh digi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: digi-${{ inputs.particle }}
+          path: digi.edm4hep.root
+          if-no-files-found: error
+
+  reco:
+    needs: digi
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v6
+      - name: Clone benchmarks
+        run: |
+          git clone "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks checkout "${BENCHMARKS_SHA}"
+      - uses: actions/download-artifact@v4
+        with:
+          name: digi-${{ inputs.particle }}
+          path: .
+      - name: Reconstruction
+        env:
+          BM: ${{ github.workspace }}/benchmarks
+        run: |
+          source /opt/setup_mucoll.sh
+          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
+          bash validation/run_tracking_chain.sh reco
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reco-${{ inputs.particle }}
+          path: |
+            reco.edm4hep.root
+            reco_histograms.root
+          if-no-files-found: error
+
+  plot:
+    needs: reco
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user root
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: reco-${{ inputs.particle }}
+          path: .
+      - name: Make tracking-performance plots
+        run: |
+          source /opt/setup_mucoll.sh
+          mkdir -p "public/${{ inputs.particle }}"
+          python validation/plot_tracking_perf.py \
+            reco_histograms.root "public/${{ inputs.particle }}" \
+            --particle "${{ inputs.particle }}"
+      - name: Upload plots (per-particle Pages fragment)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-${{ inputs.particle }}
+          path: public
+          if-no-files-found: error
