@@ -12,11 +12,17 @@
 #   digi -> digi.edm4hep.root  (needs sim.edm4hep.root)
 #   reco -> reco.edm4hep.root + reco_histograms.root  (needs digi.edm4hep.root)
 #
-# The steering files live in the mucoll-benchmarks checkout pointed to by $BM.
-# Geometry / tracking files come from the environment variables exported by
-# k4MuCPlayground/setup_digireco.sh (MUCOLL_GEO, MUCOLL_MATMAP, ...).
+# This script also sets up the environment itself, deliberately NOT relying on
+# the benchmarks' k4MuCPlayground/setup_digireco.sh. That script only (a) puts
+# the benchmarks dirs on PYTHONPATH and (b) exports the geometry env vars, but it
+# hardcodes a `linux-x86_64` install glob (breaks on other arches) and is not
+# written for strict mode. We replicate both jobs here, arch-independently.
 #
-# Sample configuration is taken from the environment (set by the workflow):
+# The steering files live in the mucoll-benchmarks checkout pointed to by $BM.
+#
+# Configuration is taken from the environment (set by the workflow):
+#   BM     mucoll-benchmarks checkout dir  (required)
+#   GEOM   detector geometry name          (default MAIA_v0)
 #   NEV    number of events                (default 100)
 #   PPE    particles per event             (default 1)
 #   PDG    PDG id of the gun particle      (default -13, mu+)
@@ -30,6 +36,7 @@ set -euo pipefail
 STAGE="${1:?usage: run_tracking_chain.sh <gen|sim|digi|reco>}"
 
 : "${BM:?BM (mucoll-benchmarks dir) must be set}"
+GEOM="${GEOM:-MAIA_v0}"
 NEV="${NEV:-100}"
 PPE="${PPE:-1}"
 PDG="${PDG:--13}"
@@ -38,8 +45,40 @@ PTMAX="${PTMAX:-100}"
 THMIN="${THMIN:-10}"
 THMAX="${THMAX:-170}"
 
-echo "=== stage=${STAGE} BM=${BM} NEV=${NEV} PPE=${PPE} PDG=${PDG} pt=[${PTMIN},${PTMAX}] theta=[${THMIN},${THMAX}] ==="
+# --- Stack runtime -----------------------------------------------------------
+# setup_mucoll.sh references unset variables (e.g. ACLOCAL_PATH) and is not
+# written for strict mode; source it with strict mode off, then restore it.
+set +euo pipefail
+# shellcheck disable=SC1091
+source /opt/setup_mucoll.sh
+set -euo pipefail
+
+# --- PYTHONPATH for the benchmarks steering modules --------------------------
+# (reco_steer.py does `from reco_components...`, `from muc_mt...`, etc.)
+export PYTHONPATH="${BM}/digitization:${BM}/reconstruction:${BM}/common:${PYTHONPATH:-}"
+
+# --- Geometry / tracking files ----------------------------------------------
+# Resolved by globbing the spack install tree (arch-independent: linux-*).
+resolve_one() { ls -d $1 2>/dev/null | head -n 1; }
+K4GEO_SHARE=$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4geo-*/share/k4geo")
+K4ATS_DATA=$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4actstracking-*/share/k4ActsTracking/data")
+
+export MUCOLL_GEOM_NAME="${GEOM}"
+export MUCOLL_GEO=$(resolve_one "${K4GEO_SHARE}/MuColl/*/compact/${GEOM}/${GEOM}.xml")
+# MAIA ships a per-geometry material map; others use a generic one.
+if [ -f "${K4ATS_DATA}/${GEOM}_material.json" ]; then
+  export MUCOLL_MATMAP="${K4ATS_DATA}/${GEOM}_material.json"
+else
+  export MUCOLL_MATMAP="${K4ATS_DATA}/material-maps.json"
+fi
+export MUCOLL_TGEO="${K4ATS_DATA}/${GEOM}.root"
+export MUCOLL_TGEO_DESC="${K4ATS_DATA}/${GEOM}.json"
+
+echo "=== stage=${STAGE} BM=${BM} GEOM=${GEOM} NEV=${NEV} PPE=${PPE} PDG=${PDG} pt=[${PTMIN},${PTMAX}] theta=[${THMIN},${THMAX}] ==="
 echo "    MUCOLL_GEO=${MUCOLL_GEO:-<unset>}"
+echo "    MUCOLL_MATMAP=${MUCOLL_MATMAP:-<unset>}"
+echo "    MUCOLL_TGEO=${MUCOLL_TGEO:-<unset>}"
+echo "    MUCOLL_TGEO_DESC=${MUCOLL_TGEO_DESC:-<unset>}"
 
 case "${STAGE}" in
   gen)

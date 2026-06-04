@@ -89,6 +89,7 @@ jobs:
       - name: Generation
         env:
           BM: ${{ github.workspace }}/benchmarks
+          GEOM: ${{ inputs.geometry }}
           NEV: ${{ inputs.n-events }}
           PPE: ${{ inputs.particles-per-event }}
           PDG: ${{ inputs.pdg }}
@@ -96,10 +97,7 @@ jobs:
           PTMAX: ${{ inputs.pt-max }}
           THMIN: ${{ inputs.theta-min }}
           THMAX: ${{ inputs.theta-max }}
-        run: |
-          source /opt/setup_mucoll.sh
-          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
-          bash validation/run_tracking_chain.sh gen
+        run: bash validation/run_tracking_chain.sh gen
       - uses: actions/upload-artifact@v4
         with:
           name: gen-${{ inputs.particle }}
@@ -128,11 +126,9 @@ jobs:
       - name: Simulation
         env:
           BM: ${{ github.workspace }}/benchmarks
+          GEOM: ${{ inputs.geometry }}
           NEV: ${{ inputs.n-events }}
-        run: |
-          source /opt/setup_mucoll.sh
-          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
-          bash validation/run_tracking_chain.sh sim
+        run: bash validation/run_tracking_chain.sh sim
       - uses: actions/upload-artifact@v4
         with:
           name: sim-${{ inputs.particle }}
@@ -161,10 +157,8 @@ jobs:
       - name: Digitisation
         env:
           BM: ${{ github.workspace }}/benchmarks
-        run: |
-          source /opt/setup_mucoll.sh
-          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
-          bash validation/run_tracking_chain.sh digi
+          GEOM: ${{ inputs.geometry }}
+        run: bash validation/run_tracking_chain.sh digi
       - uses: actions/upload-artifact@v4
         with:
           name: digi-${{ inputs.particle }}
@@ -193,10 +187,8 @@ jobs:
       - name: Reconstruction
         env:
           BM: ${{ github.workspace }}/benchmarks
-        run: |
-          source /opt/setup_mucoll.sh
-          source "${BM}/k4MuCPlayground/setup_digireco.sh" "${BM}" "${{ inputs.geometry }}"
-          bash validation/run_tracking_chain.sh reco
+          GEOM: ${{ inputs.geometry }}
+        run: bash validation/run_tracking_chain.sh reco
       - uses: actions/upload-artifact@v4
         with:
           name: reco-${{ inputs.particle }}
