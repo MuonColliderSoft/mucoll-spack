@@ -1,0 +1,68 @@
+name: Physics validation (manual)
+description: |
+  Manually trigger the per-particle physics-validation chain
+  (gen -> sim -> digi -> reco -> plot) against a chosen image, via the
+  reusable physics-validation-template workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pdg:
+        description: "Particle gun PDG id (label is inferred from it)"
+        type: choice
+        default: "-13"
+        options:
+          - "-13"    # muon
+          - "-11"     # electron
+          - "-211"    # pion
+          - "22"     # photon (neutral)
+          - "2112"   # neutron (neutral)
+      image:
+        description: "Image to run the chain in"
+        type: string
+        default: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest
+      geometry:
+        description: "Detector geometry name"
+        type: string
+        default: MAIA_v0
+      n-events:
+        description: "Number of events"
+        type: string
+        default: "1000"
+      particles-per-event:
+        description: "Particles generated per event"
+        type: string
+        default: "1"
+      pt-min:
+        description: "Minimum transverse momentum [GeV]"
+        type: string
+        default: "1"
+      pt-max:
+        description: "Maximum transverse momentum [GeV]"
+        type: string
+        default: "10"
+      theta-min:
+        description: "Minimum polar angle [deg]"
+        type: string
+        default: "10"
+      theta-max:
+        description: "Maximum polar angle [deg]"
+        type: string
+        default: "170"
+
+permissions:
+  contents: read
+
+jobs:
+  physics-validation:
+    uses: ./.github/workflows/physics-validation-template.yaml
+    with:
+      image: ${{ inputs.image }}
+      pdg: ${{ inputs.pdg }}
+      geometry: ${{ inputs.geometry }}
+      n-events: ${{ inputs.n-events }}
+      particles-per-event: ${{ inputs.particles-per-event }}
+      pt-min: ${{ inputs.pt-min }}
+      pt-max: ${{ inputs.pt-max }}
+      theta-min: ${{ inputs.theta-min }}
+      theta-max: ${{ inputs.theta-max }}

@@ -42,7 +42,6 @@ jobs:
     with:
       image: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest
       pdg: ${{ matrix.pdg }}
-    secrets: inherit
 
   deploy-pages:
     needs: physics-validation
