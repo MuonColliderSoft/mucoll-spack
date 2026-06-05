@@ -1,12 +1,10 @@
-name: Physics validation (tracking chain)
+name: Physics validation
 description: |
   Reusable per-particle physics-validation pipeline.
   Runs sim -> digi -> reco as independent jobs (each gets a fresh runner time
   budget), forwarding the output of each stage to the next as an artifact. The
   generator-level input is not produced here (the gun exercises no release code):
-  sim downloads a pre-generated per-particle file. The sim/digi/reco chain is
-  identical for every particle; the final "plot" job is the only per-study step
-  (see validation/make_plots.sh).
+  sim downloads a pre-generated per-particle file. 
 
   The mucoll-sim image is large, so jobs do NOT use a job-level `container:`
   (which pulls before any step runs and exhausts the runner disk). Instead each
@@ -25,12 +23,12 @@ on:
         type: string
         default: "-13"
       geometry:
-        description: "Detector geometry name passed to setup_digireco.sh"
+        description: "Detector geometry name"
         required: false
         type: string
         default: MAIA_v0
       n-events:
-        description: "Number of events to simulate (ddsim --numberOfEvents)"
+        description: "Number of events to process"
         required: false
         type: string
         default: "1000"
@@ -95,8 +93,8 @@ jobs:
           git -C benchmarks checkout "${BENCHMARKS_SHA}"
           git -C benchmarks submodule update --init --recursive
       - name: Download generated input
-        # Pre-generated particle-gun file (the trivial gen step exercises no
-        # release code). Stored as assets on the 'phys-val-inputs' release; one
+        # Pre-generated particle-gun file. 
+        # Stored as asset on the 'phys-val-inputs' release; one
         # file per particle label inferred from the PDG id.
         run: |
           curl -fSL --retry 3 -o gen.edm4hep.root \

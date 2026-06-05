@@ -10,13 +10,12 @@ on:
       pdg:
         description: "Particle gun PDG id (label is inferred from it)"
         type: choice
-        default: "-13"
+        default: "13"
         options:
-          - "-13"    # muon
-          - "-11"     # electron
-          - "-211"    # pion
+          - "13"    # muon
+          - "11"     # electron
+          - "211"    # pion
           - "22"     # photon (neutral)
-          - "2112"   # neutron (neutral)
       image:
         description: "Image to run the chain in"
         type: string
