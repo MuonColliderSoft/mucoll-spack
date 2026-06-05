@@ -36,10 +36,10 @@ on:
 permissions:
   contents: read
 
-# Pinned mucoll-benchmarks (samf25 fork, k4MuC-gen3 branch).
+# Pinned mucoll-benchmarks
 env:
-  BENCHMARKS_REPO: https://github.com/samf25/mucoll-benchmarks.git
-  BENCHMARKS_SHA: 69dca0e67f6cad8abcfa1f8f06fa072735e65c9e
+  BENCHMARKS_REPO: https://github.com/MuonColliderSoft/mucoll-benchmarks.git
+  BENCHMARKS_SHA: 6246556ce3f50c7280b06a2242d825e9cba9a825
 
 defaults:
   run:
