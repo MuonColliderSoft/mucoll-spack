@@ -4,7 +4,7 @@
 #
 # Runs one stage of the generic gen -> sim -> digi -> reco chain. This chain is
 # the same for every particle gun; only the downstream performance analysis and
-# plotting (e.g. plot_tracking_perf.py) differ per study.
+# plotting (see validation/make_plots.sh) differ per study.
 #
 # Usage: run_chain.sh <gen|sim|digi|reco>
 #
