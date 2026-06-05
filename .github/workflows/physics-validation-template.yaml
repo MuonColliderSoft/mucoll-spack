@@ -33,7 +33,7 @@ on:
         description: "Number of events to simulate (ddsim --numberOfEvents)"
         required: false
         type: string
-        default: "10000"
+        default: "1000"
 
 permissions:
   contents: read
@@ -157,6 +157,7 @@ jobs:
           docker exec -w /work \
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
+            -e NEV="${{ inputs.n-events }}" \
             ci /bin/bash /work/validation/run_chain.sh digi
       - uses: actions/upload-artifact@v7
         with:
@@ -202,6 +203,7 @@ jobs:
           docker exec -w /work \
             -e BM=/work/benchmarks \
             -e GEOM="${{ inputs.geometry }}" \
+            -e NEV="${{ inputs.n-events }}" \
             ci /bin/bash /work/validation/run_chain.sh reco
       - uses: actions/upload-artifact@v7
         with:

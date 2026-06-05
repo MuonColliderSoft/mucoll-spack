@@ -96,7 +96,9 @@ case "${STAGE}" in
     ;;
 
   digi)
-    k4run "${BM}/digitization/digi_steer.py" \
+    # --num-events overrides the steering's default EvtMax so digi processes the
+    # same number of events as the simulation.
+    k4run --num-events "${NEV}" "${BM}/digitization/digi_steer.py" \
       --IOSvc.Input sim.edm4hep.root \
       --IOSvc.Output digi.edm4hep.root
     ;;
@@ -104,7 +106,9 @@ case "${STAGE}" in
   reco)
     # PandoraSettings are resolved relative to the working directory by reco_steer.py
     cp -r "${BM}/reconstruction/PandoraSettings" ./
-    k4run "${BM}/reconstruction/reco_steer.py" \
+    # --num-events overrides the steering's default EvtMax so reco processes the
+    # same number of events as the simulation.
+    k4run --num-events "${NEV}" "${BM}/reconstruction/reco_steer.py" \
       --IOSvc.Input digi.edm4hep.root \
       --IOSvc.Output reco.edm4hep.root
     ;;
