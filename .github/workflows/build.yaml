@@ -3,7 +3,11 @@ description: |
   Publish mucoll software stack docker image.
   This workflow relies on a spack cache.
 
-on: push
+on:
+  # Build on push to any branch (accepting a duplicate build when a branch also
+  # has an open PR), plus pull_request so the required checks report on PRs.
+  push:
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +26,9 @@ jobs:
 
   physics-validation:
     needs: build-sim-image
+    # Skip on fork PRs: the image isn't published there, so there is nothing to
+    # validate (fork PRs build the image but cannot push it).
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     strategy:
       fail-fast: false
       matrix:

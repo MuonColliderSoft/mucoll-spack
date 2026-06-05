@@ -50,6 +50,9 @@ jobs:
     needs:
       - build-linux-amd64
       - build-linux-arm64
+    # Skip on fork PRs: the per-arch images aren't pushed there, and the manifest
+    # push needs registry write (fork PRs only get a read-only GITHUB_TOKEN).
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     outputs:
       image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}

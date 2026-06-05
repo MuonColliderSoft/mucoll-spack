@@ -73,7 +73,9 @@ jobs:
         id: build
         uses: docker/build-push-action@v7
         with:
-          push: true
+          # Build always; push only when not a fork PR (fork PRs get a
+          # read-only GITHUB_TOKEN and cannot push to the registry).
+          push: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
           platforms: linux/${{ inputs.platform }}
           context: ./Docker
           file: ./Docker/Dockerfile-${{ inputs.image-type }}
