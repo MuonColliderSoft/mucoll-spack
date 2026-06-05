@@ -10,23 +10,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # TESTING: image build disabled to save CI resources while iterating on
-  # physics-validation. Re-enable this job (and restore physics-validation's
-  # `needs`/`image` wiring) when done testing.
-  # build-sim-image:
-  #   uses: ./.github/workflows/image-template.yaml
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [ubuntu24]
-  #   with:
-  #     os: ${{ matrix.os }}
-  #     registry: ghcr.io
+  build-sim-image:
+    uses: ./.github/workflows/image-template.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu24]
+    with:
+      os: ${{ matrix.os }}
+      registry: ghcr.io
 
   physics-validation:
-    # TESTING: decoupled from build-sim-image; pulls the latest published image.
-    # Restore `needs: build-sim-image` + `image: ${{ needs.build-sim-image.outputs.image }}`
-    # to run against the freshly-built image.
+    needs: build-sim-image
     strategy:
       fail-fast: false
       matrix:
@@ -35,10 +30,10 @@ jobs:
           - "13"    # muon
           - "11"   # electron
           - "211"  # pion
-          - "22"   # photon 
+          - "22"   # photon
     uses: ./.github/workflows/physics-validation-template.yaml
     with:
-      image: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest
+      image: ${{ needs.build-sim-image.outputs.image }}
       pdg: ${{ matrix.pdg }}
 
   deploy-pages:
