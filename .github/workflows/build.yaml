@@ -32,12 +32,10 @@ jobs:
       matrix:
         # Particle label is inferred from the PDG id in the template.
         pdg:
-          - "-13"    # muon
-          # future particle guns:
-          # - "-11"   # electron
-          # - "-211"  # pion
-          - "22"   # photon  (neutral: needs calo/PFO plots)
-          # - "2112" # neutron (neutral: needs calo/PFO plots)
+          - "13"    # muon
+          - "11"   # electron
+          - "211"  # pion
+          - "22"   # photon 
     uses: ./.github/workflows/physics-validation-template.yaml
     with:
       image: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest

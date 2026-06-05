@@ -33,7 +33,7 @@ on:
         description: "Number of events to simulate (ddsim --numberOfEvents)"
         required: false
         type: string
-        default: "1000"
+        default: "10000"
 
 permissions:
   contents: read
@@ -65,7 +65,6 @@ jobs:
             13)   name=muon ;;
             211)  name=pion ;;
             22)   name=photon ;;
-            2112) name=neutron ;;
             *)    name="pdg${PDG}" ;;
           esac
           echo "Mapped PDG ${PDG} -> ${name}"
