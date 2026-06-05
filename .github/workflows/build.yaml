@@ -4,16 +4,18 @@ description: |
   This workflow relies on a spack cache.
 
 on:
-  # Build on push to any branch (accepting a duplicate build when a branch also
-  # has an open PR), plus pull_request so the required checks report on PRs.
+  # Build/publish the image when changes land on main; run on pull requests (so
+  # the required checks report on PRs); allow manual runs via the "Run workflow"
+  # button. No push trigger on other branches -- use dispatch for those.
   push:
+    branches: [main]
+  workflow_dispatch:
   pull_request:
 
 concurrency:
-  # Key on the branch name (same for a branch push and its PR) so the push build
-  # and the PR build share one group and don't both run -- the later-started run
-  # cancels the earlier one. For PRs github.head_ref is the source branch; for
-  # pushes it is empty, so we fall back to github.ref_name.
+  # Key on the branch name so repeated PR pushes / manual runs for the same branch
+  # don't pile up -- the later-started run cancels the earlier one. For PRs
+  # github.head_ref is the source branch; otherwise we fall back to github.ref_name.
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
