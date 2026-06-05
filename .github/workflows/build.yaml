@@ -10,7 +10,11 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Key on the branch name (same for a branch push and its PR) so the push build
+  # and the PR build share one group and don't both run -- the later-started run
+  # cancels the earlier one. For PRs github.head_ref is the source branch; for
+  # pushes it is empty, so we fall back to github.ref_name.
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
