@@ -79,10 +79,13 @@ jobs:
           platforms: linux/${{ inputs.platform }}
           context: ./Docker
           file: ./Docker/Dockerfile-${{ inputs.image-type }}
+          # On pull_request, github.sha is the ephemeral merge commit (absent from
+          # a plain clone), so the Dockerfile's `git clone && git checkout` would
+          # fail. Use the PR head repo+SHA instead; fall back to the push context.
           build-args: |
             OS=${{ inputs.os }}
-            GITHUB_REPOSITORY=${{ github.repository }}
-            MUCOLL_SHA=${{ github.sha }}
+            GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name || github.repository }}
+            MUCOLL_SHA=${{ github.event.pull_request.head.sha || github.sha }}
             SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache
             OCI_USERNAME=${{ github.actor }}
             BRANCH=${{ github.ref_name }}
