@@ -67,7 +67,7 @@ packages:
   acts:
     require: '@main+dd4hep+json cxxstd=20'
   k4geo:
-    require: '@00-24'
+    require: '@main'
   k4gaudipandora:
     require: '@main'
   k4reco:
