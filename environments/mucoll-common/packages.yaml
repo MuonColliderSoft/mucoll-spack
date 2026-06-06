@@ -67,11 +67,11 @@ packages:
   acts:
     require: '@main+dd4hep+json cxxstd=20'
   k4geo:
-    require: '@main'
+    require: '@00-24'
   k4gaudipandora:
     require: '@main'
   k4reco:
-    require: '@main'
+    require: '@0.2'
   k4actstracking:
     require: '@calosurface-extrapolation'
   k4simgeant4:
