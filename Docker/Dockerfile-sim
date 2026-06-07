@@ -22,13 +22,18 @@ RUN . /opt/setup_spack.sh && \
     cd /opt/spack-packages && \
     . ${REPOPATH}/.cherry-pick
 
+# Get Rust
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y && \
+    echo ". $HOME/.cargo/env" > ${HOME}/setup_env.sh
+
 # Install pre-compiled LLVM binaries to avoid expensive source builds in CI.
 # Add the LLVM apt repo (if not already added)
-RUN apt-get update && apt-get install -y wget gnupg && \
+RUN apt update && apt install -y wget gnupg && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
-    echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main" >> /etc/apt/sources.list.d/llvm.list && \
-    apt-get update && \
-    apt-get install -y llvm-16 clang-16 lld-16
+    echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main" | tee /etc/apt/sources.list.d/llvm-22.list && \
+    apt update && \
+    apt install -y llvm-22 clang-22 && \ 
+    llvm-config-22 --version
 
 # Add the package repositories
 ARG SPACK_BUILDCACHE
