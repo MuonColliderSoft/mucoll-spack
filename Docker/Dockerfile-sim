@@ -58,9 +58,9 @@ RUN . /opt/setup_spack.sh && \
 # Concretizing the MuColl stack reusing system packages as external
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
-    export PATH=/usr/lib/llvm-16/bin:${PATH} && \
-    spack compiler find /usr/lib/llvm-16/bin && \
-    #OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
+    export PATH=/usr/lib/llvm-22/bin:${PATH} && \
+    spack compiler find /usr/lib/llvm-22/bin && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
 # Installing fragments of dependency tree in separate layers for cached debugging
