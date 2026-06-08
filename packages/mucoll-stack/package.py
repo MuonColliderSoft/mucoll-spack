@@ -44,12 +44,18 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('llvm', default=False, description='Build with LLVM')
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
+    variant('analysis', default=False, description='Minimal build for analysis only')
+    variant('sim', default=False, description='Build with simulation tools')
 
     # Add compilers to the build dependencies
     # so that we have them available to set them in the env script
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
+
+    with when('+analysis'):
+        depends_on('edm4hep')
+        depends_on('podio')
 
     with when('+sim'):
         ############################### Key4hep ###############
