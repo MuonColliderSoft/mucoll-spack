@@ -22,7 +22,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack+devtools+pytools+analysis
+      spec: mucoll-stack+devtools+pytools+analysis~sim~ml
 
   analysis-arm64:
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -33,7 +33,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack+devtools+pytools+analysis
+      spec: mucoll-stack+devtools+pytools+analysis~sim~ml
 
   # --------------------------------------------------------------------- sim --
   sim-amd64:
@@ -47,7 +47,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+sim
+      spec: mucoll-stack+devtools+pytools+analysis+sim~ml
 
   sim-arm64:
     needs: analysis-arm64
@@ -60,7 +60,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+sim
+      spec: mucoll-stack+devtools+pytools+analysis+sim~ml
 
   # ---------------------------------------------------------------------- ml --
   ml-amd64:

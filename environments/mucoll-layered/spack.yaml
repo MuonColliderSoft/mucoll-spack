@@ -11,7 +11,11 @@ spack:
         glu: [mesa]
 
   concretizer:
-    unify: true
+    # when_possible (not true) because the sim and ml roots require different
+    # k4actstracking branches and therefore cannot share a single DAG. Spack
+    # still concretizes the whole environment together and shares every package
+    # it can; only the conflicting k4actstracking subtree is duplicated.
+    unify: when_possible
     targets:
       host_compatible: true
 
@@ -26,5 +30,5 @@ spack:
   # already-installed store.
   specs:
   - mucoll-stack+devtools+pytools+analysis
-  - mucoll-stack+devtools+pytools+analysis+sim
-  - mucoll-stack+devtools+pytools+analysis+sim+ml
+  - mucoll-stack+devtools+pytools+analysis+sim ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack+devtools+pytools+analysis+sim+ml ^k4actstracking@gnn
