@@ -27,12 +27,14 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y && \
     echo ". $HOME/.cargo/env" > ${HOME}/setup_env.sh
 
 # Install pre-compiled LLVM binaries to avoid expensive source builds in CI.
+# libzstd-dev/zlib1g-dev are needed so LLVM's CMake exports (LLVMSupport ->
+# zstd::libzstd_shared, ZLIB::ZLIB) resolve when py-llvmlite links against LLVM.
 # Add the LLVM apt repo (if not already added)
 RUN apt update && apt install -y wget gnupg && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
     echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" | tee /etc/apt/sources.list.d/llvm-20.list && \
     apt update && \
-    apt install -y llvm-20 clang-20 lld-20 && \
+    apt install -y llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev && \
     llvm-config-20 --version
 
 # Add the package repositories
