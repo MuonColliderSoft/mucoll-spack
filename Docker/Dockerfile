@@ -30,10 +30,10 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y && \
 # Add the LLVM apt repo (if not already added)
 RUN apt update && apt install -y wget gnupg && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
-    echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main" | tee /etc/apt/sources.list.d/llvm-22.list && \
+    echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" | tee /etc/apt/sources.list.d/llvm-20.list && \
     apt update && \
-    apt install -y llvm-22 clang-22 && \ 
-    llvm-config-22 --version
+    apt install -y llvm-20 clang-20 lld-20 && \
+    llvm-config-20 --version
 
 # Add the package repositories
 ARG SPACK_BUILDCACHE
@@ -59,8 +59,8 @@ RUN . /opt/setup_spack.sh && \
 # Concretizing the MuColl stack reusing system packages as external
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
-    export PATH=/usr/lib/llvm-22/bin:${PATH} && \
-    spack compiler find /usr/lib/llvm-22/bin && \
+    export PATH=/usr/lib/llvm-20/bin:${PATH} && \
+    spack compiler find /usr/lib/llvm-20/bin && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 

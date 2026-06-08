@@ -1,0 +1,9 @@
+# Pull latest stable py-numba (0.65.1) + py-llvmlite (0.47.0), which support
+# llvm@20 (the newest LLVM py-llvmlite supports; acorn -> py-numba pulls it in).
+# The upstream commit doesn't cherry-pick cleanly onto this image's older
+# spack-packages, so check out the two package files at that commit instead.
+git remote add upstream https://github.com/spack/spack-packages.git 2>/dev/null || true
+git fetch --depth 50 upstream ce14512cd8b82e4e4f45367916d37f59dba08606
+git checkout ce14512cd8b82e4e4f45367916d37f59dba08606 -- \
+  repos/spack_repo/builtin/packages/py_numba/package.py \
+  repos/spack_repo/builtin/packages/py_llvmlite/package.py

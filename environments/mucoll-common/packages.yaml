@@ -46,12 +46,14 @@ packages:
     - spec: openssh@99
       prefix: /usr
 
-  # Take external llvm as it won't compile within 6 hours limit 
+  # Take external llvm as it won't compile within 6 hours limit
+  # llvm@20 (not a newer major) because py-llvmlite (via py-numba, pulled in by
+  # acorn) caps at llvm@20; the rest of the stack has no hard llvm version need.
   llvm:
     buildable: False
     externals:
-    - spec: llvm@22.1.7 +clang
-      prefix: /usr/lib/llvm-22
+    - spec: llvm@20.1.8 +clang +lld
+      prefix: /usr/lib/llvm-20
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
