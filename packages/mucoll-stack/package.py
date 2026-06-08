@@ -51,58 +51,59 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
 
-    ############################### Key4hep ###############
-    #######################################################
-    depends_on('whizard +lcio +openloops')
-    depends_on('k4marlinwrapper')
-    depends_on('k4simdelphes')
-    depends_on('k4simgeant4')
-    depends_on('k4geo')
-    depends_on('k4reco')
-    depends_on('k4gaudipandora')
-    depends_on('k4actstracking')
-    depends_on('k4marlinwrapper')
+    with when('+sim'):
+        ############################### Key4hep ###############
+        #######################################################
+        depends_on('whizard +lcio +openloops')
+        depends_on('k4marlinwrapper')
+        depends_on('k4simdelphes')
+        depends_on('k4simgeant4')
+        depends_on('k4geo')
+        depends_on('k4reco')
+        depends_on('k4gaudipandora')
+        depends_on('k4actstracking')
+        depends_on('k4marlinwrapper')
 
-    ############################### ILCSoft ###############
-    #######################################################
-    depends_on('aidatt')
-    depends_on('raida')
-    depends_on('sio')
-    depends_on('ced')
-    depends_on('cedviewer')
-    depends_on('garlic')
-    depends_on('generalbrokenlines')
-    depends_on('gear')
-    depends_on('ilcutil')
-    depends_on('lcfiplus')
-    depends_on('lcfivertex')
-    depends_on('marlin')
-    depends_on('marlinutil')
-    depends_on('marlindd4hep')
-    depends_on('marlinreco')
-    depends_on('marlinfastjet')
-    depends_on('marlinkinfit')
-    depends_on('marlinkinfitprocessors')
-    depends_on('marlintrk')
-    depends_on('kaldet')
-    depends_on('ddkaltest')
-    depends_on('kitrackmarlin')
-    depends_on('kaltest')
-    depends_on('kitrack')
-    depends_on('fcalclusterer')
-    depends_on('pandoraanalysis')
-    depends_on('pandorapfa')
-    depends_on('clicperformance')
+        ############################### ILCSoft ###############
+        #######################################################
+        depends_on('aidatt')
+        depends_on('raida')
+        depends_on('sio')
+        depends_on('ced')
+        depends_on('cedviewer')
+        depends_on('garlic')
+        depends_on('generalbrokenlines')
+        depends_on('gear')
+        depends_on('ilcutil')
+        depends_on('lcfiplus')
+        depends_on('lcfivertex')
+        depends_on('marlin')
+        depends_on('marlinutil')
+        depends_on('marlindd4hep')
+        depends_on('marlinreco')
+        depends_on('marlinfastjet')
+        depends_on('marlinkinfit')
+        depends_on('marlinkinfitprocessors')
+        depends_on('marlintrk')
+        depends_on('kaldet')
+        depends_on('ddkaltest')
+        depends_on('kitrackmarlin')
+        depends_on('kaltest')
+        depends_on('kitrack')
+        depends_on('fcalclusterer')
+        depends_on('pandoraanalysis')
+        depends_on('pandorapfa')
+        depends_on('clicperformance')
 
-    ############ custom Muon Collider packages ############
-    #######################################################
-    depends_on('muoncvxddigitiser')
-    depends_on('mybibutils')
-    depends_on('pelican')
+        ############ custom Muon Collider packages ############
+        #######################################################
+        depends_on('muoncvxddigitiser')
+        depends_on('mybibutils')
+        depends_on('pelican')
     
-    ############ generic packages ############
-    #######################################################
-    depends_on('delphes')
+        ############ generic packages ############
+        #######################################################
+        depends_on('delphes')
 
     ##################### developer tools #################
     #######################################################
