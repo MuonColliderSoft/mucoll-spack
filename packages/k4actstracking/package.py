@@ -41,8 +41,9 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     depends_on("edm4hep")
     depends_on("k4fwcore")
     depends_on("opendatadetector", type="test")
-    depends_on("py-torch")
-    depends_on("py-onnxruntime")
+    # The ML inference dependencies are only needed by the GNN tracking pipeline.
+    depends_on("py-torch", when="@gnn")
+    depends_on("py-onnxruntime", when="@gnn")
 
     def cmake_args(self):
         return []
