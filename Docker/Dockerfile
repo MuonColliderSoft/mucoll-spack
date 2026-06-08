@@ -45,12 +45,13 @@ RUN . /opt/setup_spack.sh && \
     fi
 
 # Create the release environment
+ARG ENVIRONMENT=mucoll-release
 RUN . /opt/setup_spack.sh && \
-    cd ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release && \
+    cd ${SPACK_ROOT}/var/mucoll-spack/environments/${ENVIRONMENT} && \
     spack env activate . && \
     cd - && \
     echo ". /opt/setup_spack.sh" >> ${HOME}/setup_env.sh && \
-    echo "cd ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release" >> ${HOME}/setup_env.sh && \
+    echo "cd ${SPACK_ROOT}/var/mucoll-spack/environments/${ENVIRONMENT}" >> ${HOME}/setup_env.sh && \
     echo "spack env activate ." >> ${HOME}/setup_env.sh && \
     echo "cd -" >> ${HOME}/setup_env.sh && \
     echo "spack env status" >> ${HOME}/setup_env.sh
