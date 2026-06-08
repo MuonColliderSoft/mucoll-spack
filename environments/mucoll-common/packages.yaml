@@ -50,8 +50,8 @@ packages:
   llvm:
     buildable: False
     externals:
-    - spec: llvm@16.0.6 +clang +lld
-      prefix: /usr/lib/llvm-16
+    - spec: llvm@22.1.7 +clang
+      prefix: /usr/lib/llvm-22
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
