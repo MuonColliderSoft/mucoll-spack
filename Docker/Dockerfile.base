@@ -87,7 +87,7 @@ RUN --mount=type=secret,id=ocipass \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack install ${SPACK_INSTALL_OPTS} "${SPEC}" && \
     spack env deactivate && \
     spack clean -a && \
-    spack mirror remove local-buildcache || true
+    { spack mirror remove local-buildcache || true; }
 
 # Point the default setup at this layer's mucoll-stack root. Only the analysis
 # root is installed in this image, so the spack find query is unambiguous.

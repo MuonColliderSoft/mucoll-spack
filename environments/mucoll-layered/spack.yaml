@@ -28,7 +28,12 @@ spack:
   # unify:true so every shared dependency resolves to a single hash. Each
   # layered image installs only its own root spec, reusing the parent layer's
   # already-installed store.
+  # The sim/ml variants are written out explicitly (incl. the negations) so that
+  # each abstract root is matched by exactly one `spack install <spec>` query in
+  # the layered Dockerfiles. Without the ~sim~ml / ~ml negations the abstract
+  # roots overlap: `+analysis` is satisfied by all three (installs everything),
+  # while `+analysis~sim~ml` is satisfied by none of the un-negated roots.
   specs:
-  - mucoll-stack+devtools+pytools+analysis
-  - mucoll-stack+devtools+pytools+analysis+sim ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack+devtools+pytools+analysis~sim~ml
+  - mucoll-stack+devtools+pytools+analysis+sim~ml ^k4actstracking@calosurface-extrapolation
   - mucoll-stack+devtools+pytools+analysis+sim+ml ^k4actstracking@gnn
