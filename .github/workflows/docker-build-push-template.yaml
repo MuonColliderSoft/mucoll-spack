@@ -20,6 +20,17 @@ on:
       image-type:
         required: true
         type: string
+      dockerfile:
+        required: true
+        type: string
+      base-image:
+        required: false
+        type: string
+        default: ''
+      spec:
+        required: false
+        type: string
+        default: ''
     outputs:
       image-uri:
         description: "The URI of the built image with digest"
@@ -76,10 +87,11 @@ jobs:
           push: true
           platforms: linux/${{ inputs.platform }}
           context: ./Docker
-          file: ./Docker/Dockerfile
+          file: ./Docker/${{ inputs.dockerfile }}
           build-args: |
             OS=${{ inputs.os }}
-            ENVIRONMENT=mucoll-release${{ inputs.image-type != 'sim' && format('-{0}', inputs.image-type) || '' }}
+            BASE_IMAGE=${{ inputs.base-image }}
+            SPEC=${{ inputs.spec }}
             GITHUB_REPOSITORY=${{ github.repository }}
             MUCOLL_SHA=${{ github.sha }}
             SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache

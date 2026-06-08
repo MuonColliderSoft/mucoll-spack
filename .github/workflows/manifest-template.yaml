@@ -1,7 +1,7 @@
-name: Publish Docker Image
+name: Publish multi-arch manifest
 description: |
-  Loads a mucoll stack from spack cache.
-  This workflow builds a multi-arch image and pushes it to the registry.
+  Combines the per-architecture images (amd64 + arm64) of a single mucoll image
+  type into a multi-arch manifest and pushes it to the registry.
 
 on:
   workflow_call:
@@ -13,9 +13,14 @@ on:
         required: true
         type: string
       image-type:
-        required: false
+        required: true
         type: string
-        default: sim
+      amd64-image:
+        required: true
+        type: string
+      arm64-image:
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -24,28 +29,7 @@ permissions:
   attestations: write
 
 jobs:
-  build-linux-amd64:
-    uses: ./.github/workflows/docker-build-push-template.yaml
-    with:
-      os: ${{ inputs.os }}
-      runner: ubuntu-latest
-      platform: amd64
-      registry: ${{ inputs.registry }}
-      image-type: ${{ inputs.image-type }}
-  
-  build-linux-arm64:
-    uses: ./.github/workflows/docker-build-push-template.yaml
-    with:
-      os: ${{ inputs.os }}
-      runner: ubuntu-24.04-arm
-      platform: arm64
-      registry: ${{ inputs.registry }}
-      image-type: ${{ inputs.image-type }}
-
   publish-multiarch:
-    needs:
-      - build-linux-amd64
-      - build-linux-arm64
     runs-on: ubuntu-latest
     steps:
       - name: Login to DockerHub
@@ -64,12 +48,12 @@ jobs:
         id: lowercase-amd64
         uses: Entepotenz/change-string-case-action-min-dependencies@v1
         with:
-          string: ${{ needs.build-linux-amd64.outputs.image-uri }}
+          string: ${{ inputs.amd64-image }}
       - name: Change string case for arm64
         id: lowercase-arm64
         uses: Entepotenz/change-string-case-action-min-dependencies@v1
         with:
-          string: ${{ needs.build-linux-arm64.outputs.image-uri }}
+          string: ${{ inputs.arm64-image }}
       - name: Create manifest
         id: build
         uses: int128/docker-manifest-create-action@v2

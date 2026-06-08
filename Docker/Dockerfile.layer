@@ -1,0 +1,47 @@
+###############################################################################
+#  Repository: ${IMAGE}/mucoll-${image-type}   (sim, ml)
+#  Tag:        ${VERSION}-${OS}
+#
+#  Thin layer built FROM a parent mucoll image (analysis -> sim -> ml). The
+#  environment is already fully concretized in the base image, so this layer
+#  just installs its own root spec; dependencies provided by the parent layer
+#  are reused from the store and only the genuinely new packages are built
+#  (pulled from / pushed back to the buildcache when available).
+###############################################################################
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# e.g. mucoll-stack+devtools+pytools+analysis+sim  or  ...+analysis+sim+ml
+ARG SPEC
+ARG SPACK_BUILDCACHE
+ARG OCI_USERNAME
+
+USER root
+WORKDIR /root
+
+# Re-add the buildcache mirror (it was removed in the parent layer), install
+# only this layer's root spec reusing the parent's store, then clean up.
+RUN --mount=type=secret,id=ocipass \
+    . /root/setup_env.sh && \
+    if [ -n "${SPACK_BUILDCACHE}" ]; then \
+        OCI_PASSWORD=$(cat /run/secrets/ocipass) spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}"; \
+    fi && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt "${SPEC}" && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack install --only-concrete --no-add --fail-fast "${SPEC}" && \
+    spack env deactivate && \
+    spack clean -a && \
+    spack mirror remove local-buildcache || true
+
+# Point the default setup at this layer's mucoll-stack root. The query selects
+# this layer's variant; only roots installed so far are matched.
+RUN . /root/setup_env.sh && \
+    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" "${SPEC}") && \
+    MUCOLL_STACK_PATH_CLEANED=$(echo ${MUCOLL_STACK_PATH} | sed -E 's/\x1b\[[0-9;]*m//g') && \
+    echo "source ${MUCOLL_STACK_PATH_CLEANED}/setup.sh" > /opt/setup_mucoll.sh && \
+    echo "alias setup_mucoll=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" > /etc/profile.d/aliases.sh
+
+USER mucoll
+WORKDIR /home/mucoll
+
+ENTRYPOINT ["/bin/bash", "-c", "source /opt/setup_mucoll.sh && exec /bin/bash"]

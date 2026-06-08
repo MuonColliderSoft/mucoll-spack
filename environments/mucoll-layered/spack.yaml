@@ -1,0 +1,30 @@
+spack:
+  packages:
+    all:
+      target: [x86_64, aarch64]
+      variants:
+        - build_type=RelWithDebInfo
+        - 'cxxstd=20'
+      buildable: true
+      providers:
+        gl: [mesa]
+        glu: [mesa]
+
+  concretizer:
+    unify: true
+    targets:
+      host_compatible: true
+
+  view: false
+
+  include:
+  - ../mucoll-common/packages.yaml
+
+  # Three nested root specs (analysis ⊂ sim ⊂ ml) concretized together under
+  # unify:true so every shared dependency resolves to a single hash. Each
+  # layered image installs only its own root spec, reusing the parent layer's
+  # already-installed store.
+  specs:
+  - mucoll-stack+devtools+pytools+analysis
+  - mucoll-stack+devtools+pytools+analysis+sim
+  - mucoll-stack+devtools+pytools+analysis+sim+ml

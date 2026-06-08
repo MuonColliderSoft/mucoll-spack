@@ -62,7 +62,7 @@ packages:
     require: +python+tui+source-highlight~debuginfod
 
   py-pandas:
-    require: ~excel~parquet~performance
+    require: ~excel~parquet
 
   k4fwcore:
     require: '@main'
