@@ -35,7 +35,9 @@ class K4actstracking(CMakePackage, Key4hepPackage):
 
     depends_on("cxx", type="build")
 
-    depends_on("acts+dd4hep+json+gnn")
+    depends_on("acts+dd4hep+json")
+    # The GNN tracking pipeline is the only consumer of the acts GNN plugin.
+    depends_on("acts+dd4hep+json+gnn", when="@gnn")
     depends_on("gaudi")
     depends_on("root")
     depends_on("edm4hep")

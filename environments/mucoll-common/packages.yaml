@@ -69,8 +69,11 @@ packages:
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
+  # +gnn is intentionally NOT required globally: only the @gnn branch of
+  # k4actstracking (used by the ml layer) needs the acts GNN plugin (and its
+  # py-torch / onnxruntime deps). The sim layer concretizes acts~gnn.
   acts:
-    require: '@main+dd4hep+json+gnn cxxstd=20'
+    require: '@main+dd4hep+json cxxstd=20'
   k4geo:
     require: '@main'
   k4gaudipandora:
