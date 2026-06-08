@@ -29,9 +29,9 @@ RUN --mount=type=secret,id=ocipass \
     fi && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt "${SPEC}" && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack install --only-concrete --no-add --fail-fast "${SPEC}" && \
+    { spack mirror remove local-buildcache || true; } && \
     spack env deactivate && \
-    spack clean -a && \
-    { spack mirror remove local-buildcache || true; }
+    spack clean -a
 
 # Point the default setup at this layer's mucoll-stack root. The query selects
 # this layer's variant; only roots installed so far are matched.
