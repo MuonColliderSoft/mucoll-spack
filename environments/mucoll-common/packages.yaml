@@ -73,7 +73,14 @@ packages:
   # k4actstracking (used by the ml layer) needs the acts GNN plugin (and its
   # py-torch / onnxruntime deps). The sim layer concretizes acts~gnn.
   acts:
-    require: '@main+dd4hep+json cxxstd=20'
+    # Temporarily pin acts@main to the last commit before the grid refactor
+    # (acts-project/acts#5541, c36cd88cd, 2026-06-08) that broke compilation of
+    # the CylindricalSpacePointGrid fill path: grid.atPosition(binIndex) now
+    # resolves to the position-lookup overload (Point = std::size_t), so
+    # MultiAxisHelper subscripts a scalar -> "subscripted value is neither array
+    # nor pointer" when building k4actstracking. Revert to '@main' once acts
+    # main is fixed upstream.
+    require: '@main commit=0f9e9afe70b1e817f965dfda6dc7fa94376fbef6 +dd4hep+json cxxstd=20'
   k4geo:
     require: '@main'
   k4gaudipandora:
