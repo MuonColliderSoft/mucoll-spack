@@ -102,6 +102,11 @@ packages:
   # list instead (a global require would make those per-root specs unsatisfiable).
   k4simgeant4:
     require: '@main'
+  # The latest release (00-07-06) fails to build against k4fwcore@main: it still
+  # includes k4FWCore/PodioDataSvc.h, which has been removed upstream. main tracks
+  # the current k4fwcore API and compiles cleanly, so pin it until a release catches up.
+  k4simdelphes:
+    require: '@main'
   pyatlasify:
     require: '@master'
 
