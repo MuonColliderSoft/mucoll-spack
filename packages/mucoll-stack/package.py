@@ -45,6 +45,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
     variant('analysis', default=False, description='Minimal build for analysis only')
+    variant('reco', default=False, description='Build with reconstruction tools')
     variant('sim', default=False, description='Build with simulation tools')
 
     # Add compilers to the build dependencies
@@ -65,6 +66,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #depends_on('k4simdelphes')
         #depends_on('k4simgeant4')
         depends_on('k4geo')
+
+        #with when('+reco'):
         depends_on('k4reco')
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
