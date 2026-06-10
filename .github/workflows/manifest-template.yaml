@@ -1,0 +1,65 @@
+name: Publish multi-arch manifest
+description: |
+  Combines the per-architecture images (amd64 + arm64) of a single mucoll image
+  type into a multi-arch manifest and pushes it to the registry.
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      registry:
+        required: true
+        type: string
+      image-type:
+        required: true
+        type: string
+      amd64-image:
+        required: true
+        type: string
+      arm64-image:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  publish-multiarch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker Meta
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
+          flavor: latest=${{ github.ref == 'refs/heads/main' }}
+      - name: Change string case for amd64
+        id: lowercase-amd64
+        uses: Entepotenz/change-string-case-action-min-dependencies@v1
+        with:
+          string: ${{ inputs.amd64-image }}
+      - name: Change string case for arm64
+        id: lowercase-arm64
+        uses: Entepotenz/change-string-case-action-min-dependencies@v1
+        with:
+          string: ${{ inputs.arm64-image }}
+      - name: Create manifest
+        id: build
+        uses: int128/docker-manifest-create-action@v2
+        with:
+          index-annotations: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          sources: |
+            ${{ steps.lowercase-amd64.outputs.lowercase }}
+            ${{ steps.lowercase-arm64.outputs.lowercase }}

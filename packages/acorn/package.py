@@ -16,7 +16,7 @@ class Acorn(PythonPackage):
 
     depends_on("py-setuptools")
     depends_on("py-click")
-    #depends_on("py-numba")
+    depends_on("py-numba")
     depends_on("py-tqdm")
     depends_on("py-networkx")
     depends_on("py-seaborn")
@@ -31,3 +31,8 @@ class Acorn(PythonPackage):
     depends_on("py-scikit-learn")
     depends_on("py-trackml")
     #depends_on("py-black")
+    depends_on("py-atlasify")
+    depends_on("py-class-resolver")
+    depends_on("py-torch-cluster")
+    depends_on("py-torch-sparse")
+    depends_on("py-torch-spline-conv")

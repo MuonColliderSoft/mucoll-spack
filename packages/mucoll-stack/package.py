@@ -44,6 +44,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('llvm', default=False, description='Build with LLVM')
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
+    variant('analysis', default=False, description='Minimal build for analysis only')
+    variant('reco', default=False, description='Build with reconstruction tools')
+    variant('sim', default=False, description='Build with simulation tools')
 
     # Add compilers to the build dependencies
     # so that we have them available to set them in the env script
@@ -51,58 +54,64 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
 
-    ############################### Key4hep ###############
-    #######################################################
-    depends_on('whizard +lcio +openloops')
-    depends_on('k4marlinwrapper')
-    depends_on('k4simdelphes')
-    depends_on('k4simgeant4')
-    depends_on('k4geo')
-    depends_on('k4reco')
-    depends_on('k4gaudipandora')
-    depends_on('k4actstracking')
-    depends_on('k4marlinwrapper')
+    with when('+analysis'):
+        depends_on('edm4hep')
+        depends_on('podio')
 
-    ############################### ILCSoft ###############
-    #######################################################
-    depends_on('aidatt')
-    depends_on('raida')
-    depends_on('sio')
-    depends_on('ced')
-    depends_on('cedviewer')
-    depends_on('garlic')
-    depends_on('generalbrokenlines')
-    depends_on('gear')
-    depends_on('ilcutil')
-    depends_on('lcfiplus')
-    depends_on('lcfivertex')
-    depends_on('marlin')
-    depends_on('marlinutil')
-    depends_on('marlindd4hep')
-    depends_on('marlinreco')
-    depends_on('marlinfastjet')
-    depends_on('marlinkinfit')
-    depends_on('marlinkinfitprocessors')
-    depends_on('marlintrk')
-    depends_on('kaldet')
-    depends_on('ddkaltest')
-    depends_on('kitrackmarlin')
-    depends_on('kaltest')
-    depends_on('kitrack')
-    depends_on('fcalclusterer')
-    depends_on('pandoraanalysis')
-    depends_on('pandorapfa')
-    depends_on('clicperformance')
+    with when('+sim'):
+        ############################### Key4hep ###############
+        #######################################################
+        depends_on('whizard +lcio +openloops')
+        #depends_on('k4marlinwrapper')
+        #depends_on('k4simdelphes')
+        #depends_on('k4simgeant4')
+        depends_on('k4geo')
 
-    ############ custom Muon Collider packages ############
-    #######################################################
-    depends_on('muoncvxddigitiser')
-    depends_on('mybibutils')
-    depends_on('pelican')
+        #with when('+reco'):
+        depends_on('k4reco')
+        depends_on('k4gaudipandora')
+        depends_on('k4actstracking')
+
+        ############################### ILCSoft ###############
+        #######################################################
+        depends_on('aidatt')
+        depends_on('raida')
+        depends_on('sio')
+        depends_on('ced')
+        depends_on('cedviewer')
+        depends_on('garlic')
+        depends_on('generalbrokenlines')
+        depends_on('gear')
+        depends_on('ilcutil')
+        depends_on('lcfiplus')
+        depends_on('lcfivertex')
+        depends_on('marlin')
+        depends_on('marlinutil')
+        depends_on('marlindd4hep')
+        depends_on('marlinreco')
+        depends_on('marlinfastjet')
+        depends_on('marlinkinfit')
+        depends_on('marlinkinfitprocessors')
+        depends_on('marlintrk')
+        depends_on('kaldet')
+        depends_on('ddkaltest')
+        depends_on('kitrackmarlin')
+        depends_on('kaltest')
+        depends_on('kitrack')
+        depends_on('fcalclusterer')
+        depends_on('pandoraanalysis')
+        depends_on('pandorapfa')
+        depends_on('clicperformance')
+
+        ############ custom Muon Collider packages ############
+        #######################################################
+        depends_on('muoncvxddigitiser')
+        depends_on('mybibutils')
+        depends_on('pelican')
     
-    ############ generic packages ############
-    #######################################################
-    depends_on('delphes')
+        ############ generic packages ############
+        #######################################################
+        depends_on('delphes')
 
     ##################### developer tools #################
     #######################################################
@@ -115,7 +124,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('llvm', when='+llvm')
 
     with when('+ml'):
-        depends_on("k4mltracking")
+        #depends_on("k4mltracking")
         # ML tools
         depends_on('onnx')
         depends_on('xgboost')
@@ -166,7 +175,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
 
         # See https://github.com/root-project/root/issues/18949
-        env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
+        #env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
 
         # set vdt, needed for root, see https://github.com/spack/spack/pull/37278
         if "vdt" in self.spec:

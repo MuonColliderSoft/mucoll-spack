@@ -1,0 +1,39 @@
+spack:
+  packages:
+    all:
+      target: [x86_64, aarch64]
+      variants:
+        - build_type=RelWithDebInfo
+        - 'cxxstd=20'
+      buildable: true
+      providers:
+        gl: [mesa]
+        glu: [mesa]
+
+  concretizer:
+    # when_possible (not true) because the sim and ml roots require different
+    # k4actstracking branches and therefore cannot share a single DAG. Spack
+    # still concretizes the whole environment together and shares every package
+    # it can; only the conflicting k4actstracking subtree is duplicated.
+    unify: when_possible
+    targets:
+      host_compatible: true
+
+  view: false
+
+  include:
+  - ../mucoll-common/packages.yaml
+
+  # Three nested root specs (analysis ⊂ sim ⊂ ml) concretized together under
+  # unify:true so every shared dependency resolves to a single hash. Each
+  # layered image installs only its own root spec, reusing the parent layer's
+  # already-installed store.
+  # The sim/ml variants are written out explicitly (incl. the negations) so that
+  # each abstract root is matched by exactly one `spack install <spec>` query in
+  # the layered Dockerfiles. Without the ~sim~ml / ~ml negations the abstract
+  # roots overlap: `+analysis` is satisfied by all three (installs everything),
+  # while `+analysis~sim~ml` is satisfied by none of the un-negated roots.
+  specs:
+  - mucoll-stack+devtools+pytools+analysis~sim~ml
+  - mucoll-stack+devtools+pytools+analysis+sim~ml ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack+devtools+pytools+analysis+sim+ml ^k4actstracking@gnn

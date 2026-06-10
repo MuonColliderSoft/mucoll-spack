@@ -1,6 +1,13 @@
 ###############################################################################
-#  Repository: ${IMAGE}/mucoll-sim
-#  Tag:        ${VERSION}-alma9
+#  Repository: ${IMAGE}/mucoll-analysis
+#  Tag:        ${VERSION}-${OS}
+#
+#  Base layer of the layered Muon Collider images. It bootstraps spack, the
+#  mucoll repo and the toolchain, concretizes the WHOLE layered environment
+#  (analysis + sim + ml roots together, so shared packages get a single hash)
+#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images are
+#  built FROM this image with Dockerfile.layer and install their extra specs,
+#  reusing this layer's already-installed store.
 ###############################################################################
 
 ARG OS=alma9
@@ -27,13 +34,15 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y && \
     echo ". $HOME/.cargo/env" > ${HOME}/setup_env.sh
 
 # Install pre-compiled LLVM binaries to avoid expensive source builds in CI.
+# libzstd-dev/zlib1g-dev are needed so LLVM's CMake exports (LLVMSupport ->
+# zstd::libzstd_shared, ZLIB::ZLIB) resolve when py-llvmlite links against LLVM.
 # Add the LLVM apt repo (if not already added)
 RUN apt update && apt install -y wget gnupg && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
-    echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-22 main" | tee /etc/apt/sources.list.d/llvm-22.list && \
+    echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" | tee /etc/apt/sources.list.d/llvm-20.list && \
     apt update && \
-    apt install -y llvm-22 clang-22 && \ 
-    llvm-config-22 --version
+    apt install -y llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev && \
+    llvm-config-20 --version
 
 # Add the package repositories
 ARG SPACK_BUILDCACHE
@@ -44,49 +53,53 @@ RUN . /opt/setup_spack.sh && \
         spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}";\
     fi
 
-# Create the release environment
+# Activate the layered environment (analysis + sim + ml roots)
+ARG ENVIRONMENT=mucoll-layered
 RUN . /opt/setup_spack.sh && \
-    cd ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release && \
+    cd ${SPACK_ROOT}/var/mucoll-spack/environments/${ENVIRONMENT} && \
     spack env activate . && \
     cd - && \
     echo ". /opt/setup_spack.sh" >> ${HOME}/setup_env.sh && \
-    echo "cd ${SPACK_ROOT}/var/mucoll-spack/environments/mucoll-release" >> ${HOME}/setup_env.sh && \
+    echo "cd ${SPACK_ROOT}/var/mucoll-spack/environments/${ENVIRONMENT}" >> ${HOME}/setup_env.sh && \
     echo "spack env activate ." >> ${HOME}/setup_env.sh && \
     echo "cd -" >> ${HOME}/setup_env.sh && \
     echo "spack env status" >> ${HOME}/setup_env.sh
 
-# Concretizing the MuColl stack reusing system packages as external
+# Concretize the WHOLE layered stack (all three roots) reusing system packages
+# as external, so shared dependencies get identical hashes across all layers.
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
-    export PATH=/usr/lib/llvm-22/bin:${PATH} && \
-    spack compiler find /usr/lib/llvm-22/bin && \
+    export PATH=/usr/lib/llvm-20/bin:${PATH} && \
+    spack compiler find /usr/lib/llvm-20/bin && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
-# Installing fragments of dependency tree in separate layers for cached debugging
+# Install fragments of the dependency tree in separate layers for cached debugging
 ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
 
+# Install ONLY the analysis root from the already-concretized environment.
+# The ~sim~ml negations are required so the abstract spec matches just the
+# analysis root and not the sim/ml roots (which also satisfy +analysis).
+ARG SPEC=mucoll-stack+devtools+pytools+analysis~sim~ml
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
-    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt && \
-    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack install ${SPACK_INSTALL_OPTS} && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt "${SPEC}" && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack install ${SPACK_INSTALL_OPTS} "${SPEC}" && \
     spack env deactivate && \
     spack clean -a && \
-    spack mirror remove local-buildcache || true
+    { spack mirror remove local-buildcache || true; }
 
+# Point the default setup at this layer's mucoll-stack root. Only the analysis
+# root is installed in this image, so the spack find query is unambiguous.
 RUN . ${HOME}/setup_env.sh && \
-    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack) && \
+    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack+devtools+pytools+analysis~sim~ml) && \
     MUCOLL_STACK_PATH_CLEANED=$(echo ${MUCOLL_STACK_PATH} | sed -E 's/\x1b\[[0-9;]*m//g') && \
     echo "source ${MUCOLL_STACK_PATH_CLEANED}/setup.sh" > /opt/setup_mucoll.sh && \
     echo "alias setup_mucoll=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" >> /etc/profile.d/aliases.sh
-
-# Create entrypoint script to source setup and exec command
-RUN echo '#!/bin/bash\nsource /opt/setup_mucoll.sh\nexec "$@"' > /opt/entrypoint.sh && chmod +x /opt/entrypoint.sh
 
 # Setting up users to be used for the local environment setup
 RUN useradd --shell /bin/bash --create-home mucoll
 USER mucoll
 WORKDIR /home/mucoll
 
-# ENTRYPOINT ["/opt/entrypoint.sh"]
 ENTRYPOINT ["/bin/bash", "-c", "source /opt/setup_mucoll.sh && exec /bin/bash"]

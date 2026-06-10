@@ -16,9 +16,10 @@ spack env deactivate
 
 # Now move on to mucoll
 spack repo add ./mucoll-spack
-spack env activate ./mucoll-spack/environments/mucoll-release
+spack env activate ./mucoll-spack/environments/mucoll-layered
 spack concretize --reuse
-spack install --only-concrete --no-add --fail-fast
+# Install a single layer, e.g. the analysis subset (or +analysis+sim, +analysis+sim+ml)
+spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+analysis
 
 # Load the Muon Collider environment
 source $MUCOLL_STACK
@@ -29,7 +30,7 @@ source $MUCOLL_STACK
 When signing in to a machine with the installed sofware stack (VM or Docker container), it has to be loaded into the environment:
 
 ```bash
-spack env activate ./mucoll-spack/environments/mucoll-release
+spack env activate ./mucoll-spack/environments/mucoll-layered
 source $MUCOLL_STACK
 ```
 
@@ -58,11 +59,11 @@ spack checksum lcgeo 0.17
 
 ## Creating a new stack release
 
-To introduce a new release version for the whole software stack, update the version number in [`packages/mucoll-stack/package.py`](packages/mucoll-stack/package.py) and then update versions of all the relevant packages in [environments/mucoll-release/packages.yaml].  
+To introduce a new release version for the whole software stack, update the version number in [`packages/mucoll-stack/package.py`](packages/mucoll-stack/package.py) and then update versions of all the relevant packages in [environments/mucoll-common/packages.yaml](environments/mucoll-common/packages.yaml).  
 Test this new configuration in a fresh environment:
 ```bash
 # Create a development environment
-spack env create dev ./mucoll-spack/environments/mucoll-release/spack.yaml
+spack env create dev ./mucoll-spack/environments/mucoll-layered/spack.yaml
 spack env activate dev
 
 # Add stack with updated version to the environment
@@ -72,7 +73,7 @@ spack add mucoll-stack
 spack spec --reuse -NIt
 ```
 
-Packages that are already installed in the `sim` environment are known to Spack and will be reused, providing a clear indication of which part of the dependency tree will be modified by the new release.
+Packages that are already installed in the `mucoll-layered` environment are known to Spack and will be reused, providing a clear indication of which part of the dependency tree will be modified by the new release.
 
 ## Modifying an existing package
 
@@ -131,7 +132,13 @@ To return to the original version of the release:
 # Deactivate the current environment (if on lxplus)
 spack env deactivate
 # Activate the default environment (if in a Docker container)
-spack env activate sim
+spack env activate mucoll-layered
 ```
-The stack image will be created:
-- `${REPOSITORY}/mucoll-sim:${VERSION}-alma9`: Contains the full Muon Collider Spack environment.
+
+## Layered images
+
+The CI builds three images as a layered chain, each built on top of the previous one so packages
+are installed once and reused down the chain:
+- `${REPOSITORY}/mucoll-analysis-${OS}:${VERSION}`: minimal analysis stack (`mucoll-stack+devtools+pytools+analysis`).
+- `${REPOSITORY}/mucoll-sim-${OS}:${VERSION}`: built on `mucoll-analysis`, adds the simulation stack (`+sim`).
+- `${REPOSITORY}/mucoll-ml-${OS}:${VERSION}`: built on `mucoll-sim`, adds the machine-learning stack (`+ml`).
