@@ -172,7 +172,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
 
         # See https://github.com/root-project/root/issues/18949
-        env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
+        #env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
 
         # set vdt, needed for root, see https://github.com/spack/spack/pull/37278
         if "vdt" in self.spec:
