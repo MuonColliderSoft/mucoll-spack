@@ -1,0 +1,42 @@
+name: Physics validation (manual)
+description: |
+  Manually trigger the per-particle physics-validation chain
+  (sim -> digi -> reco -> plot; the gun input is pre-generated and downloaded)
+  against a chosen image, via the reusable physics-validation-template workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pdg:
+        description: "Particle gun PDG id (label is inferred from it)"
+        type: choice
+        default: "13"
+        options:
+          - "13"    # muon
+          - "11"     # electron
+          - "211"    # pion
+          - "22"     # photon (neutral)
+      image:
+        description: "Image to run the chain in"
+        type: string
+        default: ghcr.io/muoncollidersoft/mucoll-sim-ubuntu24:latest
+      geometry:
+        description: "Detector geometry name"
+        type: string
+        default: MAIA_v0
+      n-events:
+        description: "Number of events to simulate"
+        type: string
+        default: "1000"
+
+permissions:
+  contents: read
+
+jobs:
+  physics-validation:
+    uses: ./.github/workflows/physics-validation-template.yaml
+    with:
+      image: ${{ inputs.image }}
+      pdg: ${{ inputs.pdg }}
+      geometry: ${{ inputs.geometry }}
+      n-events: ${{ inputs.n-events }}

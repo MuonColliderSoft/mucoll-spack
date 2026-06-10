@@ -5,10 +5,20 @@ description: |
   Each layer is built FROM the previous one (per architecture) so packages are
   installed once and reused down the chain. Relies on a spack buildcache.
 
-on: push
+on:
+  # Build/publish the image when changes land on main; run on pull requests (so
+  # the required checks report on PRs); allow manual runs via the "Run workflow"
+  # button. No push trigger on other branches -- use dispatch for those.
+  push:
+    branches: [main]
+  workflow_dispatch:
+  pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Key on the branch name so repeated PR pushes / manual runs for the same branch
+  # don't pile up -- the later-started run cancels the earlier one. For PRs
+  # github.head_ref is the source branch; otherwise we fall back to github.ref_name.
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -119,3 +129,61 @@ jobs:
       image-type: ml
       amd64-image: ${{ needs.ml-amd64.outputs.image-uri }}
       arm64-image: ${{ needs.ml-arm64.outputs.image-uri }}
+
+  # ------------------------------------------------------ physics validation --
+  physics-validation:
+    # Run the sim -> digi -> reco -> plot chain against the freshly published
+    # multi-arch sim image, gated on the successful sim manifest build.
+    needs: manifest-sim
+    # Skip on fork PRs: the image isn't pushed there, so there is nothing to pull
+    # and validate (fork PRs build the image but cannot push it).
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Particle label is inferred from the PDG id in the template.
+        pdg:
+          - "13"   # muon
+          - "11"   # electron
+          - "211"  # pion
+          - "22"   # photon
+    uses: ./.github/workflows/physics-validation-template.yaml
+    with:
+      image: ${{ needs.manifest-sim.outputs.image }}
+      pdg: ${{ matrix.pdg }}
+
+  deploy-pages:
+    needs: physics-validation
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Collect per-particle plot fragments
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pages-*
+          path: public
+          merge-multiple: true
+      - name: Generate landing page
+        run: |
+          cd public
+          {
+            echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+            echo '<title>MuColl physics validation</title></head><body>'
+            echo '<h1>MuColl physics validation</h1><ul>'
+            for d in */ ; do [ -d "$d" ] && echo "<li><a href=\"${d}\">${d%/}</a></li>"; done
+            echo '</ul></body></html>'
+          } > index.html
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
