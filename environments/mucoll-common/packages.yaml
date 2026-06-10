@@ -46,12 +46,14 @@ packages:
     - spec: openssh@99
       prefix: /usr
 
-  # Take external llvm as it won't compile within 6 hours limit 
+  # Take external llvm as it won't compile within 6 hours limit
+  # llvm@20 (not a newer major) because py-llvmlite (via py-numba, pulled in by
+  # acorn) caps at llvm@20; the rest of the stack has no hard llvm version need.
   llvm:
     buildable: False
     externals:
-    - spec: llvm@22.1.7 +clang
-      prefix: /usr/lib/llvm-22
+    - spec: llvm@20.1.8 +clang +lld
+      prefix: /usr/lib/llvm-20
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
@@ -59,23 +61,54 @@ packages:
   gdb:
     require: +python+tui+source-highlight~debuginfod
 
+  py-pandas:
+    require: ~excel~parquet
+
+  # Pin py-torch to the latest series. py-torch@2.9.1 is available and every
+  # root concretizes to it individually, but under `unify: when_possible` the
+  # solver's whole-DAG version optimization settles the *shared* py-torch on
+  # 2.7.1: downgrading the single py-torch node lets several of its shared
+  # dependencies stay at their newest preferred versions, which the solver
+  # scores as a lower total penalty than keeping py-torch newest. There is no
+  # hard conflict (forcing @2.9.1 concretizes fine), so a version floor that
+  # excludes 2.7.1 is enough to let the newest release win. Use a floor (not an
+  # exact pin) so future releases are picked up automatically.
+  py-torch:
+    require: '@2.8:'
+
   k4fwcore:
     require: '@main'
 
   dd4hep:
     require: '+edm4hep+lcio+xercesc+hepmc3'
+  # +gnn is intentionally NOT required globally: only the @gnn branch of
+  # k4actstracking (used by the ml layer) needs the acts GNN plugin (and its
+  # py-torch / onnxruntime deps). The sim layer concretizes acts~gnn.
   acts:
     require: '@main+dd4hep+json cxxstd=20'
   k4geo:
+    require: '@main'
+  k4gen:
     require: '@main'
   k4gaudipandora:
     require: '@main'
   k4reco:
     require: '@0.2'
-  k4actstracking:
-    require: '@calosurface-extrapolation'
+  k4marlinwrapper:
+    require: '@main'
+  # NOTE: k4actstracking version is intentionally NOT pinned globally here.
+  # The sim and ml layers require different branches (@calosurface-extrapolation
+  # vs @gnn), so the version is constrained per-root in each environment's spec
+  # list instead (a global require would make those per-root specs unsatisfiable).
   k4simgeant4:
     require: '@main'
+  # The latest release (00-07-06) fails to build against k4fwcore@main: it still
+  # includes k4FWCore/PodioDataSvc.h, which has been removed upstream. main tracks
+  # the current k4fwcore API and compiles cleanly, so pin it until a release catches up.
+  k4simdelphes:
+    require: '@main'
+  pyatlasify:
+    require: '@master'
 
   muoncvxddigitiser:
     require: '@0.2.2'

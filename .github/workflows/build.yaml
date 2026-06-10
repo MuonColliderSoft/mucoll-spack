@@ -1,7 +1,9 @@
 name: Build MuColl Stack and Publish Image
 description: |
-  Publish mucoll software stack docker image.
-  This workflow relies on a spack cache.
+  Publish the layered mucoll software stack docker images:
+  mucoll-analysis -> mucoll-sim -> mucoll-ml.
+  Each layer is built FROM the previous one (per architecture) so packages are
+  installed once and reused down the chain. Relies on a spack buildcache.
 
 on: push
 
@@ -10,12 +12,110 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-sim-image:
-    uses: ./.github/workflows/image-template.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu24]
+  # ---------------------------------------------------------------- analysis --
+  analysis-amd64:
+    uses: ./.github/workflows/docker-build-push-template.yaml
     with:
-      os: ${{ matrix.os }}
+      os: ubuntu24
+      runner: ubuntu-latest
+      platform: amd64
       registry: ghcr.io
+      image-type: analysis
+      dockerfile: Dockerfile.base
+      spec: mucoll-stack+devtools+pytools+analysis~sim~ml
+
+  analysis-arm64:
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-24.04-arm
+      platform: arm64
+      registry: ghcr.io
+      image-type: analysis
+      dockerfile: Dockerfile.base
+      spec: mucoll-stack+devtools+pytools+analysis~sim~ml
+
+  # --------------------------------------------------------------------- sim --
+  sim-amd64:
+    needs: analysis-amd64
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-latest
+      platform: amd64
+      registry: ghcr.io
+      image-type: sim
+      dockerfile: Dockerfile.layer
+      base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
+      spec: mucoll-stack+devtools+pytools+analysis+sim~ml
+
+  sim-arm64:
+    needs: analysis-arm64
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-24.04-arm
+      platform: arm64
+      registry: ghcr.io
+      image-type: sim
+      dockerfile: Dockerfile.layer
+      base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
+      spec: mucoll-stack+devtools+pytools+analysis+sim~ml
+
+  # ---------------------------------------------------------------------- ml --
+  ml-amd64:
+    needs: sim-amd64
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-latest
+      platform: amd64
+      registry: ghcr.io
+      image-type: ml
+      dockerfile: Dockerfile.layer
+      base-image: ${{ needs.sim-amd64.outputs.image-uri }}
+      spec: mucoll-stack+devtools+pytools+analysis+sim+ml
+
+  ml-arm64:
+    needs: sim-arm64
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-24.04-arm
+      platform: arm64
+      registry: ghcr.io
+      image-type: ml
+      dockerfile: Dockerfile.layer
+      base-image: ${{ needs.sim-arm64.outputs.image-uri }}
+      spec: mucoll-stack+devtools+pytools+analysis+sim+ml
+
+  # --------------------------------------------------------------- manifests --
+  manifest-analysis:
+    needs: [analysis-amd64, analysis-arm64]
+    uses: ./.github/workflows/manifest-template.yaml
+    with:
+      os: ubuntu24
+      registry: ghcr.io
+      image-type: analysis
+      amd64-image: ${{ needs.analysis-amd64.outputs.image-uri }}
+      arm64-image: ${{ needs.analysis-arm64.outputs.image-uri }}
+
+  manifest-sim:
+    needs: [sim-amd64, sim-arm64]
+    uses: ./.github/workflows/manifest-template.yaml
+    with:
+      os: ubuntu24
+      registry: ghcr.io
+      image-type: sim
+      amd64-image: ${{ needs.sim-amd64.outputs.image-uri }}
+      arm64-image: ${{ needs.sim-arm64.outputs.image-uri }}
+
+  manifest-ml:
+    needs: [ml-amd64, ml-arm64]
+    uses: ./.github/workflows/manifest-template.yaml
+    with:
+      os: ubuntu24
+      registry: ghcr.io
+      image-type: ml
+      amd64-image: ${{ needs.ml-amd64.outputs.image-uri }}
+      arm64-image: ${{ needs.ml-arm64.outputs.image-uri }}

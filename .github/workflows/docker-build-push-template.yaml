@@ -20,6 +20,17 @@ on:
       image-type:
         required: true
         type: string
+      dockerfile:
+        required: true
+        type: string
+      base-image:
+        required: false
+        type: string
+        default: ''
+      spec:
+        required: false
+        type: string
+        default: ''
     outputs:
       image-uri:
         description: "The URI of the built image with digest"
@@ -35,7 +46,11 @@ jobs:
   build-and-push:
     runs-on: ${{ inputs.runner }}
     outputs:
-      image-uri: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}:${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ inputs.platform }}@${{ steps.build.outputs.digest }}
+      # Digest-pinned, lowercased reference. Used both as a manifest source and
+      # as the FROM (BASE_IMAGE) of the next layer, so it must be a valid docker
+      # reference: lowercase repository (github.repository_owner is mixed-case)
+      # and pinned by digest (avoids the metadata-action suffix being duplicated).
+      image-uri: ${{ steps.imgref.outputs.lowercase }}@${{ steps.build.outputs.digest }}
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: endersonmenezes/free-disk-space@v3
@@ -76,9 +91,11 @@ jobs:
           push: true
           platforms: linux/${{ inputs.platform }}
           context: ./Docker
-          file: ./Docker/Dockerfile-${{ inputs.image-type }}
+          file: ./Docker/${{ inputs.dockerfile }}
           build-args: |
             OS=${{ inputs.os }}
+            BASE_IMAGE=${{ inputs.base-image }}
+            SPEC=${{ inputs.spec }}
             GITHUB_REPOSITORY=${{ github.repository }}
             MUCOLL_SHA=${{ github.sha }}
             SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache
@@ -88,3 +105,8 @@ jobs:
             "ocipass=${{ secrets.GITHUB_TOKEN }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Lowercase image name
+        id: imgref
+        uses: Entepotenz/change-string-case-action-min-dependencies@v1
+        with:
+          string: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
