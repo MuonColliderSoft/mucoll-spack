@@ -132,10 +132,9 @@ jobs:
 
   # ------------------------------------------------------ physics validation --
   physics-validation:
-    # Run the sim -> digi -> reco -> plot chain against the freshly built sim
-    # image. Depends only on the amd64 sim build (the validation jobs run on
-    # amd64 runners), so it can start without waiting on arm64 / ml layers.
-    needs: sim-amd64
+    # Run the sim -> digi -> reco -> plot chain against the freshly published
+    # multi-arch sim image, gated on the successful sim manifest build.
+    needs: manifest-sim
     # Skip on fork PRs: the image isn't pushed there, so there is nothing to pull
     # and validate (fork PRs build the image but cannot push it).
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -150,7 +149,7 @@ jobs:
           - "22"   # photon
     uses: ./.github/workflows/physics-validation-template.yaml
     with:
-      image: ${{ needs.sim-amd64.outputs.image-uri }}
+      image: ${{ needs.manifest-sim.outputs.image }}
       pdg: ${{ matrix.pdg }}
 
   deploy-pages:
