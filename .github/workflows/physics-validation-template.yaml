@@ -36,10 +36,12 @@ on:
 permissions:
   contents: read
 
-# Pinned mucoll-benchmarks
+# mucoll-benchmarks: track the head of main. The repo carries its digi/reco
+# configs and the tracking-plots scripts as submodules, so each checkout must
+# pull them recursively.
 env:
   BENCHMARKS_REPO: https://github.com/MuonColliderSoft/mucoll-benchmarks.git
-  BENCHMARKS_SHA: 6246556ce3f50c7280b06a2242d825e9cba9a825
+  BENCHMARKS_REF: main
 
 defaults:
   run:
@@ -89,9 +91,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Clone benchmarks
         run: |
-          git clone "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks checkout "${BENCHMARKS_SHA}"
-          git -C benchmarks submodule update --init --recursive
+          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks submodule update --init --recursive --depth 1
       - name: Download generated input
         # Pre-generated particle-gun file. 
         # Stored as asset on the 'phys-val-inputs' release; one
@@ -138,9 +139,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Clone benchmarks
         run: |
-          git clone "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks checkout "${BENCHMARKS_SHA}"
-          git -C benchmarks submodule update --init --recursive
+          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks submodule update --init --recursive --depth 1
       - uses: actions/download-artifact@v8
         with:
           name: sim-${{ needs.meta.outputs.particle }}
@@ -184,9 +184,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Clone benchmarks
         run: |
-          git clone "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks checkout "${BENCHMARKS_SHA}"
-          git -C benchmarks submodule update --init --recursive
+          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks submodule update --init --recursive --depth 1
       - uses: actions/download-artifact@v8
         with:
           name: digi-${{ needs.meta.outputs.particle }}
@@ -230,9 +229,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: Clone benchmarks
         run: |
-          git clone "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks checkout "${BENCHMARKS_SHA}"
-          git -C benchmarks submodule update --init --recursive
+          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
+          git -C benchmarks submodule update --init --recursive --depth 1
       - uses: actions/download-artifact@v8
         with:
           name: reco-${{ needs.meta.outputs.particle }}

@@ -19,13 +19,13 @@
 # The chain is identical for every particle; performance analysis / plotting is
 # handled separately (see make_plots.sh), operating on reco.edm4hep.root.
 #
-# This script also sets up the environment itself, deliberately NOT relying on
-# the benchmarks' k4MuCPlayground/setup_digireco.sh. That script only (a) puts
-# the benchmarks dirs on PYTHONPATH and (b) exports the geometry env vars, but it
-# hardcodes a `linux-x86_64` install glob (breaks on other arches) and is not
-# written for strict mode. We replicate both jobs here, arch-independently.
-#
-# The steering files live in the mucoll-benchmarks checkout pointed to by $BM.
+# Environment + geometry config come from the benchmarks' setup_config.sh, which
+# maps the geometry name to its config package (MAIA_v0 -> MAIAConfig,
+# MuColl_* -> MuCollConfig, MuSIC_* -> MuSICConfig), exports the geometry env
+# vars (MUCOLL_GEO / MUCOLL_TGEO / MUCOLL_MATMAP / ...) and puts the config and
+# common dirs on PYTHONPATH. The geometry-specific digi/reco steering then lives
+# under $MUCOLL_CONFIG/$MUCOLL_CONFIG_NAME/; gen/sim are geometry-agnostic and
+# live at the top of the mucoll-benchmarks checkout pointed to by $BM.
 #
 # Configuration is taken from the environment (set by the workflow):
 #   BM     mucoll-benchmarks checkout dir  (required)
@@ -52,33 +52,27 @@ PTMAX="${PTMAX:-100}"
 THMIN="${THMIN:-10}"
 THMAX="${THMAX:-170}"
 
-# --- Stack runtime -----------------------------------------------------------
-# setup_mucoll.sh references unset variables (e.g. ACLOCAL_PATH) and is not
-# written for strict mode; source it with strict mode off, then restore it.
+# --- Stack runtime + geometry/config selection -------------------------------
+# Source the release stack, then the benchmarks' setup_config.sh, which selects
+# the config package from the geometry name and exports the geometry env vars,
+# MUCOLL_CONFIG / MUCOLL_CONFIG_NAME and PYTHONPATH. Neither script is written
+# for strict mode (setup_mucoll.sh references unset vars; setup_config.sh uses
+# `return` on error), so source them with strict mode off, then restore it and
+# assert the config was resolved.
 set +euo pipefail
 # shellcheck disable=SC1091
 source /opt/setup_mucoll.sh
+# shellcheck disable=SC1091
+source "${BM}/setup_config.sh" "${BM}" "${GEOM}"
 set -euo pipefail
 
-# --- PYTHONPATH for the benchmarks steering modules --------------------------
-# (reco_steer.py does `from reco_components...`, `from muc_mt...`, etc.)
-export PYTHONPATH="${BM}/digitization:${BM}/reconstruction:${BM}/common:${PYTHONPATH:-}"
+: "${MUCOLL_CONFIG:?setup_config.sh did not set MUCOLL_CONFIG (unknown geometry '${GEOM}'?)}"
+# Geometry-specific digi/reco steering + PandoraSettings live here.
+CONFIG_DIR="${MUCOLL_CONFIG}/${MUCOLL_CONFIG_NAME}"
 
-# --- Geometry ----------------------------------------------------------------
-# Only the DD4hep compact description is needed: k4geo exports its location as
-# k4geo_DIR (-> <k4geo prefix>/share/k4geo); fall back to globbing if unset.
-# MUCOLL_GEOM_NAME selects the reco tracking path; for MAIA_v0 the CKF builds the
-# ACTS geometry from the compact, so the prebuilt material/TGeo files
-# (MUCOLL_MATMAP / MUCOLL_TGEO / MUCOLL_TGEO_DESC) are NOT required. Non-MAIA
-# geometries would need those re-added.
-resolve_one() { ls -d $1 2>/dev/null | head -n 1; }
-K4GEO_SHARE="${k4geo_DIR:-$(resolve_one "/opt/spack/opt/spack/*/*/*/*/linux-*/k4geo-*/share/k4geo")}"
-
-export MUCOLL_GEOM_NAME="${GEOM}"
-export MUCOLL_GEO=$(resolve_one "${K4GEO_SHARE}/MuColl/*/compact/${GEOM}/${GEOM}.xml")
-
-echo "=== stage=${STAGE} BM=${BM} GEOM=${GEOM} NEV=${NEV} PPE=${PPE} PDG=${PDG} pt=[${PTMIN},${PTMAX}] theta=[${THMIN},${THMAX}] ==="
+echo "=== stage=${STAGE} BM=${BM} GEOM=${GEOM} CONFIG=${MUCOLL_CONFIG_NAME} NEV=${NEV} PPE=${PPE} PDG=${PDG} pt=[${PTMIN},${PTMAX}] theta=[${THMIN},${THMAX}] ==="
 echo "    MUCOLL_GEO=${MUCOLL_GEO:-<unset>}"
+echo "    CONFIG_DIR=${CONFIG_DIR}"
 
 case "${STAGE}" in
   gen)
@@ -97,18 +91,21 @@ case "${STAGE}" in
 
   digi)
     # --num-events overrides the steering's default EvtMax so digi processes the
-    # same number of events as the simulation.
-    k4run --num-events "${NEV}" "${BM}/digitization/digi_steer.py" \
+    # same number of events as the simulation. --IOSvc.Input/Output override the
+    # steering's hardcoded sim_output/digi_output names to our artifact names.
+    k4run --num-events "${NEV}" "${CONFIG_DIR}/digi_steer.py" \
+      --DD4hepXMLFile "${MUCOLL_GEO}" \
       --IOSvc.Input sim.edm4hep.root \
       --IOSvc.Output digi.edm4hep.root
     ;;
 
   reco)
-    # PandoraSettings are resolved relative to the working directory by reco_steer.py
-    cp -r "${BM}/reconstruction/PandoraSettings" ./
+    # PandoraSettings are resolved relative to the working directory by the PFA.
+    cp -r "${CONFIG_DIR}/PandoraSettings" ./
     # --num-events overrides the steering's default EvtMax so reco processes the
     # same number of events as the simulation.
-    k4run --num-events "${NEV}" "${BM}/reconstruction/reco_steer.py" \
+    k4run --num-events "${NEV}" "${CONFIG_DIR}/reco_steer.py" \
+      --DD4hepXMLFile "${MUCOLL_GEO}" \
       --IOSvc.Input digi.edm4hep.root \
       --IOSvc.Output reco.edm4hep.root
     ;;
