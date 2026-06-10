@@ -47,12 +47,15 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('analysis', default=False, description='Minimal build for analysis only')
     variant('reco', default=False, description='Build with reconstruction tools')
     variant('sim', default=False, description='Build with simulation tools')
+    variant('gen', default=False, description='Build with generators')
 
     # Add compilers to the build dependencies
     # so that we have them available to set them in the env script
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
+
+    depends_on('pelican')
 
     with when('+analysis'):
         depends_on('edm4hep')
@@ -61,13 +64,23 @@ class MucollStack(BundlePackage, Key4hepPackage):
     with when('+sim'):
         ############################### Key4hep ###############
         #######################################################
-        depends_on('whizard +lcio +openloops')
         #depends_on('k4marlinwrapper')
         #depends_on('k4simdelphes')
         #depends_on('k4simgeant4')
-        depends_on('k4geo')
+        depends_on('dd4hep')
+        depends_on('delphes')
 
-        #with when('+reco'):
+    with when('+gen'):
+        depends_on('whizard +lcio +openloops')
+        depends_on('hepmc3')
+
+    with when('+reco'):
+        # reco-only images stay Geant4-free (lighter). When +sim is also present
+        # the +sim block's full dd4hep wins, so this edge is gated off to avoid a
+        # ~ddg4/+ddg4 clash on the shared dd4hep node.
+        depends_on('dd4hep~ddg4', when='~sim')
+
+        depends_on('k4geo')
         depends_on('k4reco')
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
@@ -107,11 +120,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('muoncvxddigitiser')
         depends_on('mybibutils')
-        depends_on('pelican')
-    
-        ############ generic packages ############
-        #######################################################
-        depends_on('delphes')
 
     ##################### developer tools #################
     #######################################################

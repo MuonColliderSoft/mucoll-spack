@@ -78,6 +78,19 @@ jobs:
           registry: ${{ inputs.registry }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Resolve spack pins from key4hep-spack
+        # Resolve the key4hep-spack main SHA once and read both pin files *at
+        # that SHA*, so the spack commit, the spack-packages commit and the
+        # key4hep-spack checkout (whose .cherry-pick targets that spack-packages
+        # commit) stay mutually consistent within a run. Only Dockerfile.base
+        # consumes these; the layer Dockerfile ignores the unused build-args.
+        id: pins
+        run: |
+          k4sha=$(git ls-remote https://github.com/key4hep/key4hep-spack.git main | cut -f1)
+          echo "k4sha=$k4sha" >> "$GITHUB_OUTPUT"
+          base="https://raw.githubusercontent.com/key4hep/key4hep-spack/$k4sha"
+          echo "spack=$(curl -fsSL "$base/.latest-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+          echo "packages=$(curl -fsSL "$base/.latest-packages-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v6
@@ -104,6 +117,9 @@ jobs:
             SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache
             OCI_USERNAME=${{ github.actor }}
             BRANCH=${{ github.ref_name }}
+            SPACK_COMMIT=${{ steps.pins.outputs.spack }}
+            SPACK_PACKAGES_COMMIT=${{ steps.pins.outputs.packages }}
+            KEY4HEP_SPACK_SHA=${{ steps.pins.outputs.k4sha }}
           secrets: |
             "ocipass=${{ secrets.GITHUB_TOKEN }}"
           tags: ${{ steps.meta.outputs.tags }}

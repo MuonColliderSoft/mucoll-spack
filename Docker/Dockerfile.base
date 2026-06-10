@@ -2,17 +2,89 @@
 #  Repository: ${IMAGE}/mucoll-analysis
 #  Tag:        ${VERSION}-${OS}
 #
-#  Base layer of the layered Muon Collider images. It bootstraps spack, the
-#  mucoll repo and the toolchain, concretizes the WHOLE layered environment
-#  (analysis + sim + ml roots together, so shared packages get a single hash)
-#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images are
-#  built FROM this image with Dockerfile.layer and install their extra specs,
-#  reusing this layer's already-installed store.
+#  Base layer of the layered Muon Collider images. Starting from a plain
+#  ubuntu:24.04 it bootstraps spack + spack-packages + key4hep-spack from
+#  scratch (the relevant steps of key4hep-images/ubuntu24-build and
+#  key4hep-spack/Dockerfile-externals), then clones the mucoll repo and the
+#  toolchain, concretizes the WHOLE layered environment (analysis + reco + sim +
+#  ml roots together, so shared packages get a single hash) but installs ONLY
+#  the analysis root. The mucoll-reco / mucoll-sim / mucoll-ml images are built
+#  FROM this image with Dockerfile.layer and install their extra specs, reusing
+#  this layer's already-installed store.
 ###############################################################################
 
-ARG OS=alma9
-FROM ghcr.io/key4hep/key4hep-externals-${OS}:2026-05-13
+ARG OS=ubuntu24
+FROM ubuntu:24.04
 
+# --------------------------------------------------------------------------- #
+#  System packages (from key4hep-images/ubuntu24/ubuntu24-build/Dockerfile).
+#  tzdata is needed for setting the timezones (gives the nightlies the right
+#  time and date).
+# --------------------------------------------------------------------------- #
+RUN apt update -y && \
+    apt upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt install -y \
+    build-essential git python3 python3-pip vim unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev ccache mold strace \
+    python3-boto3 python3-requests python3-yaml && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# --------------------------------------------------------------------------- #
+#  Bootstrap spack + spack-packages (from key4hep-spack/Dockerfile-externals).
+#  Pins are supplied at build time by CI, resolved from the key4hep-spack repo:
+#    SPACK_COMMIT          <- key4hep-spack/.latest-commit
+#    SPACK_PACKAGES_COMMIT <- key4hep-spack/.latest-packages-commit
+#    KEY4HEP_SPACK_SHA     <- key4hep-spack main HEAD (the SHA the pins were read from)
+# --------------------------------------------------------------------------- #
+ENV SPACK_COLOR="always"
+ARG SPACK_COMMIT
+ARG SPACK_PACKAGES_COMMIT
+
+# Setting up Spack
+RUN git clone https://github.com/spack/spack.git /opt/spack && \
+    echo "export SPACK_ROOT=/opt/spack" >> /opt/setup_spack.sh && \
+    echo ". /opt/spack/share/spack/setup-env.sh" >> /opt/setup_spack.sh && \
+    echo "alias setup_spack=\". /opt/setup_spack.sh\"" >> /etc/profile.d/aliases.sh && \
+    if [ -n "${SPACK_COMMIT}" ]; then cd /opt/spack && git checkout ${SPACK_COMMIT}; fi
+
+# Checkout spack packages and register them as the builtin repo
+RUN . /opt/setup_spack.sh && \
+    git clone https://github.com/spack/spack-packages /opt/spack-packages && \
+    cd /opt/spack-packages && \
+    if [ -n "${SPACK_PACKAGES_COMMIT}" ]; then git checkout ${SPACK_PACKAGES_COMMIT}; fi && \
+    spack repo set --destination "/opt/spack-packages" builtin
+
+# Configure spack: padded install paths (buildcache relocation) and system compilers
+RUN . /opt/setup_spack.sh && \
+    spack config add 'config:install_tree:padded_length:128' && \
+    spack compiler find
+
+# --------------------------------------------------------------------------- #
+#  Add the key4hep-spack repository (the `k4` namespace mucoll-stack imports
+#  from, and where most externals / key4hep packages are defined). Previously
+#  this was provided by the key4hep-externals base image; built from ubuntu we
+#  must clone it, apply its cherry-picks to spack-packages, and add the repo.
+# --------------------------------------------------------------------------- #
+ARG KEY4HEP_SPACK_REPO=key4hep/key4hep-spack
+ARG KEY4HEP_SPACK_SHA
+RUN . /opt/setup_spack.sh && \
+    REPOPATH=${SPACK_ROOT}/var/key4hep-spack && \
+    git clone https://github.com/${KEY4HEP_SPACK_REPO} ${REPOPATH} && \
+    cd ${REPOPATH} && \
+    if [ -n "${KEY4HEP_SPACK_SHA}" ]; then git checkout ${KEY4HEP_SPACK_SHA}; fi
+
+# Apply key4hep's patches to spack packages, then register the repo
+RUN . /opt/setup_spack.sh && \
+    REPOPATH=${SPACK_ROOT}/var/key4hep-spack && \
+    cd /opt/spack-packages && \
+    . ${REPOPATH}/.cherry-pick
+RUN . /opt/setup_spack.sh && \
+    spack repo add ${SPACK_ROOT}/var/key4hep-spack
+
+# --------------------------------------------------------------------------- #
+#  MuColl-specific bootstrap (unchanged: assumes /opt/setup_spack.sh, /opt/spack
+#  and /opt/spack-packages exist, which the steps above now provide).
+# --------------------------------------------------------------------------- #
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=muoncollidersoft/mucoll-spack
 
@@ -23,7 +95,7 @@ RUN . /opt/setup_spack.sh && \
     cd ${REPOPATH} && \
     git checkout ${MUCOLL_SHA}
 
-# Apply our patches to spack
+# Apply our patches to spack (after key4hep's: overrides py-numba/py-llvmlite for LLVM 20)
 RUN . /opt/setup_spack.sh && \
     REPOPATH=${SPACK_ROOT}/var/mucoll-spack && \
     cd /opt/spack-packages && \
@@ -53,7 +125,7 @@ RUN . /opt/setup_spack.sh && \
         spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}";\
     fi
 
-# Activate the layered environment (analysis + sim + ml roots)
+# Activate the layered environment (analysis + reco + sim + ml roots)
 ARG ENVIRONMENT=mucoll-layered
 RUN . /opt/setup_spack.sh && \
     cd ${SPACK_ROOT}/var/mucoll-spack/environments/${ENVIRONMENT} && \
@@ -65,7 +137,7 @@ RUN . /opt/setup_spack.sh && \
     echo "cd -" >> ${HOME}/setup_env.sh && \
     echo "spack env status" >> ${HOME}/setup_env.sh
 
-# Concretize the WHOLE layered stack (all three roots) reusing system packages
+# Concretize the WHOLE layered stack (all four roots) reusing system packages
 # as external, so shared dependencies get identical hashes across all layers.
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
@@ -78,9 +150,9 @@ RUN --mount=type=secret,id=ocipass \
 ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
 
 # Install ONLY the analysis root from the already-concretized environment.
-# The ~sim~ml negations are required so the abstract spec matches just the
-# analysis root and not the sim/ml roots (which also satisfy +analysis).
-ARG SPEC=mucoll-stack+devtools+pytools+analysis~sim~ml
+# The ~reco~sim~ml negations are required so the abstract spec matches just the
+# analysis root and not the reco/sim/ml roots (which also satisfy +analysis).
+ARG SPEC=mucoll-stack+devtools+pytools+analysis~reco~sim~ml
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt "${SPEC}" && \
@@ -92,7 +164,7 @@ RUN --mount=type=secret,id=ocipass \
 # Point the default setup at this layer's mucoll-stack root. Only the analysis
 # root is installed in this image, so the spack find query is unambiguous.
 RUN . ${HOME}/setup_env.sh && \
-    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack+devtools+pytools+analysis~sim~ml) && \
+    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack+devtools+pytools+analysis~reco~sim~ml) && \
     MUCOLL_STACK_PATH_CLEANED=$(echo ${MUCOLL_STACK_PATH} | sed -E 's/\x1b\[[0-9;]*m//g') && \
     echo "source ${MUCOLL_STACK_PATH_CLEANED}/setup.sh" > /opt/setup_mucoll.sh && \
     echo "alias setup_mucoll=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" >> /etc/profile.d/aliases.sh
