@@ -64,17 +64,6 @@ packages:
   py-pandas:
     require: ~excel~parquet
 
-  # Pin a single Python interpreter across the whole layered environment.
-  # Without this, `unify: when_possible` splits the stack into two interpreters:
-  # the sim+ml subtree is capped at python<=3.13 (acorn -> py-numba/py-llvmlite
-  # require python@3.10:3.13), while the analysis-only group floats up to the
-  # newest python@3.14. Every package the two halves share (root, edm4hep,
-  # podio, py-numpy, py-scipy, py-matplotlib, ...) then gets built twice. Forcing
-  # one interpreter collapses ~70 redundant builds. 3.13 is the highest the
-  # numba-capped ml subtree allows, so it is the single feasible value.
-  python:
-    require: '@3.13'
-
   # Pin py-torch to the latest series. py-torch@2.9.1 is available and every
   # root concretizes to it individually, but under `unify: when_possible` the
   # solver's whole-DAG version optimization settles the *shared* py-torch on
