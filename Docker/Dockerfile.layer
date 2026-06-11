@@ -9,7 +9,7 @@
 #  (pulled from / pushed back to the buildcache when available).
 ###############################################################################
 
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ghcr.io/muoncollidersoft/mucoll-analysis-ubuntu24:latest
 FROM ${BASE_IMAGE}
 
 # e.g. mucoll-stack+devtools+pytools+analysis+sim  or  ...+analysis+sim+ml
