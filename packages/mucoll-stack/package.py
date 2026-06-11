@@ -55,6 +55,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
 
+    depends_on('cmake')
     depends_on('pelican')
 
     with when('+analysis'):
@@ -125,7 +126,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ##################### developer tools #################
     #######################################################
     with when('+devtools'):
-        depends_on('cmake')
         depends_on('ninja')
         depends_on('doxygen')
         depends_on('gdb')

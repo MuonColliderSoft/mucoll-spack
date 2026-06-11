@@ -34,10 +34,9 @@ spack:
   # layered Dockerfiles. Without the ~reco/~sim/~ml negations the abstract roots
   # overlap: `+analysis` is satisfied by all four (installs everything), while
   # `+analysis~reco~sim~ml` is satisfied by none of the un-negated roots.
-  # The reco and sim roots share k4actstracking@calosurface-extrapolation; only
-  # the ml root uses @gnn (which is why unify is when_possible, not true).
+
   specs:
-  - mucoll-stack+devtools+pytools+analysis~reco~sim~ml
-  - mucoll-stack+devtools+pytools+analysis+reco~sim~ml ^k4actstracking@calosurface-extrapolation^geant4~data
-  - mucoll-stack+devtools+pytools+analysis+reco+sim~ml ^k4actstracking@calosurface-extrapolation^geant4+data
-  - mucoll-stack+devtools+pytools+analysis+reco+sim+ml ^k4actstracking@gnn^geant4+data
+  - mucoll-stack~devtools+pytools+analysis~reco~sim~ml
+  - mucoll-stack~devtools+pytools+analysis+reco~sim~ml ^k4actstracking@calosurface-extrapolation^geant4~data
+  - mucoll-stack~devtools+pytools+analysis+reco+sim~ml ^k4actstracking@calosurface-extrapolation^geant4+data
+  - mucoll-stack~devtools+pytools+analysis+reco+sim+ml ^k4actstracking@gnn^geant4+data
