@@ -78,7 +78,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # reco-only images stay Geant4-free (lighter). When +sim is also present
         # the +sim block's full dd4hep wins, so this edge is gated off to avoid a
         # ~ddg4/+ddg4 clash on the shared dd4hep node.
-        depends_on('dd4hep~ddg4', when='~sim')
+        #depends_on('dd4hep~ddg4', when='~sim')
+        depends_on('dd4hep')
 
         depends_on('k4geo')
         depends_on('k4reco')
