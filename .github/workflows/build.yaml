@@ -32,7 +32,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack+devtools+pytools+analysis~reco~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis~reco~sim~ml
 
   analysis-arm64:
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -43,7 +43,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack+devtools+pytools+analysis~reco~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis~reco~sim~ml
 
   # -------------------------------------------------------------------- reco --
   reco-amd64:
@@ -57,7 +57,7 @@ jobs:
       image-type: reco
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+reco~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco~sim~ml
 
   reco-arm64:
     needs: analysis-arm64
@@ -70,7 +70,7 @@ jobs:
       image-type: reco
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+reco~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco~sim~ml
 
   # --------------------------------------------------------------------- sim --
   sim-amd64:
@@ -84,7 +84,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.reco-amd64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+reco+sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim~ml
 
   sim-arm64:
     needs: reco-arm64
@@ -97,7 +97,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.reco-arm64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+reco+sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim~ml
 
   # ---------------------------------------------------------------------- ml --
   ml-amd64:
@@ -111,7 +111,7 @@ jobs:
       image-type: ml
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.sim-amd64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+reco+sim+ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim+ml
 
   ml-arm64:
     needs: sim-arm64
@@ -124,7 +124,7 @@ jobs:
       image-type: ml
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.sim-arm64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+reco+sim+ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim+ml
 
   # --------------------------------------------------------------- manifests --
   manifest-analysis:
