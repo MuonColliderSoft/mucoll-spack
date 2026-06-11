@@ -39,5 +39,5 @@ spack:
   specs:
   - mucoll-stack+devtools+pytools+analysis~reco~sim~ml
   - mucoll-stack+devtools+pytools+analysis+reco~sim~ml ^k4actstracking@calosurface-extrapolation^geant4~data
-  - mucoll-stack+devtools+pytools+analysis+reco+sim~ml ^k4actstracking@calosurface-extrapolation
-  - mucoll-stack+devtools+pytools+analysis+reco+sim+ml ^k4actstracking@gnn
+  - mucoll-stack+devtools+pytools+analysis+reco+sim~ml ^k4actstracking@calosurface-extrapolation^geant4+data
+  - mucoll-stack+devtools+pytools+analysis+reco+sim+ml ^k4actstracking@gnn^geant4+data
