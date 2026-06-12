@@ -33,7 +33,7 @@ RUN apt update && apt install -y wget gnupg && \
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
     build-essential git python3 python3-pip vim unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev ccache mold strace \
-    python3-boto3 python3-requests python3-yaml llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev && \
+    python3-boto3 python3-requests python3-yaml llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev libssl-dev libcurl4-openssl-dev && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -137,11 +137,19 @@ RUN . /opt/setup_spack.sh && \
 
 # Concretize the WHOLE layered stack (all four roots) reusing system packages
 # as external, so shared dependencies get identical hashes across all layers.
+#
+# Only `rust` is detected as an external here (it is installed via rustup, not
+# apt). A blanket `spack external find --not-buildable` must NOT be used on this
+# minimal base: it picks up the system openssl/curl, which ship only as runtime
+# libraries + CLIs (no -dev headers), and marking them non-buildable then breaks
+# anything that compiles against them (e.g. libevent: "openssl/ssl.h not found").
+# The genuinely-wanted externals (opengl, mesa, krb5, openssh, llvm) are declared
+# explicitly in environments/mucoll-common/packages.yaml instead.
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     export PATH=/usr/lib/llvm-20/bin:${PATH} && \
     spack compiler find /usr/lib/llvm-20/bin && \
-    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
 # Install fragments of the dependency tree in separate layers for cached debugging

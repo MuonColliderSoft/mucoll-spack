@@ -35,8 +35,14 @@ spack:
   # overlap: `+analysis` is satisfied by all four (installs everything), while
   # `+analysis~reco~sim~ml` is satisfied by none of the un-negated roots.
 
+  # Per-root Geant4 split: the reco root forces dd4hep~ddg4 AND k4geo~geant4 (so
+  # neither dd4hep nor k4geo's G4 plugin pulls Geant4 -> no Geant4 in the reco
+  # image), while sim/ml force dd4hep+ddg4 / k4geo+geant4 (Geant4 + its data,
+  # needed for ddsim). Pinning per-root makes the solver keep two dd4hep / two
+  # k4geo nodes instead of unifying them under when_possible (same pattern as
+  # k4actstracking).
   specs:
   - mucoll-stack~devtools+pytools+analysis~reco~sim~ml
-  - mucoll-stack~devtools+pytools+analysis+reco~sim~ml ^k4actstracking@calosurface-extrapolation^geant4~data
-  - mucoll-stack~devtools+pytools+analysis+reco+sim~ml ^k4actstracking@calosurface-extrapolation^geant4+data
-  - mucoll-stack~devtools+pytools+analysis+reco+sim+ml ^k4actstracking@gnn^geant4+data
+  - mucoll-stack~devtools+pytools+analysis+reco~sim~ml ^dd4hep~ddg4 ^k4geo~geant4 ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack~devtools+pytools+analysis+reco+sim~ml ^dd4hep+ddg4 ^k4geo+geant4 ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack~devtools+pytools+analysis+reco+sim+ml ^dd4hep+ddg4 ^k4geo+geant4 ^k4actstracking@gnn
