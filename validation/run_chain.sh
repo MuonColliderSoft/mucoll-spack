@@ -86,6 +86,8 @@ case "${STAGE}" in
     ddsim --steeringFile "${BM}/simulation/steer_baseline.py" \
       --inputFiles gen.edm4hep.root \
       --outputFile sim.edm4hep.root \
+      # We cannot afford to run with HP in the CI validation
+      --physicsList FTFP_BERT \
       --numberOfEvents "${NEV}"
     ;;
 
