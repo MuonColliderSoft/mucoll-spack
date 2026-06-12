@@ -87,7 +87,7 @@ case "${STAGE}" in
       --inputFiles gen.edm4hep.root \
       --outputFile sim.edm4hep.root \
       # We cannot afford to run with HP in the CI validation
-      --physicsList FTFP_BERT \
+      --physics.list FTFP_BERT \
       --numberOfEvents "${NEV}"
     ;;
 
