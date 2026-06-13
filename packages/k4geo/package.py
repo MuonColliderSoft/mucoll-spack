@@ -34,6 +34,11 @@ class K4geo(CMakePackage):
         default=True,
         description="Build the Geant4-dependent k4geoG4 plugin (requires DD4hep DDG4 and Geant4)",
     )
+    variant(
+        "beampipe_stl",
+        default=True,
+        description="Download and install the FCC-ee MDI beampipe CAD (STL) files",
+    )
 
     depends_on("cxx", type="build")
 
@@ -53,12 +58,10 @@ class K4geo(CMakePackage):
             f"-DCMAKE_CXX_STANDARD={self.spec['root'].variants['cxxstd'].value}"
         )
         args.append(self.define_from_variant("INSTALL_COMPACT_FILES", "compact"))
-        # Automatically install the CAD beampipe files if we install the compact files
-        args.append(
-            self.define(
-                "INSTALL_BEAMPIPE_STL_FILES", self.spec.variants["compact"].value
-            )
-        )
+        # The beampipe STL files are downloaded from the network at configure
+        # time, so this variant lets consumers opt out (the MuColl stack does,
+        # via packages.yaml: it doesn't use the FCC-ee MDI beampipe CAD).
+        args.append(self.define_from_variant("INSTALL_BEAMPIPE_STL_FILES", "beampipe_stl"))
         args.append(self.define_from_variant("K4GEO_USE_GEANT4", "geant4"))
         args.append(self.define("BUILD_TESTING", self.run_tests))
         return args
