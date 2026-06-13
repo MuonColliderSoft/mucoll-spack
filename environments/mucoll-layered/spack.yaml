@@ -12,7 +12,7 @@ spack:
 
   concretizer:
     # when_possible (not true) because the ml root requires a different
-    # k4actstracking branch (@gnn) than the reco/sim roots
+    # k4actstracking branch (@gnn) than the sim root
     # (@calosurface-extrapolation) and therefore cannot share a single DAG. Spack
     # still concretizes the whole environment together and shares every package
     # it can; only the conflicting k4actstracking subtree is duplicated.
@@ -25,26 +25,22 @@ spack:
   include:
   - ../mucoll-common/packages.yaml
 
-  # Four nested root specs (analysis ⊂ reco ⊂ sim ⊂ ml) concretized together
-  # under unify:when_possible so every shared dependency resolves to a single
-  # hash. Each layered image installs only its own root spec, reusing the parent
+  # Three nested root specs (analysis ⊂ sim ⊂ ml) concretized together under
+  # unify:when_possible so every shared dependency resolves to a single hash.
+  # Each layered image installs only its own root spec, reusing the parent
   # layer's already-installed store.
-  # The variants are written out explicitly (incl. the negations) so that each
+  #
+  # There is no separate reco image: the +sim variant covers both reconstruction
+  # and simulation, so the sim/ml roots carry +sim. sim/ml need Geant4 for ddsim
+  # (dd4hep+ddg4, geant4+data) -- a single shared geant4 across both, no
+  # data-variant split. The analysis root stays Geant4-free. Only the
+  # k4actstracking branch differs (sim @calosurface-extrapolation vs ml @gnn),
+  # hence unify:when_possible.
+  #
+  # The variants are written out explicitly (incl. the negations) so each
   # abstract root is matched by exactly one `spack install <spec>` query in the
-  # layered Dockerfiles. Without the ~reco/~sim/~ml negations the abstract roots
-  # overlap: `+analysis` is satisfied by all four (installs everything), while
-  # `+analysis~reco~sim~ml` is satisfied by none of the un-negated roots.
-
-  # Per-root Geant4 split. The reco root needs k4SimGeant4 (for GeoSvc) so it
-  # carries Geant4, but only the libraries -- geant4~data keeps the multi-GB
-  # physics datasets out, since reco never runs Geant4 (EnableGeant4Geo=False).
-  # k4geo~geant4 still skips k4geo's own (unused) G4 plugin. The sim/ml roots use
-  # geant4+data and k4geo+geant4 for actual ddsim. Pinning per-root makes the
-  # solver keep separate geant4/dd4hep/k4simgeant4/k4geo nodes for reco vs sim/ml
-  # under when_possible (same pattern as k4actstracking); the Geant4-linked
-  # subtree is therefore built once per data variant.
+  # layered Dockerfiles (e.g. ~sim~ml selects only analysis; +sim~ml only sim).
   specs:
-  - mucoll-stack~devtools+pytools+analysis~reco~sim~ml
-  - mucoll-stack~devtools+pytools+analysis+reco~sim~ml ^dd4hep+ddg4 ^geant4~data ^k4geo~geant4 ^k4actstracking@calosurface-extrapolation
-  - mucoll-stack~devtools+pytools+analysis+reco+sim~ml ^dd4hep+ddg4 ^geant4+data ^k4geo+geant4 ^k4actstracking@calosurface-extrapolation
-  - mucoll-stack~devtools+pytools+analysis+reco+sim+ml ^dd4hep+ddg4 ^geant4+data ^k4geo+geant4 ^k4actstracking@gnn
+  - mucoll-stack~devtools+pytools+analysis~sim~ml
+  - mucoll-stack~devtools+pytools+analysis+sim~ml ^dd4hep+ddg4 ^geant4+data ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack~devtools+pytools+analysis+sim+ml ^dd4hep+ddg4 ^geant4+data ^k4actstracking@gnn
