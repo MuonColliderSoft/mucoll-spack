@@ -17,9 +17,7 @@ ARG OS=ubuntu24
 FROM ubuntu:24.04
 
 # --------------------------------------------------------------------------- #
-#  System packages (from key4hep-images/ubuntu24/ubuntu24-build/Dockerfile).
-#  tzdata is needed for setting the timezones (gives the nightlies the right
-#  time and date).
+#  System packages 
 # --------------------------------------------------------------------------- #
 RUN apt update && apt install -y wget && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
@@ -72,9 +70,7 @@ RUN . /opt/setup_spack.sh && \
 
 # --------------------------------------------------------------------------- #
 #  Add the key4hep-spack repository (the `k4` namespace mucoll-stack imports
-#  from, and where most externals / key4hep packages are defined). Previously
-#  this was provided by the key4hep-externals base image; built from ubuntu we
-#  must clone it, apply its cherry-picks to spack-packages, and add the repo.
+#  from, and where most externals / key4hep packages are defined). 
 # --------------------------------------------------------------------------- #
 ARG KEY4HEP_SPACK_REPO=key4hep/key4hep-spack
 ARG KEY4HEP_SPACK_SHA
@@ -94,8 +90,7 @@ RUN . /opt/setup_spack.sh && \
     spack repo add ${SPACK_ROOT}/var/key4hep-spack
 
 # --------------------------------------------------------------------------- #
-#  MuColl-specific bootstrap (unchanged: assumes /opt/setup_spack.sh, /opt/spack
-#  and /opt/spack-packages exist, which the steps above now provide).
+#  MuColl-specific bootstrap 
 # --------------------------------------------------------------------------- #
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=muoncollidersoft/mucoll-spack
