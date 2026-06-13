@@ -45,14 +45,17 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
     variant('analysis', default=False, description='Minimal build for analysis only')
-    variant('reco', default=False, description='Build with reconstruction tools')
-    variant('sim', default=False, description='Build with simulation tools')
+    variant('sim', default=False, description='Build with reconstruction and simulation tools')
+    variant('gen', default=False, description='Build with generators')
 
     # Add compilers to the build dependencies
     # so that we have them available to set them in the env script
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
+
+    depends_on('cmake')
+    depends_on('pelican')
 
     with when('+analysis'):
         depends_on('edm4hep')
@@ -61,16 +64,16 @@ class MucollStack(BundlePackage, Key4hepPackage):
     with when('+sim'):
         ############################### Key4hep ###############
         #######################################################
-        depends_on('whizard +lcio +openloops')
-        #depends_on('k4marlinwrapper')
-        #depends_on('k4simdelphes')
-        #depends_on('k4simgeant4')
-        depends_on('k4geo')
+        depends_on('dd4hep')
+        depends_on('delphes')
 
-        #with when('+reco'):
+        depends_on('k4geo')
         depends_on('k4reco')
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
+        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reconstruction
+        # workflow loads at runtime (with EnableGeant4Geo=False).
+        depends_on('k4simgeant4')
 
         ############################### ILCSoft ###############
         #######################################################
@@ -107,16 +110,14 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('muoncvxddigitiser')
         depends_on('mybibutils')
-        depends_on('pelican')
-    
-        ############ generic packages ############
-        #######################################################
-        depends_on('delphes')
+
+    with when('+gen'):
+        depends_on('whizard +lcio +openloops')
+        depends_on('hepmc3')
 
     ##################### developer tools #################
     #######################################################
     with when('+devtools'):
-        depends_on('cmake')
         depends_on('ninja')
         depends_on('doxygen')
         depends_on('gdb')

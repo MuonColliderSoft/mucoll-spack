@@ -2,6 +2,8 @@ name: Build MuColl Stack and Publish Image
 description: |
   Publish the layered mucoll software stack docker images:
   mucoll-analysis -> mucoll-sim -> mucoll-ml.
+  The +sim variant covers both reconstruction and simulation; there is no
+  separate reco image.
   Each layer is built FROM the previous one (per architecture) so packages are
   installed once and reused down the chain. Relies on a spack buildcache.
 
@@ -32,7 +34,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack+devtools+pytools+analysis~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis~sim~ml
 
   analysis-arm64:
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -43,9 +45,11 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack+devtools+pytools+analysis~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis~sim~ml
 
   # --------------------------------------------------------------------- sim --
+  # Built FROM analysis; the +sim variant installs the reconstruction +
+  # simulation packages, so the sim image is the full reco+sim environment.
   sim-amd64:
     needs: analysis-amd64
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -57,7 +61,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis+sim~ml
 
   sim-arm64:
     needs: analysis-arm64
@@ -70,7 +74,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis+sim~ml
 
   # ---------------------------------------------------------------------- ml --
   ml-amd64:
@@ -84,7 +88,7 @@ jobs:
       image-type: ml
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.sim-amd64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+sim+ml
+      spec: mucoll-stack~devtools+pytools+analysis+sim+ml
 
   ml-arm64:
     needs: sim-arm64
@@ -97,7 +101,7 @@ jobs:
       image-type: ml
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.sim-arm64.outputs.image-uri }}
-      spec: mucoll-stack+devtools+pytools+analysis+sim+ml
+      spec: mucoll-stack~devtools+pytools+analysis+sim+ml
 
   # --------------------------------------------------------------- manifests --
   manifest-analysis:

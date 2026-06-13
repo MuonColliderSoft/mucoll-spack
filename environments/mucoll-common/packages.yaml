@@ -55,14 +55,38 @@ packages:
     - spec: llvm@20.1.8 +clang +lld
       prefix: /usr/lib/llvm-20
 
+  boost:
+    require: +python
+    buildable: true
+
+  # Ask for Python > 3.11
+  # Since many packages depend on setuptools that was dropped in 3.12,
+  # without asking explicitly the version used will be 3.11
+  python:
+    require: "@3.12: +optimizations"
+
+
   # needed by Alma9 to support AVX2 instructions
   binutils:
     require: +gas
   gdb:
     require: +python+tui+source-highlight~debuginfod
 
+  xrootd:
+    require: +krb5 cxxstd=20
+
+  root:
+    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo cxxstd=20'
+
+  hdf5:
+    require: +cxx+hl
+  hepmc3:
+    require: +python+rootio
+  
   py-pandas:
     require: ~excel~parquet
+  py-numpy:
+    require: ^openblas
 
   # Pin py-torch to the latest series. py-torch@2.9.1 is available and every
   # root concretizes to it individually, but under `unify: when_possible` the
@@ -74,7 +98,18 @@ packages:
   # excludes 2.7.1 is enough to let the newest release win. Use a floor (not an
   # exact pin) so future releases are picked up automatically.
   py-torch:
-    require: '@2.8:'
+    require: '@2.8:~cuda+custom-protobuf'
+
+  # The versions of py-onnx and py-onnxruntime should be consistent based on this table
+  # https://onnxruntime.ai/docs/reference/compatibility.html#onnx-opset-support
+  py-onnx:
+    require: '@1.16:'
+  py-onnxruntime:
+    require: '@1.18:'
+    
+  geant4:
+    require: ~opengl~qt~vecgeom +ipo cxxstd=20
+
 
   k4fwcore:
     require: '@main'
@@ -86,14 +121,18 @@ packages:
   # py-torch / onnxruntime deps). The sim layer concretizes acts~gnn.
   acts:
     require: '@main+dd4hep+json cxxstd=20'
+  # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
+  # which MuColl does not use (and which intermittently breaks the build). The
+  # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
+  # upstream key4hep/k4geo@main.
   k4geo:
-    require: '@main'
+    require: '@main ~beampipe_stl'
   k4gen:
     require: '@main'
   k4gaudipandora:
     require: '@main'
   k4reco:
-    require: '@0.2'
+    require: '@main'
   k4marlinwrapper:
     require: '@main'
   # NOTE: k4actstracking version is intentionally NOT pinned globally here.
