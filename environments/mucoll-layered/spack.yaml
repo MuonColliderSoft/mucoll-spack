@@ -35,14 +35,16 @@ spack:
   # overlap: `+analysis` is satisfied by all four (installs everything), while
   # `+analysis~reco~sim~ml` is satisfied by none of the un-negated roots.
 
-  # Per-root Geant4 split: the reco root forces dd4hep~ddg4 AND k4geo~geant4 (so
-  # neither dd4hep nor k4geo's G4 plugin pulls Geant4 -> no Geant4 in the reco
-  # image), while sim/ml force dd4hep+ddg4 / k4geo+geant4 (Geant4 + its data,
-  # needed for ddsim). Pinning per-root makes the solver keep two dd4hep / two
-  # k4geo nodes instead of unifying them under when_possible (same pattern as
-  # k4actstracking).
+  # Per-root Geant4 split. The reco root needs k4SimGeant4 (for GeoSvc) so it
+  # carries Geant4, but only the libraries -- geant4~data keeps the multi-GB
+  # physics datasets out, since reco never runs Geant4 (EnableGeant4Geo=False).
+  # k4geo~geant4 still skips k4geo's own (unused) G4 plugin. The sim/ml roots use
+  # geant4+data and k4geo+geant4 for actual ddsim. Pinning per-root makes the
+  # solver keep separate geant4/dd4hep/k4simgeant4/k4geo nodes for reco vs sim/ml
+  # under when_possible (same pattern as k4actstracking); the Geant4-linked
+  # subtree is therefore built once per data variant.
   specs:
   - mucoll-stack~devtools+pytools+analysis~reco~sim~ml
-  - mucoll-stack~devtools+pytools+analysis+reco~sim~ml ^dd4hep~ddg4 ^k4geo~geant4 ^k4actstracking@calosurface-extrapolation
-  - mucoll-stack~devtools+pytools+analysis+reco+sim~ml ^dd4hep+ddg4 ^k4geo+geant4 ^k4actstracking@calosurface-extrapolation
-  - mucoll-stack~devtools+pytools+analysis+reco+sim+ml ^dd4hep+ddg4 ^k4geo+geant4 ^k4actstracking@gnn
+  - mucoll-stack~devtools+pytools+analysis+reco~sim~ml ^dd4hep+ddg4 ^geant4~data ^k4geo~geant4 ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack~devtools+pytools+analysis+reco+sim~ml ^dd4hep+ddg4 ^geant4+data ^k4geo+geant4 ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack~devtools+pytools+analysis+reco+sim+ml ^dd4hep+ddg4 ^geant4+data ^k4geo+geant4 ^k4actstracking@gnn

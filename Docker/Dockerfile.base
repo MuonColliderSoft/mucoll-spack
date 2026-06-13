@@ -28,7 +28,6 @@ RUN apt update && apt install -y wget && \
 # Install pre-compiled LLVM binaries to avoid expensive source builds in CI.
 # libzstd-dev/zlib1g-dev are needed so LLVM's CMake exports (LLVMSupport ->
 # zstd::libzstd_shared, ZLIB::ZLIB) resolve when py-llvmlite links against LLVM.
-# Add the LLVM apt repo (if not already added)
 
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \

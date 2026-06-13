@@ -76,16 +76,17 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('hepmc3')
 
     with when('+reco'):
-        # reco-only images stay Geant4-free (lighter). When +sim is also present
-        # the +sim block's full dd4hep wins, so this edge is gated off to avoid a
-        # ~ddg4/+ddg4 clash on the shared dd4hep node.
-        #depends_on('dd4hep~ddg4', when='~sim')
         depends_on('dd4hep')
 
         depends_on('k4geo')
         depends_on('k4reco')
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
+        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reco workflow
+        # loads at runtime (with EnableGeant4Geo=False). It links Geant4, so the
+        # reco image carries the Geant4 libraries (but not the physics data --
+        # see geant4~data on the reco root in environments/mucoll-layered).
+        depends_on('k4simgeant4')
 
         ############################### ILCSoft ###############
         #######################################################
