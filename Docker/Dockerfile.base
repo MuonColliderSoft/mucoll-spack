@@ -21,7 +21,7 @@ FROM ubuntu:24.04
 #  tzdata is needed for setting the timezones (gives the nightlies the right
 #  time and date).
 # --------------------------------------------------------------------------- #
-RUN apt update && apt install -y wget gnupg && \
+RUN apt update && apt install -y wget && \
     wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
     echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" | tee /etc/apt/sources.list.d/llvm-20.list
 
@@ -32,8 +32,8 @@ RUN apt update && apt install -y wget gnupg && \
 
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    build-essential git python3 python3-pip vim unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev ccache mold strace \
-    python3-boto3 python3-requests python3-yaml llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev libssl-dev libcurl4-openssl-dev && \
+    build-essential git python3 unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev \
+    llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -149,7 +149,7 @@ RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     export PATH=/usr/lib/llvm-20/bin:${PATH} && \
     spack compiler find /usr/lib/llvm-20/bin && \
-    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find --not-buildable && \
+    OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
 
 # Install fragments of the dependency tree in separate layers for cached debugging
