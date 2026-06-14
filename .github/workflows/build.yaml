@@ -177,12 +177,32 @@ jobs:
       - name: Generate landing page
         run: |
           cd public
+          shopt -s nullglob
+          # make_plots.sh writes each gallery to <particle>/<settings-tag>/index.html,
+          # so the landing page must link one level below the particle dir. Linking to
+          # the particle dir alone 404s on Pages (no <particle>/index.html exists).
           {
             echo '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
-            echo '<title>MuColl physics validation</title></head><body>'
-            echo '<h1>MuColl physics validation</h1><ul>'
-            for d in */ ; do [ -d "$d" ] && echo "<li><a href=\"${d}\">${d%/}</a></li>"; done
-            echo '</ul></body></html>'
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            echo '<title>MuColl physics validation</title>'
+            echo '<style>body{font-family:system-ui,sans-serif;margin:1.5rem;color:#222}'
+            echo 'h2{margin-top:1.5rem;font-size:1.1rem}code{font-size:.85em;word-break:break-all}</style>'
+            echo '</head><body>'
+            echo '<h1>MuColl physics validation</h1>'
+            for particle in */ ; do
+              p="${particle%/}"
+              echo "<h2>${p}</h2><ul>"
+              n=0
+              for gallery in "${particle}"*/ ; do
+                [ -f "${gallery}index.html" ] || continue
+                tag="${gallery#"${particle}"}"; tag="${tag%/}"
+                echo "<li><a href=\"${gallery}index.html\"><code>${tag}</code></a></li>"
+                n=$((n + 1))
+              done
+              [ "${n}" -eq 0 ] && echo '<li><em>no plots produced</em></li>'
+              echo '</ul>'
+            done
+            echo '</body></html>'
           } > index.html
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
