@@ -4,6 +4,8 @@
 
 This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack. It is built on top of the key4hep-dev-external environment from the [key4hep-stack](https://github.com/key4hep/key4hep-spack) repository, which is required for installation.
 
+See [doc/ReleaseNotes.md](doc/ReleaseNotes.md) for the changelog of tagged releases and the work in progress on the 3.x series.
+
 After installing [Spack](https://github.com/key4hep/spack) and downloading the [key4hep-spack](https://github.com/key4hep/key4hep-spack) and [mucoll-spack](https://github.com/MuonColliderSoft/mucoll-spack) repositories, the whole software stack can be installed using the following commands:
 
 ```bash
@@ -37,21 +39,21 @@ source $MUCOLL_STACK
 ## Package versioning
 
 Preferred convention for version names in Spack is numbers separated by dots, without leading zeros, e.g. `1.2.13`.
-Conversion to tag names in `mucoll` packages is provided by `MCIlcsoftpackage` class defined in `packages/mucoll-stack/mucoll_utils.py`, e.g. for [`lcgeo`](https://github.com/MuonColliderSoft/lcgeo/releases/tag/v00-17-MC) package version `0.17` corresponds to tag name `v00-17-MC`.
+Conversion to tag names in `mucoll` packages is provided by `MCIlcsoftpackage` class defined in `packages/mucoll-stack/mucoll_utils.py`, e.g. for [`muoncvxddigitiser`](https://github.com/MuonColliderSoft/MuonCVXDDigitiser/tags) package version `0.2.2` corresponds to tag name `v00-02-02-MC`.
 
 
 ## Adding new versions for individual packages
 
-After a new tag for the package is created, e.g. `v00-17-MC` in `lcgeo` repository, it can be added to this Spack repository in two steps:
+After a new tag for the package is created, e.g. `v00-02-02-MC` in the `MuonCVXDDigitiser` repository, it can be added to this Spack repository in two steps:
 
 1. Get the archive checksum for the new tag
 ```bash
-spack checksum lcgeo 0.17
+spack checksum muoncvxddigitiser 0.2.2
 # Validates archive URL and returns the checksum
-    version('0.17', sha256='5ab33aaf5bc37deba82c2dde78cdce6c0041257222ed7ea052ecdd388a41cf9b')
+    version('0.2.2', sha256='55f53534a1b0ab5fcd938ae4c5fa0ba38458cd7359d8c09ff896f5fa53676d01')
 ```
 
-2. Add the returned version definition to the corresponding package file: [`packages/lcgeo/package.py`](packages/lcgeo/package.py)
+2. Add the returned version definition to the corresponding package file: [`packages/muoncvxddigitiser/package.py`](packages/muoncvxddigitiser/package.py)
 
 > NOTE: This repository only contains packages maintained by the Muon Collider collaboration.
 > If the version of interest is missing from Spack for some other package, the line with a new version definition should be added to the package file in the corresponding repository.  
@@ -142,3 +144,14 @@ are installed once and reused down the chain:
 - `${REPOSITORY}/mucoll-analysis-${OS}:${VERSION}`: minimal analysis stack (`mucoll-stack+devtools+pytools+analysis`).
 - `${REPOSITORY}/mucoll-sim-${OS}:${VERSION}`: built on `mucoll-analysis`, adds the simulation stack (`+sim`).
 - `${REPOSITORY}/mucoll-ml-${OS}:${VERSION}`: built on `mucoll-sim`, adds the machine-learning stack (`+ml`).
+
+## Physics validation
+
+On every push to `main` the CI runs a per-particle `sim -> digi -> reco -> plot` chain
+(see `validation/` and `.github/workflows/physics-validation-template.yaml`) against the freshly
+published `mucoll-sim` image and publishes the resulting performance plots to GitHub Pages:
+
+<https://muoncollidersoft.github.io/mucoll-spack/>
+
+The landing page links to one gallery per particle (muon, electron, pion, photon); each gallery is
+keyed by the analysis settings used to produce it.
