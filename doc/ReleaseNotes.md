@@ -6,9 +6,6 @@ Each release corresponds to a git tag and a set of container images published by
 The release version is also recorded in `packages/mucoll-stack/package.py` and the per-package
 versions in `environments/mucoll-common/packages.yaml`.
 
-> **Note:** This is a first draft, reconstructed from the git history. Entries should be
-> reviewed and refined by the maintainers before publication.
-
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
@@ -23,9 +20,9 @@ restructuring of how the stack is built and distributed.
   (`analysis ⊂ sim ⊂ ml`) concretized together under `unify: when_possible`, so every shared
   dependency resolves to a single hash and is installed only once. The CI publishes a chain of
   images that build on top of one another:
-  - `mucoll-analysis-<os>` — minimal, Geant4-free analysis stack
+  - `mucoll-analysis-<os>` — minimal, edm4hep+podio analysis stack
     (`mucoll-stack+devtools+pytools+analysis`).
-  - `mucoll-sim-<os>` — adds the simulation **and** reconstruction stack (`+sim`, pulls in
+  - `mucoll-sim-<os>` — adds the simulation and reconstruction tools (`+sim`, pulls in
     `dd4hep+ddg4`, `geant4+data`).
   - `mucoll-ml-<os>` — adds the machine-learning stack (`+ml`).
 - **Machine-learning layer.** New `+ml` variant pulling in a PyTorch-based stack: `py-torch`
@@ -114,7 +111,7 @@ restructuring of how the stack is built and distributed.
 ## [v2.9.7] — 2025-06-03
 
 ### Changed
-- Pick up the tagged base image.
+- Pick up tagged base image from key4hep-dev-externals.
 
 ## [v2.9.6] — 2025-05-28
 
