@@ -135,6 +135,8 @@ packages:
     require: '@main'
   k4marlinwrapper:
     require: '@main'
+  k4edm4hep2lcioconv:
+    require: '@main'
   # NOTE: k4actstracking version is intentionally NOT pinned globally here.
   # The sim and ml layers require different branches (@calosurface-extrapolation
   # vs @gnn), so the version is constrained per-root in each environment's spec
