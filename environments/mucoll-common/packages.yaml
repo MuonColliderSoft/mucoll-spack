@@ -110,6 +110,8 @@ packages:
   geant4:
     require: ~opengl~qt~vecgeom +ipo cxxstd=20
 
+  edm4hep:
+    require: '@main'
 
   k4fwcore:
     require: '@main'
