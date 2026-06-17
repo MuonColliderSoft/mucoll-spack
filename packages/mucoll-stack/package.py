@@ -111,7 +111,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         ############ custom Muon Collider packages ############
         #######################################################
         #depends_on('muoncvxddigitiser')
-        #depends_on('mybibutils')
+        depends_on('mybibutils')
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')
