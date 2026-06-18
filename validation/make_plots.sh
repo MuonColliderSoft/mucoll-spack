@@ -10,11 +10,11 @@
 # This is the ONLY per-study step: the gen/sim/digi/reco chain (run_chain.sh) is
 # identical for every particle, and the analysis/plotting lives here.
 #
-# Both analyses are run for EVERY particle (all plots are produced regardless of
-# the gun type), and land in the same per-particle gallery:
-#   - tracking plots: RunAnalysis.C -> PlotAll.C (below)
-#   - photon study:   mucoll-benchmarks/analysis/python/edm4hep/study_photons.py
-#                     (efficiency + energy-resolution plots)
+# The analysis is dispatched by particle type:
+#   - photon             -> photon study only (neutral; no tracks):
+#                           mucoll-benchmarks/analysis/python/edm4hep/study_photons.py
+#                           (efficiency + energy-resolution plots)
+#   - muon/electron/pion -> tracking plots only: RunAnalysis.C -> PlotAll.C (below)
 #
 # The tracking plotting implementation lives in mucoll-benchmarks:
 #   plotting/TrackingPlots/PlottingScripts/RunAnalysis.C
@@ -161,6 +161,30 @@ if [ ! -f reco.edm4hep.root ]; then
   exit 1
 fi
 
+# -------------------------------------------------------------------------
+# Photons are neutral: produce only the photon performance study.
+# -------------------------------------------------------------------------
+if [ "${PARTICLE}" = "photon" ]; then
+  if [ ! -f "${PHOTON_SCRIPT}" ]; then
+    echo "ERROR: photon study not found: ${PHOTON_SCRIPT}" >&2
+    exit 1
+  fi
+  OUT="${PLOT_OUT_DIR:-public/${PARTICLE}}"
+  mkdir -p "${OUT}"
+  OUT="$(resolve_dir "${OUT}")"
+  echo "=== plotting ${PARTICLE} (study_photons.py) ==="
+  echo "    BM        : ${BM}"
+  echo "    output dir: ${OUT}"
+  python "${PHOTON_SCRIPT}" -i reco.edm4hep.root -o "${OUT}/histos_photon.root" -d "${OUT}"
+  write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
+  echo "=== plotting ${PARTICLE} done ==="
+  ls -lh "${OUT}" || true
+  exit 0
+fi
+
+# -------------------------------------------------------------------------
+# Charged particles (muon, electron, pion, ...): produce only tracking plots.
+# -------------------------------------------------------------------------
 if [ ! -f "${CONF}" ]; then
   echo "ERROR: RunAnalysis config not found: ${CONF}" >&2
   exit 1
@@ -168,11 +192,6 @@ fi
 
 if [ ! -f "${PLOT_SCRIPTS}/RunAnalysis.C" ] || [ ! -f "${PLOT_SCRIPTS}/PlotAll.C" ]; then
   echo "ERROR: plotting scripts not found under ${PLOT_SCRIPTS}" >&2
-  exit 1
-fi
-
-if [ ! -f "${PHOTON_SCRIPT}" ]; then
-  echo "ERROR: photon study not found: ${PHOTON_SCRIPT}" >&2
   exit 1
 fi
 
@@ -191,7 +210,7 @@ RUN_CONF="${RUN_DIR}/RunAnalysis.conf"
 
 write_analysis_config "${CONF}" "${RUN_CONF}" "${RECO_PREFIX}" "${RUN_DIR}/"
 
-echo "=== plotting ${PARTICLE} ==="
+echo "=== plotting ${PARTICLE} (tracking) ==="
 echo "    BM           : ${BM}"
 echo "    source config: ${CONF}"
 echo "    run config   : ${RUN_CONF}"
@@ -210,11 +229,6 @@ for ntuple in tracks_ntuple.root seeds_ntuple.root hits_ntuple.root; do
 done
 
 root -l -q "${PLOT_SCRIPTS}/PlotAll.C(\"${RUN_DIR}/\", \"${OUT}/\", \"${PLOT_SUFFIX}\")"
-
-# Photon performance study (efficiency + energy resolution) into the same gallery.
-# Run for every particle so all plots are produced regardless of the gun type.
-echo "=== photon study (study_photons.py) ==="
-python "${PHOTON_SCRIPT}" -i reco.edm4hep.root -o "${OUT}/histos_photon.root" -d "${OUT}"
 
 write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
 
