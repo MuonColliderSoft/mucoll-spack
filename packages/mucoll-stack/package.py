@@ -151,6 +151,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('py-pip')
         depends_on('py-scipy')
         depends_on('py-uproot')
+        depends_on('py-cppy')
 
     ##################### conflicts #######################
     #######################################################
