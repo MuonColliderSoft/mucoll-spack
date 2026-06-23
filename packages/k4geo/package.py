@@ -9,21 +9,29 @@ from spack.package import *
 class K4geo(CMakePackage):
     """DD4hep geometry models for future colliders.
 
-    MuColl overlay of the upstream key4hep/k4geo recipe. The only addition is a
-    ``beampipe_stl`` variant: upstream ties INSTALL_BEAMPIPE_STL_FILES to the
-    ``compact`` variant, which downloads the FCC-ee MDI beampipe CAD over the
-    network at configure time (flaky, and unused by MuColl). This variant lets
-    the stack opt out (see packages.yaml: k4geo ... ~beampipe_stl).
+    MuColl overlay of the upstream key4hep/k4geo recipe. It points at the
+    madbaron fork and adds a ``geant4`` variant wired to the new
+    ``K4GEO_USE_GEANT4`` CMake option, so the Geant4-dependent k4geoG4 plugin
+    (the only part of k4geo that links DD4hep::DDG4 and Geant4) can be skipped.
+    Disabling it lets the reconstruction layer build k4geo with no Geant4 at all.
+
+    It also adds a ``beampipe_stl`` variant: upstream ties
+    INSTALL_BEAMPIPE_STL_FILES to the ``compact`` variant, which downloads the
+    FCC-ee MDI beampipe CAD over the network at configure time (flaky, and unused
+    by MuColl). This variant lets the stack opt out (see packages.yaml: k4geo ...
+    ~beampipe_stl).
     """
 
     homepage = "https://github.com/key4hep/k4geo"
-    git = "https://github.com/key4hep/k4geo.git"
+    git = "https://github.com/madbaron/k4geo.git"
     url = "https://github.com/key4hep/k4geo/archive/v00-16-07.tar.gz"
 
     generator = "Ninja"
 
     maintainers("jmcarcell", "madbaron")
 
+    # Test branch carrying the optional-Geant4-plugin change (madbaron fork).
+    version("optional-geant4-plugin", branch="optional-geant4-plugin")
     version("main", branch="main")
     version(
         "00-24",
@@ -40,6 +48,11 @@ class K4geo(CMakePackage):
 
     variant("compact", default=True, description="Install compact files")
     variant(
+        "geant4",
+        default=True,
+        description="Build the Geant4-dependent k4geoG4 plugin (requires DD4hep DDG4 and Geant4)",
+    )
+    variant(
         "beampipe_stl",
         default=True,
         description="Download and install the FCC-ee MDI beampipe CAD (STL) files",
@@ -50,6 +63,9 @@ class K4geo(CMakePackage):
     depends_on("lcio")
     depends_on("dd4hep")
     depends_on("dd4hep@1.31:", when="@0.22:")
+    # The DDG4 component (and Geant4) are only needed for the k4geoG4 plugin.
+    depends_on("dd4hep+ddg4", when="+geant4")
+    depends_on("geant4", when="+geant4")
     depends_on("root")
     depends_on("python", type="build")
     depends_on("ninja", type="build")
@@ -65,6 +81,7 @@ class K4geo(CMakePackage):
         # time, so this variant lets consumers opt out (the MuColl stack does,
         # via packages.yaml: it doesn't use the FCC-ee MDI beampipe CAD).
         args.append(self.define_from_variant("INSTALL_BEAMPIPE_STL_FILES", "beampipe_stl"))
+        args.append(self.define_from_variant("K4GEO_USE_GEANT4", "geant4"))
         args.append(self.define("BUILD_TESTING", self.run_tests))
         return args
 

@@ -6,11 +6,11 @@
 #  ubuntu:24.04 it bootstraps spack + spack-packages + key4hep-spack from
 #  scratch (the relevant steps of key4hep-images/ubuntu24-build and
 #  key4hep-spack/Dockerfile-externals), then clones the mucoll repo and the
-#  toolchain, concretizes the WHOLE layered environment (analysis + sim + ml
-#  roots together, so shared packages get a single hash) but installs ONLY
-#  the analysis root. The mucoll-sim / mucoll-ml images are built FROM this
-#  image with Dockerfile.layer and install their extra specs, reusing this
-#  layer's already-installed store.
+#  toolchain, concretizes the WHOLE layered environment (analysis + reco + sim +
+#  ml roots together, so shared packages get a single hash) but installs ONLY
+#  the analysis root. The mucoll-reco / mucoll-sim / mucoll-ml images are built
+#  FROM this image with Dockerfile.layer and install their extra specs, reusing
+#  this layer's already-installed store.
 ###############################################################################
 
 ARG OS=ubuntu24
@@ -117,7 +117,7 @@ RUN . /opt/setup_spack.sh && \
         spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}";\
     fi
 
-# Activate the layered environment (analysis + sim + ml roots)
+# Activate the layered environment (analysis + reco + sim + ml roots)
 ARG ENVIRONMENT=mucoll-layered
 RUN . /opt/setup_spack.sh && \
     cd ${SPACK_ROOT}/var/mucoll-spack/environments/${ENVIRONMENT} && \
@@ -150,9 +150,9 @@ RUN --mount=type=secret,id=ocipass \
 ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
 
 # Install ONLY the analysis root from the already-concretized environment.
-# The ~sim~ml negations are required so the abstract spec matches just the
-# analysis root and not the sim/ml roots (which also satisfy +analysis).
-ARG SPEC=mucoll-stack~devtools+pytools+analysis~sim~ml
+# The ~reco~sim~ml negations are required so the abstract spec matches just the
+# analysis root and not the reco/sim/ml roots (which also satisfy +analysis).
+ARG SPEC=mucoll-stack~devtools+pytools+analysis~reco~sim~ml
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt "${SPEC}" && \
@@ -165,7 +165,7 @@ RUN --mount=type=secret,id=ocipass \
 # Point the default setup at this layer's mucoll-stack root. Only the analysis
 # root is installed in this image, so the spack find query is unambiguous.
 RUN . ${HOME}/setup_env.sh && \
-    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack~devtools+pytools+analysis~sim~ml) && \
+    MUCOLL_STACK_PATH=$(spack find --format "{prefix}" mucoll-stack~devtools+pytools+analysis~reco~sim~ml) && \
     MUCOLL_STACK_PATH_CLEANED=$(echo ${MUCOLL_STACK_PATH} | sed -E 's/\x1b\[[0-9;]*m//g') && \
     echo "source ${MUCOLL_STACK_PATH_CLEANED}/setup.sh" > /opt/setup_mucoll.sh && \
     echo "alias setup_mucoll=\". ${MUCOLL_STACK_PATH_CLEANED}/setup.sh\"" >> /etc/profile.d/aliases.sh

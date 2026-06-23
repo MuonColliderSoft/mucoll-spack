@@ -45,7 +45,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
     variant('analysis', default=False, description='Minimal build for analysis only')
-    variant('sim', default=False, description='Build with reconstruction and simulation tools')
+    variant('reco', default=False, description='Build with reconstruction tools')
+    variant('sim', default=False, description='Build with simulation tools')
     variant('gen', default=False, description='Build with generators')
 
     # Add compilers to the build dependencies
@@ -63,20 +64,21 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('edm4hep')
         depends_on('podio')
 
-    with when('+sim'):
+    with when('+reco'):
         ############################### Key4hep ###############
         #######################################################
         depends_on('dd4hep')
-        depends_on('delphes')
 
         depends_on('k4geo')
         depends_on('k4reco')
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
-        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reconstruction
-        # workflow loads at runtime (with EnableGeant4Geo=False).
-        depends_on('k4simgeant4')
         depends_on('k4marlinwrapper')
+        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reco workflow
+        # loads at runtime (with EnableGeant4Geo=False). It links Geant4, so the
+        # reco image carries the Geant4 libraries (but not the physics data --
+        # see geant4~data on the reco root in environments/mucoll-layered).
+        depends_on('k4simgeant4')
 
         ############################### ILCSoft ###############
         #######################################################
@@ -113,6 +115,12 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('muoncvxddigitiser')
         depends_on('mybibutils')
+
+    with when('+sim'):
+        ############################### Key4hep ###############
+        #######################################################
+        depends_on('dd4hep')
+        depends_on('delphes')
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')

@@ -123,12 +123,13 @@ packages:
   # py-torch / onnxruntime deps). The sim layer concretizes acts~gnn.
   acts:
     require: '@main+dd4hep+json cxxstd=20'
+  # Testing the madbaron fork branch that adds the K4GEO_USE_GEANT4 option
+  # (overlay recipe packages/k4geo). Revert to '@main' once it is upstreamed.
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
-  # which MuColl does not use (and which intermittently breaks the build). The
-  # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
-  # upstream key4hep/k4geo@main.
+  # which MuColl does not use (and which intermittently breaks the build). Both
+  # the geant4 and beampipe_stl variants are added by the packages/k4geo overlay.
   k4geo:
-    require: '@main ~beampipe_stl'
+    require: '@optional-geant4-plugin ~beampipe_stl'
   k4gen:
     require: '@main'
   k4gaudipandora:

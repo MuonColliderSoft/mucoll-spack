@@ -1,9 +1,7 @@
 name: Build MuColl Stack and Publish Image
 description: |
   Publish the layered mucoll software stack docker images:
-  mucoll-analysis -> mucoll-sim -> mucoll-ml.
-  The +sim variant covers both reconstruction and simulation; there is no
-  separate reco image.
+  mucoll-analysis -> mucoll-reco -> mucoll-sim -> mucoll-ml.
   Each layer is built FROM the previous one (per architecture) so packages are
   installed once and reused down the chain. Relies on a spack buildcache.
 
@@ -34,7 +32,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack~devtools+pytools+analysis~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis~reco~sim~ml
 
   analysis-arm64:
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -45,13 +43,42 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack~devtools+pytools+analysis~sim~ml
+      spec: mucoll-stack~devtools+pytools+analysis~reco~sim~ml
+
+  # -------------------------------------------------------------------- reco --
+  # Built FROM analysis; +reco installs the reconstruction packages (carrying
+  # Geant4 libraries but no physics data -- geant4~data, k4geo~geant4).
+  reco-amd64:
+    needs: analysis-amd64
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-latest
+      platform: amd64
+      registry: ghcr.io
+      image-type: reco
+      dockerfile: Dockerfile.layer
+      base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
+      spec: mucoll-stack~devtools+pytools+analysis+reco~sim~ml
+
+  reco-arm64:
+    needs: analysis-arm64
+    uses: ./.github/workflows/docker-build-push-template.yaml
+    with:
+      os: ubuntu24
+      runner: ubuntu-24.04-arm
+      platform: arm64
+      registry: ghcr.io
+      image-type: reco
+      dockerfile: Dockerfile.layer
+      base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
+      spec: mucoll-stack~devtools+pytools+analysis+reco~sim~ml
 
   # --------------------------------------------------------------------- sim --
-  # Built FROM analysis; the +sim variant installs the reconstruction +
-  # simulation packages, so the sim image is the full reco+sim environment.
+  # Built FROM reco; +sim adds the simulation packages (dd4hep, delphes) on top
+  # of reconstruction, with the full geant4+data / k4geo+geant4 for ddsim.
   sim-amd64:
-    needs: analysis-amd64
+    needs: reco-amd64
     uses: ./.github/workflows/docker-build-push-template.yaml
     with:
       os: ubuntu24
@@ -60,11 +87,11 @@ jobs:
       registry: ghcr.io
       image-type: sim
       dockerfile: Dockerfile.layer
-      base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim~ml
+      base-image: ${{ needs.reco-amd64.outputs.image-uri }}
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim~ml
 
   sim-arm64:
-    needs: analysis-arm64
+    needs: reco-arm64
     uses: ./.github/workflows/docker-build-push-template.yaml
     with:
       os: ubuntu24
@@ -73,8 +100,8 @@ jobs:
       registry: ghcr.io
       image-type: sim
       dockerfile: Dockerfile.layer
-      base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim~ml
+      base-image: ${{ needs.reco-arm64.outputs.image-uri }}
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim~ml
 
   # ---------------------------------------------------------------------- ml --
   ml-amd64:
@@ -88,7 +115,7 @@ jobs:
       image-type: ml
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.sim-amd64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim+ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim+ml
 
   ml-arm64:
     needs: sim-arm64
@@ -101,7 +128,7 @@ jobs:
       image-type: ml
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.sim-arm64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim+ml
+      spec: mucoll-stack~devtools+pytools+analysis+reco+sim+ml
 
   # --------------------------------------------------------------- manifests --
   manifest-analysis:
@@ -113,6 +140,16 @@ jobs:
       image-type: analysis
       amd64-image: ${{ needs.analysis-amd64.outputs.image-uri }}
       arm64-image: ${{ needs.analysis-arm64.outputs.image-uri }}
+
+  manifest-reco:
+    needs: [reco-amd64, reco-arm64]
+    uses: ./.github/workflows/manifest-template.yaml
+    with:
+      os: ubuntu24
+      registry: ghcr.io
+      image-type: reco
+      amd64-image: ${{ needs.reco-amd64.outputs.image-uri }}
+      arm64-image: ${{ needs.reco-arm64.outputs.image-uri }}
 
   manifest-sim:
     needs: [sim-amd64, sim-arm64]
