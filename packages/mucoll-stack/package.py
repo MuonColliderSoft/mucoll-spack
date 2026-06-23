@@ -74,11 +74,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
         depends_on('k4marlinwrapper')
-        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reco workflow
-        # loads at runtime (with EnableGeant4Geo=False). It links Geant4, so the
-        # reco image carries the Geant4 libraries (but not the physics data --
-        # see geant4~data on the reco root in environments/mucoll-layered).
-        depends_on('k4simgeant4')
 
         ############################### ILCSoft ###############
         #######################################################
@@ -121,6 +116,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('dd4hep')
         depends_on('delphes')
+        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reco workflow
+        # loads at runtime (with EnableGeant4Geo=False). It links Geant4.
+        depends_on('k4simgeant4')
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')
