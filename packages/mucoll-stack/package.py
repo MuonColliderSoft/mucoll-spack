@@ -44,7 +44,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('llvm', default=False, description='Build with LLVM')
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
-    variant('analysis', default=False, description='Minimal build for analysis only')
     variant('sim', default=False, description='Build with reconstruction and simulation tools')
     variant('gen', default=False, description='Build with generators')
 
@@ -59,9 +58,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('ccache')
     depends_on('ninja')
 
-    with when('+analysis'):
-        depends_on('edm4hep')
-        depends_on('podio')
+    # Minimal build for analysis only
+    depends_on('edm4hep')
+    depends_on('podio')
 
     with when('+sim'):
         ############################### Key4hep ###############
