@@ -42,5 +42,5 @@ spack:
   # layered Dockerfiles (e.g. ~sim~ml selects only analysis; +sim~ml only sim).
   specs:
   - mucoll-stack~devtools+pytools+analysis~sim~ml
-  - mucoll-stack~devtools+pytools+analysis+sim~ml ^dd4hep+ddg4 ^geant4+data ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack~devtools+pytools+analysis+sim~ml ^dd4hep+ddg4 ^geant4+data ^k4actstracking@main
   - mucoll-stack~devtools+pytools+analysis+sim+ml ^dd4hep+ddg4 ^geant4+data ^k4actstracking@gnn
