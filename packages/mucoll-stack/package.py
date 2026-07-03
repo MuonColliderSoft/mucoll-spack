@@ -67,6 +67,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('dd4hep')
         depends_on('delphes')
+        depends_on('hepmc3')
 
         depends_on('k4geo')
         depends_on('k4reco')
@@ -116,7 +117,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')
-        depends_on('hepmc3')
 
     ##################### developer tools #################
     #######################################################
