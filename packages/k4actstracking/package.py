@@ -13,8 +13,7 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     maintainers("vvolkl")
 
     version("main", branch="main")
-    version("calosurface-extrapolation", branch="calosurface-extrapolation")
-    version("gnn", branch="gnn-tracking-pipeiline-and-gen3-geo-tracking")
+    version("gnn", branch="gnn-trackfinding-on-main")
 
     version(
         "00-04",
