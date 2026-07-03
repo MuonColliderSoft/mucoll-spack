@@ -11,12 +11,7 @@ spack:
         glu: [mesa]
 
   concretizer:
-    # when_possible (not true) because the ml root requires a different
-    # k4actstracking branch (@gnn) than the sim root
-    # (@calosurface-extrapolation) and therefore cannot share a single DAG. Spack
-    # still concretizes the whole environment together and shares every package
-    # it can; only the conflicting k4actstracking subtree is duplicated.
-    unify: when_possible
+    unify: true
     targets:
       host_compatible: true
 
@@ -25,21 +20,14 @@ spack:
   include:
   - ../mucoll-common/packages.yaml
 
-  # Three nested root specs (analysis ⊂ sim ⊂ ml) concretized together under
-  # unify:when_possible so every shared dependency resolves to a single hash.
+  # Two nested root specs (analysis ⊂ sim) concretized together under
+  # unify:true so every shared dependency resolves to a single hash.
   # Each layered image installs only its own root spec, reusing the parent
   # layer's already-installed store.
   #
-  # There is no separate reco image: the +sim variant covers both reconstruction
-  # and simulation, so the sim/ml roots carry +sim. sim/ml need Geant4 for ddsim
-  # (dd4hep+ddg4, geant4+data) -- a single shared geant4 across both, no
-  # data-variant split. The analysis root stays Geant4-free. Only the
-  # k4actstracking branch differs (sim @calosurface-extrapolation vs ml @gnn),
-  # hence unify:when_possible.
-  #
   # The variants are written out explicitly (incl. the negations) so each
   # abstract root is matched by exactly one `spack install <spec>` query in the
-  # layered Dockerfiles (e.g. ~sim~ml selects only analysis; +sim~ml only sim).
+  # layered Dockerfiles (e.g. ~sim selects only analysis).
   specs:
   - mucoll-stack~devtools+pytools+ml~sim
   - mucoll-stack~devtools+pytools+ml+sim
