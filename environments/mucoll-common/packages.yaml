@@ -108,7 +108,7 @@ packages:
     require: '@1.18:'
     
   geant4:
-    require: ~opengl~qt~vecgeom +ipo cxxstd=20
+    require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
 
   edm4hep:
     require: '@main'
