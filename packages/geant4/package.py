@@ -62,7 +62,12 @@ class Geant4(CMakePackage):
         conditional("11", "14", when="@:10"),
         conditional("17", when="@10.4.1:"),
         conditional("20", when="@10.7.0:"),
-        conditional("23", when="@11:"),
+        # cxxstd=23 is intentionally omitted: this overlay ships a newer geant4
+        # than the clhep in the pinned spack-packages commit, and that clhep does
+        # not define cxxstd=23. Keeping the 23 conditional makes the propagation
+        # loop below emit `depends_on("clhep cxxstd=23")`, which fails to load
+        # ("invalid values for variant 'cxxstd' in package clhep: '23'"). The
+        # whole stack is pinned to cxxstd=20, so 23 is unused anyway.
     )
     variant(
         "cxxstd",
