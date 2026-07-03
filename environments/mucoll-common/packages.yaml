@@ -96,6 +96,43 @@ packages:
   py-numpy:
     require: '@:2.2 ^openblas'
 
+  # The pins below (py-sympy, eigen, py-fsspec, valgrind) exist for the SAME
+  # reason as the numpy cap above: under unify:when_possible the lean analysis
+  # root takes the newest version/variant of a shared package while the richer
+  # +sim root is capped (by acts, acorn's ML deps, geant4, ...), so the two
+  # roots cannot share a hash and the package -- plus everything above it -- is
+  # duplicated. py-torch depends on ALL of py-sympy, eigen, py-fsspec and
+  # valgrind, so each split forks the (expensive) py-torch/onnxruntime subtree.
+  # Forcing one shared config collapses it to a single build per package.
+
+  # sim caps sympy at 1.13.3 (via acorn -> py-torch-geometric / py-lightning);
+  # analysis is free to take 1.14.0. py-torch (@2.7:) and py-onnxruntime both
+  # accept 1.13.3, so pinning it unifies py-onnxruntime AND one py-torch edge.
+  py-sympy:
+    require: '@1.13.3'
+
+  # sim caps eigen at the 3.4 series (acts does not support eigen@5); analysis
+  # would otherwise take eigen@5.0.1. py-torch works with 3.4 (the sim root
+  # proves it), so pin the 3.4 series everywhere.
+  eigen:
+    require: '@3.4'
+
+  # sim pulls py-fsspec+http (acorn -> py-lightning / py-torch-geometric need
+  # remote-dataset support); analysis takes ~http. Force +http so both agree;
+  # this unifies py-uproot / py-awkward and another py-torch edge. The extra
+  # py-aiohttp dependency is cheap.
+  py-fsspec:
+    require: '+http'
+
+  # py-torch is built +valgrind, and valgrind is built +boost by default. boost
+  # legitimately has two configs (a rich +filesystem/+program_options/... build
+  # for the sim stack vs a lean build for analysis), which would otherwise be
+  # dragged into py-torch through valgrind. Dropping valgrind's boost dependency
+  # severs that amplifier so py-torch stays a single build; boost itself may
+  # still have two (cheap) configs, but nothing expensive rides on the split.
+  valgrind:
+    require: '~boost'
+
   # Pin py-torch to the latest series. py-torch@2.9.1 is available and every
   # root concretizes to it individually, but under `unify: when_possible` the
   # solver's whole-DAG version optimization settles the *shared* py-torch on
