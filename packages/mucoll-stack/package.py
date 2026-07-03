@@ -112,6 +112,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('muoncvxddigitiser')
         depends_on('mybibutils')
+        depends_on('acorn')
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')
@@ -126,14 +127,12 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('llvm', when='+llvm')
 
     with when('+ml'):
-        #depends_on("k4mltracking")
         # ML tools
         depends_on('onnx')
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
         depends_on("py-torch")
-        depends_on('acorn')
         depends_on('torch-scatter')
         depends_on('py-torch-scatter')
         depends_on('py-scikit-learn')
