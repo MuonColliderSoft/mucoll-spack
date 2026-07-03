@@ -1,7 +1,7 @@
 name: Build MuColl Stack and Publish Image
 description: |
   Publish the layered mucoll software stack docker images:
-  mucoll-analysis -> mucoll-sim -> mucoll-ml.
+  mucoll-analysis -> mucoll-sim.
   The +sim variant covers both reconstruction and simulation; there is no
   separate reco image.
   Each layer is built FROM the previous one (per architecture) so packages are
@@ -34,7 +34,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack~devtools+pytools+analysis~sim~ml
+      spec: mucoll-stack~devtools+pytools+ml~sim
 
   analysis-arm64:
     uses: ./.github/workflows/docker-build-push-template.yaml
@@ -45,7 +45,7 @@ jobs:
       registry: ghcr.io
       image-type: analysis
       dockerfile: Dockerfile.base
-      spec: mucoll-stack~devtools+pytools+analysis~sim~ml
+      spec: mucoll-stack~devtools+pytools+ml~sim
 
   # --------------------------------------------------------------------- sim --
   # Built FROM analysis; the +sim variant installs the reconstruction +
@@ -61,7 +61,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim~ml
+      spec: mucoll-stack~devtools+pytools+ml+sim
 
   sim-arm64:
     needs: analysis-arm64
@@ -74,34 +74,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim~ml
-
-  # ---------------------------------------------------------------------- ml --
-  ml-amd64:
-    needs: sim-amd64
-    uses: ./.github/workflows/docker-build-push-template.yaml
-    with:
-      os: ubuntu24
-      runner: ubuntu-latest
-      platform: amd64
-      registry: ghcr.io
-      image-type: ml
-      dockerfile: Dockerfile.layer
-      base-image: ${{ needs.sim-amd64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim+ml
-
-  ml-arm64:
-    needs: sim-arm64
-    uses: ./.github/workflows/docker-build-push-template.yaml
-    with:
-      os: ubuntu24
-      runner: ubuntu-24.04-arm
-      platform: arm64
-      registry: ghcr.io
-      image-type: ml
-      dockerfile: Dockerfile.layer
-      base-image: ${{ needs.sim-arm64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+analysis+sim+ml
+      spec: mucoll-stack~devtools+pytools+ml+sim
 
   # --------------------------------------------------------------- manifests --
   manifest-analysis:
@@ -123,16 +96,6 @@ jobs:
       image-type: sim
       amd64-image: ${{ needs.sim-amd64.outputs.image-uri }}
       arm64-image: ${{ needs.sim-arm64.outputs.image-uri }}
-
-  manifest-ml:
-    needs: [ml-amd64, ml-arm64]
-    uses: ./.github/workflows/manifest-template.yaml
-    with:
-      os: ubuntu24
-      registry: ghcr.io
-      image-type: ml
-      amd64-image: ${{ needs.ml-amd64.outputs.image-uri }}
-      arm64-image: ${{ needs.ml-arm64.outputs.image-uri }}
 
   # ------------------------------------------------------ physics validation --
   physics-validation:
