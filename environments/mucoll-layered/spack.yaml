@@ -11,7 +11,14 @@ spack:
         glu: [mesa]
 
   concretizer:
-    unify: true
+    # MUST be when_possible (not true). The two roots below are the *same*
+    # package (mucoll-stack) differing only in the `sim` variant (~sim vs +sim).
+    # unify:true permits exactly one configuration per package across the whole
+    # environment -- including the root -- so ~sim and +sim collide directly on
+    # the mucoll-stack node ("conflicting variant values '~sim' and '+sim'").
+    # when_possible lets the two root configurations coexist while still sharing
+    # every dependency the solver can prove identical.
+    unify: when_possible
     targets:
       host_compatible: true
 
@@ -21,9 +28,9 @@ spack:
   - ../mucoll-common/packages.yaml
 
   # Two nested root specs (analysis ⊂ sim) concretized together under
-  # unify:true so every shared dependency resolves to a single hash.
-  # Each layered image installs only its own root spec, reusing the parent
-  # layer's already-installed store.
+  # unify:when_possible so shared dependencies resolve to a single hash where
+  # the solver can prove them identical. Each layered image installs only its
+  # own root spec, reusing the parent layer's already-installed store.
   #
   # The variants are written out explicitly (incl. the negations) so each
   # abstract root is matched by exactly one `spack install <spec>` query in the
