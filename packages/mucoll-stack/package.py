@@ -44,7 +44,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     variant('llvm', default=False, description='Build with LLVM')
     variant('ml', default=False, description='Build with machine learning tools')
     variant('pytools', default=False, description='Build with python tools')
-    variant('analysis', default=False, description='Minimal build for analysis only')
     variant('sim', default=False, description='Build with reconstruction and simulation tools')
     variant('gen', default=False, description='Build with generators')
 
@@ -59,15 +58,16 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('ccache')
     depends_on('ninja')
 
-    with when('+analysis'):
-        depends_on('edm4hep')
-        depends_on('podio')
+    # Minimal build for analysis only
+    depends_on('edm4hep')
+    depends_on('podio')
 
     with when('+sim'):
         ############################### Key4hep ###############
         #######################################################
         depends_on('dd4hep')
         depends_on('delphes')
+        depends_on('hepmc3')
 
         depends_on('k4geo')
         depends_on('k4reco')
@@ -113,10 +113,10 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         depends_on('muoncvxddigitiser')
         depends_on('mybibutils')
+        depends_on('acorn')
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')
-        depends_on('hepmc3')
 
     ##################### developer tools #################
     #######################################################
@@ -127,14 +127,12 @@ class MucollStack(BundlePackage, Key4hepPackage):
     depends_on('llvm', when='+llvm')
 
     with when('+ml'):
-        #depends_on("k4mltracking")
         # ML tools
         depends_on('onnx')
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
         depends_on("py-torch")
-        depends_on('acorn')
         depends_on('torch-scatter')
         depends_on('py-torch-scatter')
         depends_on('py-scikit-learn')
