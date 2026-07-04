@@ -76,7 +76,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reconstruction
         # workflow loads at runtime (with EnableGeant4Geo=False).
         depends_on('k4simgeant4')
-        depends_on('k4marlinwrapper')
+        #depends_on('k4marlinwrapper')
 
         ############################### ILCSoft ###############
         #######################################################
