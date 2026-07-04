@@ -21,4 +21,4 @@ spack:
   - ../mucoll-common/packages.yaml
 
   specs:
-  - mucoll-stack+devtools+pytools+sim ^k4actstracking@calosurface-extrapolation
+  - mucoll-stack+devtools+pytools+sim+ml
