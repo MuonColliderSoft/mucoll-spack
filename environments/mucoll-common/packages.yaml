@@ -193,10 +193,5 @@ packages:
   pyatlasify:
     require: '@master'
 
-  lcio:
-    require: '@master'
-
-  muoncvxddigitiser:
-    require: '@0.2.2'
   lccontent:
     require: +monitoring
