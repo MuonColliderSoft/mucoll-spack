@@ -2,7 +2,7 @@
 #  Repository: ${IMAGE}/mucoll-${image-type}   (sim, ml)
 #  Tag:        ${VERSION}-${OS}
 #
-#  Thin layer built FROM a parent mucoll image (analysis -> sim -> ml). The
+#  Thin layer built FROM a parent mucoll image (analysis -> sim). The
 #  environment is already fully concretized in the base image, so this layer
 #  just installs its own root spec; dependencies provided by the parent layer
 #  are reused from the store and only the genuinely new packages are built

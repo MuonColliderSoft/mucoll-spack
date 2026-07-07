@@ -9,19 +9,15 @@ See [doc/ReleaseNotes.md](doc/ReleaseNotes.md) for the changelog of tagged relea
 After installing [Spack](https://github.com/key4hep/spack) and downloading the [key4hep-spack](https://github.com/key4hep/key4hep-spack) and [mucoll-spack](https://github.com/MuonColliderSoft/mucoll-spack) repositories, the whole software stack can be installed using the following commands:
 
 ```bash
-# Setup spack and install key4hep-externals
+# Setup spack
 spack repo add ./key4hep-spack
-spack env activate ./key4hep-spack/environments/key4hep-dev-external
-spack concretize --reuse
-spack install --only-concrete --no-add --fail-fast
-spack env deactivate
-
-# Now move on to mucoll
 spack repo add ./mucoll-spack
 spack env activate ./mucoll-spack/environments/mucoll-layered
 spack concretize --reuse
-# Install a single layer, e.g. the analysis subset (or +analysis+sim, +analysis+sim+ml)
-spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+analysis
+# Install a layer. The analysis layer (edm4hep/podio + ML + python tools) is the base:
+spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+ml
+# ...or add +sim for the full reconstruction + simulation stack on top:
+spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+ml+sim
 
 # Load the Muon Collider environment
 source $MUCOLL_STACK
@@ -139,11 +135,15 @@ spack env activate mucoll-layered
 
 ## Layered images
 
-The CI builds three images as a layered chain, each built on top of the previous one so packages
+The CI builds two images as a layered chain, each built on top of the previous one so packages
 are installed once and reused down the chain:
-- `${REPOSITORY}/mucoll-analysis-${OS}:${VERSION}`: minimal analysis stack (`mucoll-stack+devtools+pytools+analysis`).
-- `${REPOSITORY}/mucoll-sim-${OS}:${VERSION}`: built on `mucoll-analysis`, adds the simulation stack (`+sim`).
-- `${REPOSITORY}/mucoll-ml-${OS}:${VERSION}`: built on `mucoll-sim`, adds the machine-learning stack (`+ml`).
+- `${REPOSITORY}/mucoll-analysis-${OS}:${VERSION}`: the analysis stack, including the machine-learning
+  and python tools (`mucoll-stack~devtools+pytools+ml~sim`). This is the base layer.
+- `${REPOSITORY}/mucoll-sim-${OS}:${VERSION}`: built on `mucoll-analysis`, adds the reconstruction and
+  simulation stack (`+sim`).
+
+There is no separate `reco` or `ml` image: the `+sim` variant covers both reconstruction and
+simulation, and the machine-learning tools are now part of the base analysis layer.
 
 ## Physics validation
 
