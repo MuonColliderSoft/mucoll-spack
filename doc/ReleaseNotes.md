@@ -28,6 +28,14 @@ Work in progress on `main` on top of `v3.0`.
 - Updated `k4actstracking` version/branch selection.
 
 ### Removed
+- **Removed Marlin, ILCSoft, and LCIO from the stack.** Dropped the entire Marlin/ILCSoft
+  reconstruction chain (`marlin`, `marlinreco`, `marlintrk`, `marlinutil`, `marlindd4hep`,
+  `marlinfastjet`, `marlinkinfit*`, `pandorapfa`/`pandoraanalysis`, `gear`, `kaltest`/`ddkaltest`,
+  `kitrack*`, `clicperformance`, `fcalclusterer`, `generalbrokenlines`, `aidatt`, `raida`, `sio`,
+  `ced`/`cedviewer`, `garlic`, `lcfiplus`/`lcfivertex`, …) together with `k4marlinwrapper` and the
+  `lcio` pin from the stack's direct dependencies, along with the now-unused `muoncvxddigitiser` and
+  `mybibutils` recipes. Reconstruction is now driven entirely by the native key4hep/`k4reco` path
+  (`k4reco` can still optionally pull upstream `lcio` via its `+conformal_tracking` variant).
 - Dropped the local `k4geo` recipe in favour of the upstream Spack package.
 
 ---

@@ -35,21 +35,22 @@ source $MUCOLL_STACK
 ## Package versioning
 
 Preferred convention for version names in Spack is numbers separated by dots, without leading zeros, e.g. `1.2.13`.
-Conversion to tag names in `mucoll` packages is provided by `MCIlcsoftpackage` class defined in `packages/mucoll-stack/mucoll_utils.py`, e.g. for [`muoncvxddigitiser`](https://github.com/MuonColliderSoft/MuonCVXDDigitiser/tags) package version `0.2.2` corresponds to tag name `v00-02-02-MC`.
+
+Muon Collider forks of ILCSoft packages historically used dashed, zero-padded tags with an `-MC` suffix (e.g. version `0.2.2` maps to tag `v00-02-02-MC`); the conversion helper `MCIlcsoftpackage` in [`packages/mucoll-stack/mucoll_utils.py`](packages/mucoll-stack/mucoll_utils.py) performs this mapping. Since the Marlin/ILCSoft chain was dropped in the 3.x series (see the release notes), the stack no longer ships any package that relies on this convention — the remaining `mucoll` packages (e.g. [`k4reco`](https://github.com/MuonColliderSoft/k4Reco)) declare plain `version(...)` entries with explicit checksums.
 
 
 ## Adding new versions for individual packages
 
-After a new tag for the package is created, e.g. `v00-02-02-MC` in the `MuonCVXDDigitiser` repository, it can be added to this Spack repository in two steps:
+After a new tag for the package is created, e.g. `v00-02-00` in the `k4Reco` repository, it can be added to this Spack repository in two steps:
 
 1. Get the archive checksum for the new tag
 ```bash
-spack checksum muoncvxddigitiser 0.2.2
+spack checksum k4reco 0.2
 # Validates archive URL and returns the checksum
-    version('0.2.2', sha256='55f53534a1b0ab5fcd938ae4c5fa0ba38458cd7359d8c09ff896f5fa53676d01')
+    version('0.2', sha256='a5b02425b6970777f9f2982fd2907d38599c00996d24ff0be839a0e315509cd4')
 ```
 
-2. Add the returned version definition to the corresponding package file: [`packages/muoncvxddigitiser/package.py`](packages/muoncvxddigitiser/package.py)
+2. Add the returned version definition to the corresponding package file: [`packages/k4reco/package.py`](packages/k4reco/package.py)
 
 > NOTE: This repository only contains packages maintained by the Muon Collider collaboration.
 > If the version of interest is missing from Spack for some other package, the line with a new version definition should be added to the package file in the corresponding repository.  
@@ -79,20 +80,20 @@ It is possible to modify code of one or more packages using the [development wor
 
 > NOTE: This should primarily be used for simple code changes in a few packages that do not affect the overall build process and dependency tree of other packages in the release. For more global changes it's better to set up a new release.
 
-Assume that we want to make changes in the `LCIO` package, which many other packages depend on.
+Assume that we want to make changes in the `k4reco` package, which other parts of the reconstruction stack depend on.
 
-To leave the original release untouched it is preferable to create a new Spack environment, e.g. called `dev_lcio`, using the `.lock` file of the original environment as a starting point:
+To leave the original release untouched it is preferable to create a new Spack environment, e.g. called `dev_k4reco`, using the `.lock` file of the original environment as a starting point:
 
 ```bash
 # Create a new environment
-spack env create dev_lcio $SPACK_ENV/spack.lock
+spack env create dev_k4reco $SPACK_ENV/spack.lock
 
 # Activate the development environment
-spack env activate dev_lcio
+spack env activate dev_k4reco
 ```
 
 The general procedure to replace a package with a custom version is the following:
-1. put your new source code in a development folder of your choice, e.g. `/opt/dev/LCIO`;
+1. put your new source code in a development folder of your choice, e.g. `/opt/dev/k4Reco`;
 2. find the exact spec of this package in the release and mark it for development in the folder with the new source code;
 3. reconcretize the environment to replace the default version of the package with the development one;
 4. rebuild the modified package using `spack install <package>`;
@@ -102,22 +103,22 @@ You can repeat the last 2 steps each time you modify the source code again.
 
 ```bash
 # Create the development folder
-mkdir -p /opt/dev/LCIO
+mkdir -p /opt/dev/k4Reco
 
 # Download the original source code (and modify it)
-git clone https://github.com/MuonColliderSoft/LCIO.git --branch v02-19-01-MC
+git clone https://github.com/MuonColliderSoft/k4Reco.git --branch main
 
 # Find the exact spec of this package in the current release
-spack find lcio  # lcio@2.19.1
+spack find k4reco  # k4reco@main
 
 # Mark the package with this spec for development
-spack develop -p /opt/dev/LCIO lcio@2.19.1
+spack develop -p /opt/dev/k4Reco k4reco@main
 
 # Reconcretize the environment
 spack concretize -f --reuse
 
 # Build the modified package
-spack install lcio
+spack install k4reco
 
 # Build the rest of the release
 spack install
