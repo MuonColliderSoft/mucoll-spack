@@ -113,7 +113,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #######################################################
         #depends_on('muoncvxddigitiser')
         #depends_on('mybibutils')
-        depends_on('acorn')
+        #depends_on('acorn')
 
     with when('+gen'):
         depends_on('whizard +lcio +openloops')

@@ -182,7 +182,7 @@ packages:
   k4edm4hep2lcioconv:
     require: '@main'
   k4actstracking:
-    require: '@gnn+gnn'
+    require: '@main'
   k4simgeant4:
     require: '@main'
   # The latest release (00-07-06) fails to build against k4fwcore@main: it still
