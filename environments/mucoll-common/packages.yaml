@@ -65,6 +65,8 @@ packages:
   python:
     require: "@3.12: +optimizations"
 
+  madgraph5amc:
+    require: '@3.5.9:'
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
