@@ -14,20 +14,29 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 Work in progress on `main` on top of `v3.0`.
 
+### Added
+- **Event generators in the `sim` image.** New `+gen` variant pulling in `whizard +openloops`,
+  `madgraph5amc`, and `pythia8`. The published `sim` layer is now built as `+sim+gen` — both the
+  `mucoll-layered` environment and the CI (`amd64`/`arm64`) — so generators ship alongside
+  reconstruction and simulation in the same image.
+
 ### Changed
 - **Simplified the layered build from three images to two.** Collapsed the
   `analysis ⊂ sim ⊂ ml` chain into `analysis ⊂ sim`: the machine-learning tools (`+ml`) are now
   folded into the base analysis layer instead of shipping as a separate `mucoll-ml` image, and both
   the `analysis` and `sim` roots carry `+ml`. Removed the dedicated `+analysis` variant — the
-  edm4hep/podio analysis stack is now the always-installed base of every layer. Moved ACORN and
-  `hepmc3` into the `+sim` layer.
+  edm4hep/podio analysis stack is now the always-installed base of every layer. Moved `hepmc3`
+  into the `+sim` layer.
 - Pinned `numpy`/`eigen`/`sympy`/`py-fsspec` versions in `packages.yaml` so the `analysis` and
   `sim` roots stay shareable under `unify: when_possible` (e.g. capping `numpy` at the
-  numba-compatible ceiling pulled in via ACORN in the `+sim` layer). Disabled Geant4 examples to
-  trim the build.
-- Updated `k4actstracking` version/branch selection.
+  numba-compatible ceiling). Disabled Geant4 examples to trim the build.
+- Dropped `+lcio` from the Whizard spec (now `whizard +openloops`).
 
 ### Removed
+- **Dropped the GNN tracking path from the default build.** `k4actstracking` now tracks `@main`
+  instead of the `@gnn+gnn` branch, and the ACORN (GNN4ITk) dependency is disabled, so the standard
+  `+sim` build no longer pulls the PyTorch-Geometric-based GNN tracking pipeline. The `+ml` tools
+  (`py-torch`, `onnx`, `xgboost`, …) remain in the base analysis layer.
 - **Removed Marlin, ILCSoft, and LCIO from the stack.** Dropped the entire Marlin/ILCSoft
   reconstruction chain (`marlin`, `marlinreco`, `marlintrk`, `marlinutil`, `marlindd4hep`,
   `marlinfastjet`, `marlinkinfit*`, `pandorapfa`/`pandoraanalysis`, `gear`, `kaltest`/`ddkaltest`,

@@ -116,7 +116,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
         #depends_on('acorn')
 
     with when('+gen'):
-        depends_on('whizard +lcio +openloops')
+        depends_on('whizard +openloops')
+        depends_on('madgraph5amc')
+        depends_on('pythia8')
 
     ##################### developer tools #################
     #######################################################

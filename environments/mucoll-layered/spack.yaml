@@ -37,4 +37,4 @@ spack:
   # layered Dockerfiles (e.g. ~sim selects only analysis).
   specs:
   - mucoll-stack~devtools+pytools+ml~sim
-  - mucoll-stack~devtools+pytools+ml+sim
+  - mucoll-stack~devtools+pytools+ml+sim+gen

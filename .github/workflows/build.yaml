@@ -61,7 +61,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-amd64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+ml+sim
+      spec: mucoll-stack~devtools+pytools+ml+sim+gen
 
   sim-arm64:
     needs: analysis-arm64
@@ -74,7 +74,7 @@ jobs:
       image-type: sim
       dockerfile: Dockerfile.layer
       base-image: ${{ needs.analysis-arm64.outputs.image-uri }}
-      spec: mucoll-stack~devtools+pytools+ml+sim
+      spec: mucoll-stack~devtools+pytools+ml+sim+gen
 
   # --------------------------------------------------------------- manifests --
   manifest-analysis:
