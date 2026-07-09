@@ -162,7 +162,7 @@ packages:
     require: '@main'
 
   dd4hep:
-    require: '+edm4hep+lcio+xercesc+hepmc3'
+    require: '+edm4hep+xercesc+hepmc3'
   acts:
     require: '@main+dd4hep+json cxxstd=20'
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
@@ -179,8 +179,7 @@ packages:
     require: '@main'
   k4marlinwrapper:
     require: '@main'
-  k4edm4hep2lcioconv:
-    require: '@main'
+
   k4actstracking:
     require: '@main'
   k4simgeant4:
