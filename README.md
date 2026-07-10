@@ -16,8 +16,8 @@ spack env activate ./mucoll-spack/environments/mucoll-layered
 spack concretize --reuse
 # Install a layer. The analysis layer (edm4hep/podio + ML + python tools) is the base:
 spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+ml
-# ...or add +sim for the full reconstruction + simulation stack on top:
-spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+ml+sim
+# ...or add +sim+gen for the full reconstruction + simulation + generators stack on top:
+spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools+ml+sim+gen
 
 # Load the Muon Collider environment
 source $MUCOLL_STACK
@@ -140,11 +140,13 @@ The CI builds two images as a layered chain, each built on top of the previous o
 are installed once and reused down the chain:
 - `${REPOSITORY}/mucoll-analysis-${OS}:${VERSION}`: the analysis stack, including the machine-learning
   and python tools (`mucoll-stack~devtools+pytools+ml~sim`). This is the base layer.
-- `${REPOSITORY}/mucoll-sim-${OS}:${VERSION}`: built on `mucoll-analysis`, adds the reconstruction and
-  simulation stack (`+sim`).
+- `${REPOSITORY}/mucoll-sim-${OS}:${VERSION}`: built on `mucoll-analysis`, adds the reconstruction,
+  simulation, and generator stack (`+sim+gen`, the latter pulling in `whizard`, `madgraph5amc`, and
+  `pythia8`).
 
-There is no separate `reco` or `ml` image: the `+sim` variant covers both reconstruction and
-simulation, and the machine-learning tools are now part of the base analysis layer.
+There is no separate `reco`, `ml`, or `gen` image: the `+sim` variant covers both reconstruction and
+simulation, the generators ride along in the same layer via `+gen`, and the machine-learning tools
+are part of the base analysis layer.
 
 ## Physics validation
 

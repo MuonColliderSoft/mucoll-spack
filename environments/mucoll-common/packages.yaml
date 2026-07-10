@@ -65,6 +65,8 @@ packages:
   python:
     require: "@3.12: +optimizations"
 
+  madgraph5amc:
+    require: '@3.5.9:'
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
@@ -162,9 +164,9 @@ packages:
     require: '@main'
 
   dd4hep:
-    require: '+edm4hep+lcio+xercesc+hepmc3'
+    require: '+edm4hep+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json cxxstd=20'
+    require: '@main+dd4hep+json+edm4hep cxxstd=20'
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
   # which MuColl does not use (and which intermittently breaks the build). The
   # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
@@ -179,8 +181,7 @@ packages:
     require: '@main'
   k4marlinwrapper:
     require: '@main'
-  k4edm4hep2lcioconv:
-    require: '@main'
+
   k4actstracking:
     require: '@gnn+gnn'
   k4simgeant4:
