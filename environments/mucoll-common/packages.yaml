@@ -166,7 +166,7 @@ packages:
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json cxxstd=20'
+    require: '@main+dd4hep+json+edm4hep cxxstd=20'
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
   # which MuColl does not use (and which intermittently breaks the build). The
   # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
