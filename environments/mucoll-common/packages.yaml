@@ -183,7 +183,7 @@ packages:
     require: '@main'
 
   k4actstracking:
-    require: '@housekeeping'
+    require: '@gnn+gnn'
   k4simgeant4:
     require: '@main'
   # The latest release (00-07-06) fails to build against k4fwcore@main: it still
