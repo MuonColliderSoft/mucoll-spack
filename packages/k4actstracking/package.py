@@ -13,6 +13,7 @@ class K4actstracking(CMakePackage, Key4hepPackage):
     maintainers("vvolkl")
 
     version("main", branch="main")
+    version("housekeeping", branch="housekeeping")
     version("gnn", branch="gnn-tracking-pipeline")
 
     version(
