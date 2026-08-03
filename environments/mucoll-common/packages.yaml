@@ -166,7 +166,12 @@ packages:
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json+edm4hep+examples+geant4 cxxstd=20'
+    # +examples+python: the ACTS python bindings (acts.examples.*) are the entry
+    # point for the material mapping workflow; +hepmc3 is needed by
+    # acts.examples.hepmc3, which material_recording.py imports.
+    # The Examples/Scripts/Python helper scripts themselves are installed by the
+    # packages/acts overlay -- upstream never installs them.
+    require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20'
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
   # which MuColl does not use (and which intermittently breaks the build). The
   # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
