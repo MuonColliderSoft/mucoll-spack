@@ -167,10 +167,11 @@ packages:
     require: '+edm4hep+xercesc+hepmc3'
   acts:
     # +examples+python: the ACTS python bindings (acts.examples.*) are the entry
-    # point for the material mapping workflow; +hepmc3 is needed by
-    # acts.examples.hepmc3, which material_recording.py imports.
-    # The Examples/Scripts/Python helper scripts themselves are installed by the
-    # packages/acts overlay -- upstream never installs them.
+    # point for the material mapping workflow. +hepmc3 keeps hepmc3 explicitly in
+    # the DAG for acts.examples.hepmc3, which material_recording.py imports (the
+    # matching cmake option no longer exists upstream, so it is otherwise a no-op).
+    # The packages/acts overlay is what actually makes the bindings get built and
+    # installs the Examples/Scripts/Python helper scripts -- see the comment there.
     require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20'
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
   # which MuColl does not use (and which intermittently breaks the build). The
