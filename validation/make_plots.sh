@@ -131,8 +131,10 @@ mkdir -p "${RUN_DIR}" "${OUT}"
 RUN_DIR="$(resolve_dir "${RUN_DIR}")"
 OUT="$(resolve_dir "${OUT}")"
 
-# Provenance stamp drawn on every plot by the studies.
-LABEL="${PLOT_LABEL:-${GEOM}, ${PARTICLE}, ${NEV} events}"
+# Provenance stamp drawn on every plot by the studies. It marks the plot as
+# machine-produced; the geometry/particle/event count that produced it are
+# recorded in the settings tag of the output path.
+LABEL="${PLOT_LABEL:-Physics validation CI-generated result}"
 
 echo "=== plotting ${PARTICLE} ==="
 echo "    BM           : ${BM}"
