@@ -158,3 +158,9 @@ published `mucoll-sim` image and publishes the resulting performance plots to Gi
 
 The landing page links to one gallery per particle (muon, electron, pion, photon); each gallery is
 keyed by the analysis settings used to produce it.
+
+The plots themselves are produced by the RDataFrame studies that live in `mucoll-benchmarks`
+(`analysis/python/edm4hep/study_*.py`): `study_tracks.py`, `study_seeds.py` and `study_hits.py` for
+charged particles, `study_photons.py` for photons. Selection cuts, collection names and the set of
+studies to run are configured in `validation/plot_settings.sh`, and every setting there can be
+overridden from the environment.

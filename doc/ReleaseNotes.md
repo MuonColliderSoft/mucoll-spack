@@ -21,6 +21,12 @@ Work in progress on `main` on top of `v3.0`.
   reconstruction and simulation in the same image.
 
 ### Changed
+- **Physics-validation plotting moved to the `mucoll-benchmarks` python studies.** The plot step now
+  runs `analysis/python/edm4hep/study_{tracks,seeds,hits}.py` (and `study_photons.py` for photons)
+  instead of the retired `TrackingPlots` submodule (`RunAnalysis.C` -> `PlotAll.C`), which no longer
+  exists upstream. The studies fuse ntuple writing and plotting into a single RDataFrame event loop,
+  so there is no intermediate ntuple stage. `validation/RunAnalysis.conf` is replaced by
+  `validation/plot_settings.sh`, whose settings can all be overridden from the environment.
 - **Simplified the layered build from three images to two.** Collapsed the
   `analysis ⊂ sim ⊂ ml` chain into `analysis ⊂ sim`: the machine-learning tools (`+ml`) are now
   folded into the base analysis layer instead of shipping as a separate `mucoll-ml` image, and both
