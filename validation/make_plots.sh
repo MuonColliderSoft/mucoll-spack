@@ -1,32 +1,37 @@
 #!/bin/bash
 ###############################################################################
-# Produce the tracking plots for one particle from the reconstruction output.
+# Produce the performance plots for one particle from the reconstruction output.
 #
 # Usage: make_plots.sh <particle-label>
 #
 # Input : reco.edm4hep.root in the current directory.
-# Output: public/<particle>/ with the ROOT plot files, PNGs, and an index.html.
+# Output: public/<particle>/<settings-tag>/ with the PNGs and an index.html,
+#         plus the histogram ROOT files under plot_work/<particle>/<tag>/.
 #
 # This is the ONLY per-study step: the gen/sim/digi/reco chain (run_chain.sh) is
 # identical for every particle, and the analysis/plotting lives here.
 #
-# The analysis is dispatched by particle type:
-#   - photon             -> photon study only (neutral; no tracks):
-#                           mucoll-benchmarks/analysis/python/edm4hep/study_photons.py
-#                           (efficiency + energy-resolution plots)
-#   - muon/electron/pion -> tracking plots only: RunAnalysis.C -> PlotAll.C (below)
+# The analysis is dispatched by particle type; every study is a python script in
+# mucoll-benchmarks under analysis/python/edm4hep/:
+#   - photon             -> study_photons.py (neutral; no tracks):
+#                           efficiency + energy-resolution plots
+#   - muon/electron/pion -> the tracking studies listed in PLOT_STUDIES
+#                           (default: study_tracks.py, study_seeds.py,
+#                           study_hits.py)
 #
-# The tracking plotting implementation lives in mucoll-benchmarks:
-#   plotting/TrackingPlots/PlottingScripts/RunAnalysis.C
-#   plotting/TrackingPlots/PlottingScripts/PlotAll.C
+# These RDataFrame studies replace the legacy TrackingPlots submodule
+# (RunAnalysis.C -> PlotAll.C), which no longer exists in mucoll-benchmarks.
+# Each study fuses what used to be two steps -- ntuple writing and plotting --
+# into a single event loop, so there is no intermediate ntuple stage any more.
 #
-# Controls are read from validation/RunAnalysis.conf by default. The wrapper
-# writes a run-local config with io.inputFilePrefix and io.outputDir set for the
-# current reco artifact and settings-tagged work directory. Override with:
-#   PLOT_CONF=/path/to/RunAnalysis.conf
+# Controls are read from validation/plot_settings.sh by default; every setting
+# there can also be overridden from the environment. Additional overrides:
+#   PLOT_CONF=/path/to/plot_settings.sh
 #   PLOT_TAG=<settings-label>
-#   PLOT_RUN_DIR=/path/to/ntuple/work/dir
+#   PLOT_RUN_DIR=/path/to/histogram/output/dir
 #   PLOT_OUT_DIR=/path/to/public/plots/dir
+#   PLOT_SUFFIX=png|pdf|...
+#   PLOT_LABEL=<provenance label stamped on every plot>
 ###############################################################################
 set -euo pipefail
 
@@ -39,34 +44,12 @@ NEV="${NEV:-100}"
 PDG="${PDG:--13}"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-CONF="${PLOT_CONF:-${HERE}/RunAnalysis.conf}"
+CONF="${PLOT_CONF:-${HERE}/plot_settings.sh}"
 PLOT_SUFFIX="${PLOT_SUFFIX:-png}"
-PLOT_SCRIPTS="${BM}/plotting/TrackingPlots/PlottingScripts"
-PHOTON_SCRIPT="${BM}/analysis/python/edm4hep/study_photons.py"
-RECO_PREFIX="$(pwd)/reco.edm4hep"
+STUDY_DIR="${BM}/analysis/python/edm4hep"
 
 resolve_dir() {
   (cd "$1" && pwd)
-}
-
-conf_value() {
-  local key="$1"
-  local default="$2"
-  local value
-  value="$(awk -v key="${key}" '
-    BEGIN { FS = ":" }
-    $1 ~ "^[[:space:]]*" key "[[:space:]]*$" {
-      sub(/^[^:]*:/, "")
-      gsub(/^[[:space:]]+|[[:space:]]+$/, "")
-      print
-      found = 1
-      exit
-    }
-    END {
-      if (!found) exit 1
-    }
-  ' "${CONF}")" || value="${default}"
-  printf '%s' "${value:-${default}}"
 }
 
 sanitize_tag() {
@@ -74,40 +57,8 @@ sanitize_tag() {
 }
 
 settings_tag() {
-  local event_eta_min event_eta_max track_pt_min track_chi2_max track_hits_min
-  event_eta_min="$(conf_value event.absEtaMin 0.0)"
-  event_eta_max="$(conf_value event.absEtaMax max)"
-  track_pt_min="$(conf_value track.ptMin 0.0)"
-  track_chi2_max="$(conf_value track.chi2Max max)"
-  track_hits_min="$(conf_value track.nHitsMin 0)"
-
   sanitize_tag \
-    "geom-${GEOM}_nev-${NEV}_pdg-${PDG}_evtEta-${event_eta_min}-${event_eta_max}_trkPt-${track_pt_min}_chi2-${track_chi2_max}_hits-${track_hits_min}"
-}
-
-write_analysis_config() {
-  local template="$1"
-  local output="$2"
-  local input_prefix="$3"
-  local output_dir="$4"
-
-  awk -v input_prefix="${input_prefix}" -v output_dir="${output_dir}" '
-    /^[[:space:]]*io[.]inputFilePrefix[[:space:]]*:/ {
-      print "io.inputFilePrefix: " input_prefix
-      saw_input = 1
-      next
-    }
-    /^[[:space:]]*io[.]outputDir[[:space:]]*:/ {
-      print "io.outputDir: " output_dir
-      saw_output = 1
-      next
-    }
-    { print }
-    END {
-      if (!saw_input) print "io.inputFilePrefix: " input_prefix
-      if (!saw_output) print "io.outputDir: " output_dir
-    }
-  ' "${template}" > "${output}"
+    "geom-${GEOM}_nev-${NEV}_pdg-${PDG}_evtEta-${EVT_ABS_ETA_MIN}-${EVT_ABS_ETA_MAX}_trkPt-${TRK_PT_MIN}_chi2-${TRK_CHI2_MAX}_hits-${TRK_N_HITS_MIN}"
 }
 
 write_index() {
@@ -121,7 +72,7 @@ write_index() {
   shopt -u nullglob
 
   if [ "${#plots[@]}" -eq 0 ]; then
-    echo "ERROR: PlotAll.C did not write any .${suffix} files to ${out}" >&2
+    echo "ERROR: the studies did not write any .${suffix} files to ${out}" >&2
     exit 1
   fi
 
@@ -161,42 +112,15 @@ if [ ! -f reco.edm4hep.root ]; then
   exit 1
 fi
 
-# -------------------------------------------------------------------------
-# Photons are neutral: produce only the photon performance study.
-# -------------------------------------------------------------------------
-if [ "${PARTICLE}" = "photon" ]; then
-  if [ ! -f "${PHOTON_SCRIPT}" ]; then
-    echo "ERROR: photon study not found: ${PHOTON_SCRIPT}" >&2
-    exit 1
-  fi
-  OUT="${PLOT_OUT_DIR:-public/${PARTICLE}}"
-  mkdir -p "${OUT}"
-  OUT="$(resolve_dir "${OUT}")"
-  echo "=== plotting ${PARTICLE} (study_photons.py) ==="
-  echo "    BM        : ${BM}"
-  echo "    output dir: ${OUT}"
-  python "${PHOTON_SCRIPT}" -i reco.edm4hep.root -o "${OUT}/histos_photon.root" -d "${OUT}"
-  write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
-  echo "=== plotting ${PARTICLE} done ==="
-  ls -lh "${OUT}" || true
-  exit 0
-fi
-
-# -------------------------------------------------------------------------
-# Charged particles (muon, electron, pion, ...): produce only tracking plots.
-# -------------------------------------------------------------------------
 if [ ! -f "${CONF}" ]; then
-  echo "ERROR: RunAnalysis config not found: ${CONF}" >&2
+  echo "ERROR: plot settings not found: ${CONF}" >&2
   exit 1
 fi
+# shellcheck disable=SC1090
+source "${CONF}"
 
-if [ ! -f "${PLOT_SCRIPTS}/RunAnalysis.C" ] || [ ! -f "${PLOT_SCRIPTS}/PlotAll.C" ]; then
-  echo "ERROR: plotting scripts not found under ${PLOT_SCRIPTS}" >&2
-  exit 1
-fi
-
-if ! command -v root >/dev/null 2>&1; then
-  echo "ERROR: root command not found after sourcing /opt/setup_mucoll.sh" >&2
+if [ ! -d "${STUDY_DIR}" ]; then
+  echo "ERROR: study scripts not found under ${STUDY_DIR}" >&2
   exit 1
 fi
 
@@ -206,29 +130,122 @@ OUT="${PLOT_OUT_DIR:-public/${PARTICLE}/${RUN_TAG}}"
 mkdir -p "${RUN_DIR}" "${OUT}"
 RUN_DIR="$(resolve_dir "${RUN_DIR}")"
 OUT="$(resolve_dir "${OUT}")"
-RUN_CONF="${RUN_DIR}/RunAnalysis.conf"
 
-write_analysis_config "${CONF}" "${RUN_CONF}" "${RECO_PREFIX}" "${RUN_DIR}/"
+# Provenance stamp drawn on every plot by the studies. It marks the plot as
+# machine-produced; the geometry/particle/event count that produced it are
+# recorded in the settings tag of the output path.
+LABEL="${PLOT_LABEL:-Physics validation CI-generated result}"
 
-echo "=== plotting ${PARTICLE} (tracking) ==="
+echo "=== plotting ${PARTICLE} ==="
 echo "    BM           : ${BM}"
-echo "    source config: ${CONF}"
-echo "    run config   : ${RUN_CONF}"
-echo "    plot scripts : ${PLOT_SCRIPTS}"
+echo "    settings     : ${CONF}"
+echo "    studies dir  : ${STUDY_DIR}"
 echo "    settings tag : ${RUN_TAG}"
-echo "    ntuple dir   : ${RUN_DIR}"
+echo "    histogram dir: ${RUN_DIR}"
 echo "    output dir   : ${OUT}"
+echo "    label        : ${LABEL}"
 
-root -l -q "${PLOT_SCRIPTS}/RunAnalysis.C(\"${RUN_CONF}\")"
+run_study() {
+  local name="$1"
+  shift
+  local script="${STUDY_DIR}/study_${name}.py"
 
-for ntuple in tracks_ntuple.root seeds_ntuple.root hits_ntuple.root; do
-  if [ ! -f "${RUN_DIR}/${ntuple}" ]; then
-    echo "ERROR: RunAnalysis.C did not write ${RUN_DIR}/${ntuple}" >&2
+  if [ ! -f "${script}" ]; then
+    echo "ERROR: study script not found: ${script}" >&2
     exit 1
   fi
-done
 
-root -l -q "${PLOT_SCRIPTS}/PlotAll.C(\"${RUN_DIR}/\", \"${OUT}/\", \"${PLOT_SUFFIX}\")"
+  echo "--- study_${name}.py ---"
+  python "${script}" \
+    -i reco.edm4hep.root \
+    -o "${RUN_DIR}/histos_${name}.root" \
+    -d "${OUT}" \
+    --label "${LABEL}" \
+    --suffix "${PLOT_SUFFIX}" \
+    "$@"
+
+  if [ ! -f "${RUN_DIR}/histos_${name}.root" ]; then
+    echo "ERROR: study_${name}.py did not write ${RUN_DIR}/histos_${name}.root" >&2
+    exit 1
+  fi
+}
+
+# Event-level selection, shared by the studies that support it.
+evt_sel_opts=(
+  --evtPtMin "${EVT_PT_MIN}" --evtPtMax "${EVT_PT_MAX}"
+  --evtThetaMin "${EVT_THETA_MIN}" --evtThetaMax "${EVT_THETA_MAX}"
+  --evtAbsEtaMin "${EVT_ABS_ETA_MIN}" --evtAbsEtaMax "${EVT_ABS_ETA_MAX}"
+)
+
+# Track-level selection (study_tracks.py only).
+trk_sel_opts=(
+  --trkPtMin "${TRK_PT_MIN}" --trkPtMax "${TRK_PT_MAX}"
+  --trkThetaMin "${TRK_THETA_MIN}" --trkThetaMax "${TRK_THETA_MAX}"
+  --trkAbsEtaMin "${TRK_ABS_ETA_MIN}" --trkAbsEtaMax "${TRK_ABS_ETA_MAX}"
+  --trkPhiMin "${TRK_PHI_MIN}" --trkPhiMax "${TRK_PHI_MAX}"
+  --trkD0Min "${TRK_D0_MIN}" --trkD0Max "${TRK_D0_MAX}"
+  --trkZ0Min "${TRK_Z0_MIN}" --trkZ0Max "${TRK_Z0_MAX}"
+  --trkChi2Min "${TRK_CHI2_MIN}" --trkChi2Max "${TRK_CHI2_MAX}"
+  --trkNHitsMin "${TRK_N_HITS_MIN}" --trkNHolesMax "${TRK_N_HOLES_MAX}"
+)
+
+# -------------------------------------------------------------------------
+# Photons are neutral: produce only the photon performance study.
+# study_photons.py takes neither the selection options nor --label/--suffix.
+# -------------------------------------------------------------------------
+if [ "${PARTICLE}" = "photon" ]; then
+  PHOTON_SCRIPT="${STUDY_DIR}/study_photons.py"
+  if [ ! -f "${PHOTON_SCRIPT}" ]; then
+    echo "ERROR: photon study not found: ${PHOTON_SCRIPT}" >&2
+    exit 1
+  fi
+  echo "--- study_photons.py ---"
+  python "${PHOTON_SCRIPT}" -i reco.edm4hep.root -o "${RUN_DIR}/histos_photons.root" -d "${OUT}"
+  write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
+  echo "=== plotting ${PARTICLE} done ==="
+  ls -lh "${OUT}" || true
+  exit 0
+fi
+
+# -------------------------------------------------------------------------
+# Charged particles (muon, electron, pion, ...): the tracking studies.
+# Each study takes the subset of the controls it understands.
+# -------------------------------------------------------------------------
+# shellcheck disable=SC2086  # PLOT_STUDIES is a space-separated list
+for study in ${PLOT_STUDIES}; do
+  case "${study}" in
+    tracks)
+      run_study tracks \
+        --trackColl "${TRACK_COLL}" --trackStore "${TRACK_STORE}" \
+        --relColl "${REL_COLL}" --mcColl "${MC_COLL}" \
+        --Bfield "${BFIELD}" \
+        --ptMin "${PLOT_PT_MIN}" --ptMax "${PLOT_PT_MAX}" \
+        --nPtBins "${PLOT_N_PT_BINS}" \
+        "${evt_sel_opts[@]}" "${trk_sel_opts[@]}"
+      ;;
+    seeds)
+      run_study seeds \
+        --seedColl "${SEED_COLL}" --mcColl "${MC_COLL}" \
+        --Bfield "${BFIELD}" \
+        "${evt_sel_opts[@]}"
+      ;;
+    hits)
+      run_study hits \
+        --mcColl "${MC_COLL}" \
+        "${evt_sel_opts[@]}"
+      ;;
+    notracks)
+      # Standalone diagnostic: no event or track selection options.
+      run_study notracks \
+        --trackColl "${TRACK_COLL}" --trackStore "${TRACK_STORE}" \
+        --seedColl "${SEED_COLL}" --mcColl "${MC_COLL}"
+      ;;
+    *)
+      echo "ERROR: unknown study '${study}' in PLOT_STUDIES" >&2
+      exit 2
+      ;;
+  esac
+done
 
 write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
 

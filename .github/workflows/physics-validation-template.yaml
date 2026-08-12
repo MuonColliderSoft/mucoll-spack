@@ -36,9 +36,10 @@ on:
 permissions:
   contents: read
 
-# mucoll-benchmarks: track the head of main. The repo carries its digi/reco
-# configs and the tracking-plots scripts as submodules, so each checkout must
-# pull them recursively.
+# mucoll-benchmarks: track the head of main. The repo carries its geometry
+# digi/reco configs as submodules, so each checkout must pull them recursively.
+# The plotting studies (analysis/python/edm4hep/study_*.py) live in the repo
+# itself, so they need no submodule.
 env:
   BENCHMARKS_REPO: https://github.com/MuonColliderSoft/mucoll-benchmarks.git
   BENCHMARKS_REF: main
@@ -240,7 +241,7 @@ jobs:
         run: |
           docker run -d --name ci --privileged --entrypoint tail \
             -v "${GITHUB_WORKSPACE}:/work" -w /work "${{ inputs.image }}" -f /dev/null
-      - name: Make tracking plots
+      - name: Make performance plots
         run: |
           docker exec -w /work \
             -e BM=/work/benchmarks \
