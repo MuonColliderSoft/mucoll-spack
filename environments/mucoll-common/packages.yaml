@@ -178,15 +178,13 @@ packages:
   # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
   # upstream key4hep/k4geo@main.
   k4geo:
-    require: '@main ~beampipe_stl'
+    require: '@main~beampipe_stl'
   k4gen:
     require: '@main'
   k4gaudipandora:
-    require: '@main'
+    require: '@main~ddkaltest'
   k4reco:
-    require: '@main'
-  k4marlinwrapper:
-    require: '@main'
+    require: '@0.3~conformal_tracking'
 
   k4actstracking:
     require: '@main+gnn'
