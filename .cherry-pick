@@ -7,3 +7,6 @@ git fetch --depth 50 upstream ce14512cd8b82e4e4f45367916d37f59dba08606
 git checkout ce14512cd8b82e4e4f45367916d37f59dba08606 -- \
   repos/spack_repo/builtin/packages/py_numba/package.py \
   repos/spack_repo/builtin/packages/py_llvmlite/package.py
+
+# geant4 examples
+git cherry-pick 334aeef7ffd810fe7c15c9ba9b6c3033ba4bf899 -X theirs --no-commit
