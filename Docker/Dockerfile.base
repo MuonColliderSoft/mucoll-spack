@@ -14,7 +14,10 @@
 ###############################################################################
 
 ARG OS=ubuntu24
-FROM ubuntu:24.04
+# Everything up to (and including) `spack concretize` lives in this stage, so
+# the CI concretization check (.github/workflows/concretize-template.yaml) can
+# build `--target concretize` and exercise exactly this bootstrap.
+FROM ubuntu:24.04 AS concretize
 
 # --------------------------------------------------------------------------- #
 #  System packages 
@@ -145,6 +148,13 @@ RUN --mount=type=secret,id=ocipass \
     spack compiler find /usr/lib/llvm-20/bin && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack concretize --reuse
+
+# --------------------------------------------------------------------------- #
+#  End of the `concretize` stage. The CI check stops here; everything below is
+#  only built for the real image. Keep the split at this exact point so the
+#  check mirrors the image bootstrap one-to-one.
+# --------------------------------------------------------------------------- #
+FROM concretize AS install
 
 # Install fragments of the dependency tree in separate layers for cached debugging
 ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"

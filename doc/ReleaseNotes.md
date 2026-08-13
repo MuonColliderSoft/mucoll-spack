@@ -10,39 +10,76 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [Unreleased] — 3.x series
+## [Unreleased]
 
-Work in progress on `main` on top of `v3.0`.
+No changes yet on `main` on top of `v3.1`.
+
+---
+
+## [v3.1] — 2026-08-13
+
+Second release of the **3.x series** (`mucoll-stack@3.1`). It consolidates the layered build to two
+images, removes the Marlin/ILCSoft/LCIO reconstruction chain in favour of the native key4hep path,
+brings back the GNN tracking pipeline, and pins the stack to tagged key4hep/MuColl releases instead
+of tracking `main`.
 
 ### Added
 - **Event generators in the `sim` image.** New `+gen` variant pulling in `whizard +openloops`,
   `madgraph5amc`, and `pythia8`. The published `sim` layer is now built as `+sim+gen` — both the
-  `mucoll-layered` environment and the CI (`amd64`/`arm64`) — so generators ship alongside
-  reconstruction and simulation in the same image.
+  `mucoll-layered` environment and the CI (`amd64`/`arm64`).
+- **`k4gaudipandora` in the `+sim` layer**, providing the Gaudi ↔ PandoraPFA interface that replaces
+  the dropped `pandorapfa`/`marlin` path. It is required as `@0.3.0 ~ddkaltest`: `~ddkaltest` takes
+  the track states already present on the input tracks instead of recomputing them at the
+  calorimeter, which avoids the `k4reco +conformal_tracking` dependency (and with it LCIO).
+- **ACTS overlay recipe** (`packages/acts`) so the material-mapping workflow of
+  `k4ActsTracking/doc/material_mapping.md` actually works against `acts@main`: it passes the renamed
+  `ACTS_BUILD_PYTHON_BINDINGS` / `ACTS_BUILD_EXAMPLES_ROOT` cmake options (the builtin package's
+  names are silent no-ops on `main`), installs the `Examples/Scripts/Python` helper scripts, and
+  exports `PYTHONPATH` / `ACTS_EXAMPLES_SCRIPTS`. ACTS is now required as
+  `+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20`.
+- **GNN tracking pipeline back in the default build.** The stack requires
+  `k4actstracking@00-05 +gnn`, which pulls `acts +gnn+onnx+torch` together with `py-torch` and
+  `py-onnxruntime`. The pipeline is now selected by a variant on a tagged release rather than by
+  a branch pin, and needs no ACORN (GNN4ITk) dependency.
+- **Concretization CI now exercises the real image bootstrap.** `concretize-template.yaml` builds
+  `Docker/Dockerfile.base --target concretize` instead of running inside the key4hep externals
+  image, so it uses exactly the same pinned spack / spack-packages commits, key4hep-spack and local
+  `.cherry-pick`, LLVM-20/rust externals and buildcache mirror that the published images use.
+  Nothing is installed, so the check stays cheap while failing on exactly the concretization
+  problems a real build would hit; the concretized spec is uploaded as `spec-<target>.log`.
+- **Geant4 `examples` variant via cherry-pick.** `.cherry-pick` now cherry-picks the key4hep-spack
+  commit that adds the `examples` variant to `geant4`, so the build can turn the examples off
+  without vendoring a full local `geant4` recipe.
 
 ### Changed
+- **Simplified the layered build from three images to two.** Collapsed the
+  `analysis ⊂ sim ⊂ ml` chain into `analysis ⊂ sim`: the machine-learning tools (`+ml`) are now
+  folded into the base analysis layer instead of shipping as a separate `mucoll-ml` image, and both
+  the `analysis` and `sim` roots carry `+ml`. Removed the dedicated `+analysis` variant — the
+  edm4hep/podio analysis stack is now the always-installed base of every layer. Moved `hepmc3`
+  into the `+sim` layer. The roots are now `mucoll-stack~devtools+pytools+ml~sim` and
+  `mucoll-stack~devtools+pytools+ml+sim+gen`.
+- **Pinned the stack to tagged releases** rather than tracking upstream `main`: `edm4hep@1.1`,
+  `k4fwcore@1.7`, `k4geo@0.26`, `k4gen@0.1pre16`, `k4gaudipandora@0.3.0`, `k4actstracking@00-05`,
+  `k4reco@0.3` (new version added to the recipe and made preferred). `k4simgeant4` still tracks
+  `@main`.
 - **Physics-validation plotting moved to the `mucoll-benchmarks` python studies.** The plot step now
   runs `analysis/python/edm4hep/study_{tracks,seeds,hits}.py` (and `study_photons.py` for photons)
   instead of the retired `TrackingPlots` submodule (`RunAnalysis.C` -> `PlotAll.C`), which no longer
   exists upstream. The studies fuse ntuple writing and plotting into a single RDataFrame event loop,
   so there is no intermediate ntuple stage. `validation/RunAnalysis.conf` is replaced by
   `validation/plot_settings.sh`, whose settings can all be overridden from the environment.
-- **Simplified the layered build from three images to two.** Collapsed the
-  `analysis ⊂ sim ⊂ ml` chain into `analysis ⊂ sim`: the machine-learning tools (`+ml`) are now
-  folded into the base analysis layer instead of shipping as a separate `mucoll-ml` image, and both
-  the `analysis` and `sim` roots carry `+ml`. Removed the dedicated `+analysis` variant — the
-  edm4hep/podio analysis stack is now the always-installed base of every layer. Moved `hepmc3`
-  into the `+sim` layer.
-- Pinned `numpy`/`eigen`/`sympy`/`py-fsspec` versions in `packages.yaml` so the `analysis` and
-  `sim` roots stay shareable under `unify: when_possible` (e.g. capping `numpy` at the
-  numba-compatible ceiling). Disabled Geant4 examples to trim the build.
-- Dropped `+lcio` from the Whizard spec (now `whizard +openloops`).
+- Pinned `numpy` (`@:2.2`, the numba-compatible ceiling), `py-sympy@1.13.3`, `eigen@3.4`,
+  `py-fsspec +http` and `valgrind ~boost` in `packages.yaml` so the `analysis` and `sim` roots stay
+  shareable under `unify: when_possible` — each of these otherwise forks the expensive
+  `py-torch`/`onnxruntime` subtree across the two roots.
+- Disabled Geant4 examples (`geant4 ~examples`) to trim the build, and dropped `+lcio` from the
+  `dd4hep` and Whizard specs (now `whizard +openloops`).
+- `k4geo` is still required as `~beampipe_stl` — it skips the network download of the FCC-ee MDI
+  beampipe CAD, which MuColl does not use and which intermittently breaks the build. The variant
+  itself now comes from upstream, so it no longer needs a local overlay to exist.
 
 ### Removed
-- **Dropped the GNN tracking path from the default build.** `k4actstracking` now tracks `@main`
-  instead of the `@gnn+gnn` branch, and the ACORN (GNN4ITk) dependency is disabled, so the standard
-  `+sim` build no longer pulls the PyTorch-Geometric-based GNN tracking pipeline. The `+ml` tools
-  (`py-torch`, `onnx`, `xgboost`, …) remain in the base analysis layer.
 - **Removed Marlin, ILCSoft, and LCIO from the stack.** Dropped the entire Marlin/ILCSoft
   reconstruction chain (`marlin`, `marlinreco`, `marlintrk`, `marlinutil`, `marlindd4hep`,
   `marlinfastjet`, `marlinkinfit*`, `pandorapfa`/`pandoraanalysis`, `gear`, `kaltest`/`ddkaltest`,
@@ -50,8 +87,13 @@ Work in progress on `main` on top of `v3.0`.
   `ced`/`cedviewer`, `garlic`, `lcfiplus`/`lcfivertex`, …) together with `k4marlinwrapper` and the
   `lcio` pin from the stack's direct dependencies, along with the now-unused `muoncvxddigitiser` and
   `mybibutils` recipes. Reconstruction is now driven entirely by the native key4hep/`k4reco` path
-  (`k4reco` can still optionally pull upstream `lcio` via its `+conformal_tracking` variant).
-- Dropped the local `k4geo` recipe in favour of the upstream Spack package.
+  (`k4geo` still pulls upstream `lcio`. The changes needed to avoid this will land later).
+- Dropped the version requirements on `k4simdelphes` and `k4edm4hep2lcioconv`.
+- **Dropped the local `k4geo`, `k4actstracking` and `k4gaudipandora` recipes** in favour of the
+  upstream Spack packages, which now carry everything the overlays were adding (the `beampipe_stl`,
+  `gnn` and `ddkaltest` variants). `packages/` is down to `acorn`, `acts`, `k4reco`, `mucoll-stack`,
+  `pelican` and the python/ML helpers.
+- Removed the `mucoll-release-debug` environment (and its entry from the concretization matrix).
 
 ---
 
@@ -200,7 +242,8 @@ First tagged release of the 2.x series — Spack recipes for the Muon Collider s
 
 ---
 
-[Unreleased]: https://github.com/MuonColliderSoft/mucoll-spack/compare/v3.0...main
+[Unreleased]: https://github.com/MuonColliderSoft/mucoll-spack/compare/v3.1...main
+[v3.1]: https://github.com/MuonColliderSoft/mucoll-spack/releases/tag/v3.1
 [v3.0]: https://github.com/MuonColliderSoft/mucoll-spack/releases/tag/v3.0
 [v2.11]: https://github.com/MuonColliderSoft/mucoll-spack/releases/tag/v2.11
 [v2.10.1]: https://github.com/MuonColliderSoft/mucoll-spack/releases/tag/v2.10.1

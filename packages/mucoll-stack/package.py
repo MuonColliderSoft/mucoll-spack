@@ -29,7 +29,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
     ### stable build
     # to install exact specified version for every dependecy
     # should use `environments/mucoll-release/packages.yaml`
-    version('3.0')
+    version('3.1')
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase

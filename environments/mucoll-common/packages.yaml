@@ -30,7 +30,7 @@ packages:
     externals:
     - spec: mesa-glu@99
       prefix: /usr
- # Use the system kerberos, otherwise the tickets obtained at login with the
+  # Use the system kerberos, otherwise the tickets obtained at login with the
   # system version don't appear for the spack kerberos (happening on lxplus at least)
   krb5:
     buildable: False
@@ -153,15 +153,18 @@ packages:
     require: '@1.16:'
   py-onnxruntime:
     require: '@1.18:'
+
+  pyatlasify:
+    require: '@master'
     
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
 
   edm4hep:
-    require: '@main'
+    require: '@1.1'
 
   k4fwcore:
-    require: '@main'
+    require: '@1.7'
 
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
@@ -175,30 +178,21 @@ packages:
     require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20'
   # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
   # which MuColl does not use (and which intermittently breaks the build). The
-  # beampipe_stl variant is added by the packages/k4geo overlay; the rest mirrors
-  # upstream key4hep/k4geo@main.
+  # variant used to be carried by a local packages/k4geo overlay; it has since
+  # landed upstream, so the plain upstream recipe is enough.
   k4geo:
-    require: '@main ~beampipe_stl'
+    require: '@0.26~beampipe_stl'
   k4gen:
-    require: '@main'
+    require: '@0.1pre16'
   k4gaudipandora:
-    require: '@main'
+    require: '@0.3.0~ddkaltest'
   k4reco:
-    require: '@main'
-  k4marlinwrapper:
-    require: '@main'
+    require: '@0.3~conformal_tracking'
 
   k4actstracking:
-    require: '@main+gnn'
+    require: '@00-05+gnn'
   k4simgeant4:
     require: '@main'
-  # The latest release (00-07-06) fails to build against k4fwcore@main: it still
-  # includes k4FWCore/PodioDataSvc.h, which has been removed upstream. main tracks
-  # the current k4fwcore API and compiles cleanly, so pin it until a release catches up.
-  k4simdelphes:
-    require: '@main'
-  pyatlasify:
-    require: '@master'
 
   lccontent:
     require: +monitoring

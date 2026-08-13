@@ -1,3 +1,10 @@
+# Concretization-only check. It builds Docker/Dockerfile.base up to (and only
+# up to) its `concretize` stage, i.e. the very same bootstrap the published
+# images use -- pinned spack + spack-packages, key4hep-spack and its
+# .cherry-pick, our .cherry-pick, the LLVM-20/rust externals and the buildcache
+# mirror -- and then concretizes the requested environment. Nothing is
+# installed, so the job stays cheap while still failing on exactly the
+# concretization problems a real build would hit.
 name: concretize-template
 
 on:
@@ -9,6 +16,10 @@ on:
       os:
         required: true
         type: string
+
+permissions:
+  contents: read
+  packages: read
 
 jobs:
   concretize:
@@ -29,35 +40,69 @@ jobs:
           remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle"
           rm_cmd: "rmz"  # Use 'rmz' for faster deletion (default: 'rm')
           rmz_version: "3.1.1"  # Required when rm_cmd is 'rmz'
-          testing: false   
-      - name: Checkout Mucoll Spack
+          testing: false
+      # Only the Dockerfile is needed from the checkout: the build itself clones
+      # mucoll-spack at MUCOLL_SHA, exactly like the image build does.
+      - name: Checkout mucoll-spack
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          path: mucoll-spack
-          ref:  ${{ github.sha }}
-      - name: Launch Container
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Login to Docker Registry
+        # Needed so the buildcache mirror can be read while concretizing with
+        # --reuse (the concretizer's reuse candidates include the buildcache).
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Resolve spack pins from key4hep-spack
+        # Same resolution as docker-build-push-template.yaml: one key4hep-spack
+        # main SHA, both pin files read *at that SHA*, so the spack commit, the
+        # spack-packages commit and the key4hep-spack checkout (whose
+        # .cherry-pick targets that spack-packages commit) stay consistent.
+        id: pins
         run: |
-          docker run -it --name ci_container --privileged -v ${GITHUB_WORKSPACE}:/packages -d ghcr.io/key4hep/key4hep-externals-${{inputs.os}}:latest
-      - name: Load env and concretize
+          k4sha=$(git ls-remote https://github.com/key4hep/key4hep-spack.git main | cut -f1)
+          echo "k4sha=$k4sha" >> "$GITHUB_OUTPUT"
+          base="https://raw.githubusercontent.com/key4hep/key4hep-spack/$k4sha"
+          echo "spack=$(curl -fsSL "$base/.latest-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+          echo "packages=$(curl -fsSL "$base/.latest-packages-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+      - name: Concretize (Dockerfile.base, --target concretize)
+        env:
+          # Passed as a build secret under the id Dockerfile.base expects; the
+          # mirror is registered read-only here (nothing is installed/pushed).
+          OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        # On pull_request, github.sha is the ephemeral merge commit (absent from
+        # the plain clone the Dockerfile does), so use the PR head repo+SHA;
+        # fall back to the push context.
         run: |
-          echo '#Test env concretisation' > ${GITHUB_WORKSPACE}/concretize.sh
-          cat << 'EOF' >> ${GITHUB_WORKSPACE}/concretize.sh
-          cd /opt/spack-packages
-          . /packages/mucoll-spack/.cherry-pick
-          cd -
-          . /opt/setup_spack.sh
-          spack --version
-          spack repo add /packages/mucoll-spack
-          spack env activate /packages/mucoll-spack/environments/mucoll-${{ inputs.target }}
-          spack concretize --reuse
-          spack spec -Nt > /packages/spec-${{ inputs.target }}.log
-          EOF
-
-          chmod +x ${GITHUB_WORKSPACE}/concretize.sh
-          docker exec ci_container /bin/bash -c "/packages/concretize.sh"
+          docker buildx build \
+            --target concretize \
+            --load \
+            --tag mucoll-concretize:${{ inputs.target }} \
+            --file ./Docker/Dockerfile.base \
+            --build-arg OS=${{ inputs.os }} \
+            --build-arg ENVIRONMENT=mucoll-${{ inputs.target }} \
+            --build-arg GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name || github.repository }} \
+            --build-arg MUCOLL_SHA=${{ github.event.pull_request.head.sha || github.sha }} \
+            --build-arg SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache \
+            --build-arg OCI_USERNAME=${{ github.actor }} \
+            --build-arg SPACK_COMMIT=${{ steps.pins.outputs.spack }} \
+            --build-arg SPACK_PACKAGES_COMMIT=${{ steps.pins.outputs.packages }} \
+            --build-arg KEY4HEP_SPACK_SHA=${{ steps.pins.outputs.k4sha }} \
+            --secret id=ocipass,env=OCI_PASSWORD \
+            ./Docker
+      - name: Dump concretized spec
+        # setup_env.sh is chatty (env activate / status), so keep its output off
+        # the log file; a failure there still propagates through the && chain.
+        run: |
+          docker run --rm -e SPACK_COLOR=never mucoll-concretize:${{ inputs.target }} \
+            /bin/bash -c '. ${HOME}/setup_env.sh > /dev/null 2>&1 && spack spec -Nt' \
+            > spec-${{ inputs.target }}.log
       - name: Store artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: spec-list
-          path: ${GITHUB_WORKSPACE}/spec-${{ inputs.target }}.log
+          name: spec-${{ inputs.target }}
+          path: spec-${{ inputs.target }}.log
