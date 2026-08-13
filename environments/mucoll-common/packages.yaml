@@ -30,7 +30,7 @@ packages:
     externals:
     - spec: mesa-glu@99
       prefix: /usr
- # Use the system kerberos, otherwise the tickets obtained at login with the
+  # Use the system kerberos, otherwise the tickets obtained at login with the
   # system version don't appear for the spack kerberos (happening on lxplus at least)
   krb5:
     buildable: False
@@ -153,6 +153,9 @@ packages:
     require: '@1.16:'
   py-onnxruntime:
     require: '@1.18:'
+
+  pyatlasify:
+    require: '@master'
     
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
@@ -190,13 +193,6 @@ packages:
     require: '@main+gnn'
   k4simgeant4:
     require: '@main'
-  # The latest release (00-07-06) fails to build against k4fwcore@main: it still
-  # includes k4FWCore/PodioDataSvc.h, which has been removed upstream. main tracks
-  # the current k4fwcore API and compiles cleanly, so pin it until a release catches up.
-  k4simdelphes:
-    require: '@main'
-  pyatlasify:
-    require: '@master'
 
   lccontent:
     require: +monitoring
