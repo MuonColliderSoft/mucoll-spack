@@ -16,7 +16,7 @@ class K4gaudipandora(CMakePackage, Key4hepPackage):
 
     maintainers("jmcarcell")
 
-    version("main", branch="allow_no_lcio")
+    version("main", branch="main")
     version(
         "0.2.0",
         sha256="a7615d19dca1a13901168fa6ca196be6bfb7728a5088321bfb9ed45494c300e0",
