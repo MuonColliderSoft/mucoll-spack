@@ -181,16 +181,16 @@ packages:
   # variant used to be carried by a local packages/k4geo overlay; it has since
   # landed upstream, so the plain upstream recipe is enough.
   k4geo:
-    require: '@0.26~beampipe_stl'
+    require: '@main~beampipe_stl'
   k4gen:
     require: '@0.1pre16'
   k4gaudipandora:
-    require: '@0.3.0~ddkaltest'
+    require: '@main~ddkaltest'
   k4reco:
     require: '@0.3~conformal_tracking'
 
   k4actstracking:
-    require: '@00-05+gnn'
+    require: '@main+gnn'
   k4simgeant4:
     require: '@main'
 
