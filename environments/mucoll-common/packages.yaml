@@ -181,7 +181,7 @@ packages:
   # variant used to be carried by a local packages/k4geo overlay; it has since
   # landed upstream, so the plain upstream recipe is enough.
   k4geo:
-    require: '@main~beampipe_stl'
+    require: '@fieldmap~beampipe_stl'
   k4gen:
     require: '@0.1pre16'
   k4gaudipandora:
