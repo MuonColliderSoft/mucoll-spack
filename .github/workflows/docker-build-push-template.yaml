@@ -91,6 +91,11 @@ jobs:
           base="https://raw.githubusercontent.com/key4hep/key4hep-spack/$k4sha"
           echo "spack=$(curl -fsSL "$base/.latest-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
           echo "packages=$(curl -fsSL "$base/.latest-packages-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+      - name: Lowercase image name
+        id: imgref
+        uses: Entepotenz/change-string-case-action-min-dependencies@v1
+        with:
+          string: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v6
@@ -124,8 +129,29 @@ jobs:
             "ocipass=${{ secrets.GITHUB_TOKEN }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Lowercase image name
-        id: imgref
-        uses: Entepotenz/change-string-case-action-min-dependencies@v1
+      - name: Check image packages
+        env:
+          IMAGE: ${{ steps.imgref.outputs.lowercase }}@${{ steps.build.outputs.digest }}
+        run: |
+          docker run --name image-packages \
+            -v "${GITHUB_WORKSPACE}/validation:/validation:ro" \
+            --entrypoint python3 "${IMAGE}" \
+            /validation/image_packages/check.py \
+              --image-type "${{ inputs.image-type }}" \
+              --arch "${{ inputs.platform }}" \
+              --observed-out /tmp/observed.json
+      - name: Collect and print observed inventory
+        if: always()
+        run: |
+          if docker cp image-packages:/tmp/observed.json observed.json; then
+            echo "::group::Observed package inventory"
+            cat observed.json
+            echo "::endgroup::"
+            echo "Uploading artifact: image-packages-${{ inputs.image-type }}-${{ inputs.platform }}"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
         with:
-          string: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
+          name: image-packages-${{ inputs.image-type }}-${{ inputs.platform }}
+          path: observed.json
+          if-no-files-found: warn
