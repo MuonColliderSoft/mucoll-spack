@@ -197,4 +197,4 @@ packages:
     require: '@main'
 
   lccontent:
-    require: +monitoring
+    require: '@optimisation+monitoring'
