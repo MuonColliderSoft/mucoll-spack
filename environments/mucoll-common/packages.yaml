@@ -193,6 +193,8 @@ packages:
     require: '@main+gnn'
   k4simgeant4:
     require: '@main'
+  k4clue:
+    require: '@main'
 
   lccontent:
     require: +monitoring
