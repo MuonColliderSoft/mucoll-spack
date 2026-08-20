@@ -210,7 +210,7 @@ packages:
   acorn:
     require: '@2.0.1'
   k4reco:
-    require: '@0.3~conformal_tracking'
+    require: '@main~conformal_tracking'
 
   k4actstracking:
     require: '@main+gnn'
