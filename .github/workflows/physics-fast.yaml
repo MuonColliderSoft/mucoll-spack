@@ -164,9 +164,13 @@ jobs:
               source /opt/setup_mucoll.sh >/dev/null 2>&1
               bash /work/validation/make_plots.sh "${PARTICLE}"
               fragment_args=()
-              for fragment in /work/metric-fragments/metrics_*.json; do
+              while IFS= read -r fragment; do
                 fragment_args+=(--fragment "${fragment}")
-              done
+              done < <(find /work/metric-fragments -name "metrics_*.json" -type f -print | sort)
+              if [ "${#fragment_args[@]}" -eq 0 ]; then
+                echo "ERROR: no metrics fragments were produced" >&2
+                exit 1
+              fi
               python /work/benchmarks/analysis/benchmarks/aggregate_metrics.py \
                 --expected-events "${NEV}" \
                 --sample-label "${PARTICLE}" \
