@@ -1,0 +1,263 @@
+name: Fast physics validation
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: "Container image to test"
+        required: true
+        type: string
+      pdg:
+        description: "Particle-gun PDG id"
+        required: false
+        type: string
+        default: "211"
+      geometry:
+        description: "Detector geometry name"
+        required: false
+        type: string
+        default: MAIA_v0
+      n-events:
+        description: "Number of events"
+        required: false
+        type: string
+        default: "10"
+      benchmarks-ref:
+        description: "mucoll-benchmarks branch, tag, or commit"
+        required: false
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  fast-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Resolve particle label
+        id: meta
+        env:
+          PDG: ${{ inputs.pdg }}
+        run: |
+          apdg=${PDG#-}
+          case "$apdg" in
+            11) particle=electron ;;
+            13) particle=muon ;;
+            211) particle=pion ;;
+            22) particle=photon ;;
+            *) echo "Unsupported particle PDG: ${PDG}" >&2; exit 2 ;;
+          esac
+          echo "particle=${particle}" >> "$GITHUB_OUTPUT"
+
+      - name: Free disk space
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_swap: true
+          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages_one_command: true
+          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle"
+          rm_cmd: rmz
+          rmz_version: "3.1.1"
+          testing: false
+
+      - name: Check out mucoll-spack
+        uses: actions/checkout@v6
+
+      - name: Check out mucoll-benchmarks
+        uses: actions/checkout@v6
+        with:
+          repository: MuonColliderSoft/mucoll-benchmarks
+          ref: ${{ inputs.benchmarks-ref }}
+          path: benchmarks
+          submodules: recursive
+
+      - name: Download generated input
+        env:
+          PARTICLE: ${{ steps.meta.outputs.particle }}
+        run: |
+          curl -fSL --retry 3 -o gen.edm4hep.root \
+            "https://github.com/MuonColliderSoft/mucoll-spack/releases/download/phys-val-inputs/gen-${PARTICLE}.edm4hep.root"
+
+      - name: Launch container once
+        env:
+          IMAGE: ${{ inputs.image }}
+        run: |
+          docker run -d --name ci --privileged --entrypoint tail \
+            -v "${GITHUB_WORKSPACE}:/work" -w /work "${IMAGE}" -f /dev/null
+          docker inspect --format='image_id={{.Image}}' ci | tee container.log
+
+      - name: Simulation
+        env:
+          GEOMETRY: ${{ inputs.geometry }}
+          N_EVENTS: ${{ inputs.n-events }}
+        run: |
+          docker exec -w /work \
+            -e BM=/work/benchmarks -e GEOM="${GEOMETRY}" -e NEV="${N_EVENTS}" \
+            ci /bin/bash /work/validation/run_chain.sh sim 2>&1 | tee sim.log
+
+      - name: Digitisation
+        env:
+          GEOMETRY: ${{ inputs.geometry }}
+          N_EVENTS: ${{ inputs.n-events }}
+        run: |
+          docker exec -w /work \
+            -e BM=/work/benchmarks -e GEOM="${GEOMETRY}" -e NEV="${N_EVENTS}" \
+            ci /bin/bash /work/validation/run_chain.sh digi 2>&1 | tee digi.log
+
+      - name: Reconstruction
+        env:
+          GEOMETRY: ${{ inputs.geometry }}
+          N_EVENTS: ${{ inputs.n-events }}
+        run: |
+          docker exec -w /work \
+            -e BM=/work/benchmarks -e GEOM="${GEOMETRY}" -e NEV="${N_EVENTS}" \
+            ci /bin/bash /work/validation/run_chain.sh reco 2>&1 | tee reco.log
+
+      - name: Record production provenance
+        env:
+          IMAGE: ${{ inputs.image }}
+          GEOMETRY: ${{ inputs.geometry }}
+          N_EVENTS: ${{ inputs.n-events }}
+          PARTICLE: ${{ steps.meta.outputs.particle }}
+          PDG: ${{ inputs.pdg }}
+        run: |
+          input_url="https://github.com/MuonColliderSoft/mucoll-spack/releases/download/phys-val-inputs/gen-${PARTICLE}.edm4hep.root"
+          image_id="$(docker inspect --format='{{.Image}}' ci)"
+          image_platform="$(docker image inspect --format='{{.Os}}/{{.Architecture}}' "${image_id}")"
+          python3 validation/write_provenance.py \
+            --input gen.edm4hep.root \
+            --input-source "${input_url}" \
+            --events "${N_EVENTS}" \
+            --particle "${PARTICLE}" \
+            --pdg "${PDG}" \
+            --geometry "${GEOMETRY}" \
+            --image-reference "${IMAGE}" \
+            --image-id "${image_id}" \
+            --image-platform "${image_platform}" \
+            --benchmarks-revision "$(git -C benchmarks rev-parse HEAD)" \
+            --spack-revision "${GITHUB_SHA}" \
+            --output submission.json
+
+      - name: Run studies and aggregate report-only metrics
+        env:
+          GEOMETRY: ${{ inputs.geometry }}
+          N_EVENTS: ${{ inputs.n-events }}
+          PARTICLE: ${{ steps.meta.outputs.particle }}
+          PDG: ${{ inputs.pdg }}
+        run: |
+          docker exec -w /work \
+            -e BM=/work/benchmarks -e GEOM="${GEOMETRY}" \
+            -e NEV="${N_EVENTS}" -e PARTICLE="${PARTICLE}" -e PDG="${PDG}" \
+            -e PLOT_RUN_DIR=/work/metric-fragments \
+            -e PLOT_OUT_DIR=/work/metric-plots \
+            ci /bin/bash -lc '
+              source /opt/setup_mucoll.sh >/dev/null 2>&1
+              bash /work/validation/make_plots.sh "${PARTICLE}"
+              fragment_args=()
+              while IFS= read -r fragment; do
+                fragment_args+=(--fragment "${fragment}")
+              done < <(find /work/metric-fragments -name "metrics_*.json" -type f -print | sort)
+              if [ "${#fragment_args[@]}" -eq 0 ]; then
+                echo "ERROR: no metrics fragments were produced" >&2
+                exit 1
+              fi
+              python /work/benchmarks/analysis/benchmarks/aggregate_metrics.py \
+                --expected-events "${NEV}" \
+                --sample-label "${PARTICLE}" \
+                --input /work/reco.edm4hep.root \
+                --production-metadata /work/submission.json \
+                "${fragment_args[@]}" \
+                --output /work/metrics.json
+            ' 2>&1 | tee metrics.log
+
+      - name: Validate and summarize metrics
+        env:
+          N_EVENTS: ${{ inputs.n-events }}
+          PARTICLE: ${{ steps.meta.outputs.particle }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+
+          with open("metrics.json", encoding="utf-8") as source:
+              report = json.load(source)
+          particle = os.environ["PARTICLE"]
+          sample = report["samples"][particle]
+          expected = int(os.environ["N_EVENTS"])
+          if sample["event_count"] != expected:
+              raise SystemExit(
+                  "expected {} events, found {}".format(expected, sample["event_count"])
+              )
+          studies = sample["studies"]
+          rows = [("Particle", particle), ("Events", sample["event_count"])]
+          if "tracks" in studies:
+              tracks = studies["tracks"]["metrics"]
+              rows.extend([
+                  ("Tracking efficiency", "{:.3f}".format(tracks["tracking_efficiency"])),
+                  ("Track fake rate", "{:.3f}".format(tracks["fake_rate"])),
+                  ("Mean selected tracks/event", "{:.3f}".format(
+                      tracks["track_multiplicity"]["mean"])),
+              ])
+          if "seeds" in studies:
+              seeds = studies["seeds"]["metrics"]
+              rows.append(("Matched seed fraction", "{:.3f}".format(
+                  seeds["matched_fraction"])))
+          if "hits" in studies:
+              hits = studies["hits"]["metrics"]
+              rows.append(("Mean tracker hits/event", "{:.3f}".format(
+                  hits["total_hit_multiplicity"]["mean"])))
+          if "photons" in studies:
+              photons = studies["photons"]["metrics"]
+              rows.extend([
+                  ("Photon reconstruction efficiency", "{:.3f}".format(
+                      photons["reconstruction_efficiency"])),
+                  ("Mean PFO multiplicity", "{:.3f}".format(
+                      photons["pfo_multiplicity"]["mean"])),
+              ])
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("## Fast physics validation\n\n")
+              summary.write("| Metric | Value |\n|---|---:|\n")
+              for name, value in rows:
+                  summary.write("| {} | {} |\n".format(name, value))
+          PY
+
+      - name: Record disk and output sizes
+        if: always()
+        run: |
+          {
+            df -h /
+            docker system df
+            du -h ./*.edm4hep.root 2>/dev/null || true
+          } | tee resources.log
+
+      - name: Upload fast-validation report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: physics-fast-${{ steps.meta.outputs.particle }}
+          path: |
+            metrics.json
+            metric-fragments/metrics_*.json
+            submission.json
+            container.log
+            sim.log
+            digi.log
+            reco.log
+            metrics.log
+            resources.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f ci 2>/dev/null || true

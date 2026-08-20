@@ -1,11 +1,4 @@
 name: Build MuColl Stack and Publish Image
-description: |
-  Publish the layered mucoll software stack docker images:
-  mucoll-analysis -> mucoll-sim.
-  The +sim variant covers both reconstruction and simulation; there is no
-  separate reco image.
-  Each layer is built FROM the previous one (per architecture) so packages are
-  installed once and reused down the chain. Relies on a spack buildcache.
 
 on:
   # Build/publish the image when changes land on main; run on pull requests (so
@@ -97,10 +90,25 @@ jobs:
       amd64-image: ${{ needs.sim-amd64.outputs.image-uri }}
       arm64-image: ${{ needs.sim-arm64.outputs.image-uri }}
 
+  # ------------------------------------------------------ PR fast validation --
+  physics-fast:
+    # Pull requests get one fast, report-only pion chain against the freshly
+    # published image while the full validation runs alongside it.
+    needs: manifest-sim
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+    uses: ./.github/workflows/physics-fast.yaml
+    with:
+      image: ${{ needs.manifest-sim.outputs.image }}
+      pdg: "211"
+      geometry: MAIA_v0
+      n-events: "10"
+      benchmarks-ref: main
+
   # ------------------------------------------------------ physics validation --
   physics-validation:
     # Run the sim -> digi -> reco -> plot chain against the freshly published
-    # multi-arch sim image, gated on the successful sim manifest build.
+    # multi-arch sim image after merges, manual builds, and same-repository pull
+    # requests. Pull requests also get the quicker validation above.
     needs: manifest-sim
     # Skip on fork PRs: the image isn't pushed there, so there is nothing to pull
     # and validate (fork PRs build the image but cannot push it).

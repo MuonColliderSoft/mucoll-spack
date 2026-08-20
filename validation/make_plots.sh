@@ -32,6 +32,7 @@
 #   PLOT_OUT_DIR=/path/to/public/plots/dir
 #   PLOT_SUFFIX=png|pdf|...
 #   PLOT_LABEL=<provenance label stamped on every plot>
+# The run directory also receives one metrics_<study>.json sidecar per study.
 ###############################################################################
 set -euo pipefail
 
@@ -160,6 +161,7 @@ run_study() {
     -i reco.edm4hep.root \
     -o "${RUN_DIR}/histos_${name}.root" \
     -d "${OUT}" \
+    --metrics "${RUN_DIR}/metrics_${name}.json" \
     --label "${LABEL}" \
     --suffix "${PLOT_SUFFIX}" \
     "$@"
@@ -200,7 +202,11 @@ if [ "${PARTICLE}" = "photon" ]; then
     exit 1
   fi
   echo "--- study_photons.py ---"
-  python "${PHOTON_SCRIPT}" -i reco.edm4hep.root -o "${RUN_DIR}/histos_photons.root" -d "${OUT}"
+  python "${PHOTON_SCRIPT}" \
+    -i reco.edm4hep.root \
+    -o "${RUN_DIR}/histos_photons.root" \
+    -d "${OUT}" \
+    --metrics "${RUN_DIR}/metrics_photons.json"
   write_index "${OUT}" "${PARTICLE}" "${PLOT_SUFFIX}"
   echo "=== plotting ${PARTICLE} done ==="
   ls -lh "${OUT}" || true
