@@ -1,14 +1,8 @@
 name: Physics validation
-description: |
-  Reusable per-particle physics-validation pipeline.
-  Runs sim -> digi -> reco as independent jobs (each gets a fresh runner time
-  budget), forwarding the output of each stage to the next as an artifact. The
-  generator-level input is not produced here (the gun exercises no release code):
-  sim downloads a pre-generated per-particle file. 
 
-  The mucoll-sim image is large, so jobs do NOT use a job-level `container:`
-  (which pulls before any step runs and exhausts the runner disk). Instead each
-  job frees disk first, then launches the container manually with docker run/exec.
+# Reusable per-particle physics-validation pipeline. SIM, DIGI, and RECO run as
+# independent jobs, forwarding their output and production provenance as
+# artifacts. The large image is launched manually after each job frees disk.
 
 on:
   workflow_call:
@@ -113,10 +107,36 @@ jobs:
             -e GEOM="${{ inputs.geometry }}" \
             -e NEV="${{ inputs.n-events }}" \
             ci /bin/bash /work/validation/run_chain.sh sim
+      - name: Record production provenance
+        env:
+          IMAGE: ${{ inputs.image }}
+          GEOMETRY: ${{ inputs.geometry }}
+          N_EVENTS: ${{ inputs.n-events }}
+          PARTICLE: ${{ needs.meta.outputs.particle }}
+          PDG: ${{ inputs.pdg }}
+        run: |
+          input_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/phys-val-inputs/gen-${PARTICLE}.edm4hep.root"
+          image_id="$(docker inspect --format='{{.Image}}' ci)"
+          image_platform="$(docker image inspect --format='{{.Os}}/{{.Architecture}}' "${image_id}")"
+          python3 validation/write_provenance.py \
+            --input gen.edm4hep.root \
+            --input-source "${input_url}" \
+            --events "${N_EVENTS}" \
+            --particle "${PARTICLE}" \
+            --pdg "${PDG}" \
+            --geometry "${GEOMETRY}" \
+            --image-reference "${IMAGE}" \
+            --image-id "${image_id}" \
+            --image-platform "${image_platform}" \
+            --benchmarks-revision "$(git -C benchmarks rev-parse HEAD)" \
+            --spack-revision "${GITHUB_SHA}" \
+            --output submission.json
       - uses: actions/upload-artifact@v7
         with:
           name: sim-${{ needs.meta.outputs.particle }}
-          path: sim.edm4hep.root
+          path: |
+            sim.edm4hep.root
+            submission.json
           if-no-files-found: error
 
   digi:
@@ -161,7 +181,9 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: digi-${{ needs.meta.outputs.particle }}
-          path: digi.edm4hep.root
+          path: |
+            digi.edm4hep.root
+            submission.json
           if-no-files-found: error
 
   reco:
@@ -206,7 +228,9 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: reco-${{ needs.meta.outputs.particle }}
-          path: reco.edm4hep.root
+          path: |
+            reco.edm4hep.root
+            submission.json
           if-no-files-found: error
 
   plot:
@@ -249,6 +273,36 @@ jobs:
             -e NEV="${{ inputs.n-events }}" \
             -e PDG="${{ inputs.pdg }}" \
             ci /bin/bash /work/validation/make_plots.sh "${{ needs.meta.outputs.particle }}"
+      - name: Aggregate report-only metrics
+        env:
+          N_EVENTS: ${{ inputs.n-events }}
+          PARTICLE: ${{ needs.meta.outputs.particle }}
+        run: |
+          docker exec -w /work \
+            -e N_EVENTS="${N_EVENTS}" -e PARTICLE="${PARTICLE}" \
+            ci /bin/bash -lc '
+              source /opt/setup_mucoll.sh >/dev/null 2>&1
+              fragment_args=()
+              while IFS= read -r fragment; do
+                fragment_args+=(--fragment "${fragment}")
+              done < <(find /work/plot_work -name "metrics_*.json" -type f -print | sort)
+              python /work/benchmarks/analysis/benchmarks/aggregate_metrics.py \
+                --sample-label "${PARTICLE}" \
+                --input /work/reco.edm4hep.root \
+                --expected-events "${N_EVENTS}" \
+                --production-metadata /work/submission.json \
+                "${fragment_args[@]}" \
+                --output /work/metrics.json
+            '
+      - name: Upload benchmark metrics
+        uses: actions/upload-artifact@v7
+        with:
+          name: metrics-${{ needs.meta.outputs.particle }}
+          path: |
+            metrics.json
+            submission.json
+            plot_work/**/metrics_*.json
+          if-no-files-found: error
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v7
         with:
