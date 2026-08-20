@@ -1,16 +1,19 @@
 name: Physics validation (manual)
-description: |
-  Manually trigger the per-particle physics-validation chain
-  (sim -> digi -> reco -> plot; the gun input is pre-generated and downloaded)
-  against a chosen image, via the reusable physics-validation-template workflow.
 
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "Validation scale"
+        type: choice
+        default: fast
+        options:
+          - fast
+          - full
       pdg:
         description: "Particle gun PDG id (label is inferred from it)"
         type: choice
-        default: "13"
+        default: "211"
         options:
           - "13"    # muon
           - "11"     # electron
@@ -27,13 +30,28 @@ on:
       n-events:
         description: "Number of events to simulate"
         type: string
-        default: "1000"
+        default: "10"
+      benchmarks-ref:
+        description: "mucoll-benchmarks branch, tag, or commit (fast mode)"
+        type: string
+        default: main
 
 permissions:
   contents: read
 
 jobs:
+  physics-fast:
+    if: inputs.mode == 'fast'
+    uses: ./.github/workflows/physics-fast.yaml
+    with:
+      image: ${{ inputs.image }}
+      pdg: ${{ inputs.pdg }}
+      geometry: ${{ inputs.geometry }}
+      n-events: ${{ inputs.n-events }}
+      benchmarks-ref: ${{ inputs.benchmarks-ref }}
+
   physics-validation:
+    if: inputs.mode == 'full'
     uses: ./.github/workflows/physics-validation-template.yaml
     with:
       image: ${{ inputs.image }}
