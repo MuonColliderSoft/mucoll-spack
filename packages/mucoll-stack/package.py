@@ -71,8 +71,11 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("k4reco")
         depends_on("k4gaudipandora")
         depends_on("k4actstracking")
+        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reconstruction
+        # workflow loads at runtime (with EnableGeant4Geo=False).
         depends_on("k4simgeant4")
         depends_on("k4clue")
+        depends_on("muoncvxddigitiser")
 
     with when("+gen"):
         depends_on("whizard +openloops")
