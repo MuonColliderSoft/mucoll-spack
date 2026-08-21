@@ -164,7 +164,7 @@ packages:
     require: '@1.1'
 
   k4fwcore:
-    require: '@mtoverlay'
+    require: '@main'
 
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
