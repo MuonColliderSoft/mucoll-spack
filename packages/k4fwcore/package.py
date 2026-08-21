@@ -1,0 +1,80 @@
+from spack.package import *
+from spack.pkg.k4.key4hep_stack import Ilcsoftpackage
+
+
+class K4fwcore(CMakePackage, Ilcsoftpackage):
+    """Core framework components of the Key4HEP project"""
+
+    homepage = "https://github.com/madbaron/k4FWCore"
+    url = "https://github.com/madbaron/k4FWCore/archive/v00-01-00.tar.gz"
+    git = "https://github.com/madbaron/k4FWCore.git"
+
+    version("main", branch="main")
+    version("mtoverlay", branch="add_overlay_BIB_random_mix")
+    version(
+        "1.7", sha256="44a6197019609e635631e413ce7ddb82fdb524ca634a2b744f5566b83f0efad4"
+    )
+    version(
+        "1.6",
+        sha256="c70499c42d519fdb1dc13b3aa6baa2c24ec9cfc1e929775a1415f1cf1b608b6d",
+    )
+    version(
+        "1.5",
+        sha256="43b372a4b9214218f5bf1c11529e70727248950ec37eb55fea5323536a8636d6",
+    )
+    version(
+        "1.4",
+        sha256="8952caeade65253a4ba5ff263f501a6d954ffd57b7f1b83d7d11d586a1dd3235",
+    )
+    version(
+        "1.3",
+        sha256="3a484594b4f101a3b4755ca7ee71458440b5edfd5b455b7e64176ad6f0025d01",
+    )
+    version(
+        "1.2",
+        sha256="4405a3d6e88845807d57849a759827ad988681c31c9e63851b9f7d30c9a407e4",
+    )
+    version(
+        "1.1.2",
+        sha256="5451f1644357ac8ced0f5fc984809f4a48bdf2f4baf25a0a2f70540ed0427ac4",
+    )
+    version(
+        "1.1.1",
+        sha256="8ae8dc54e50c26537ac94050e08c4ad6c80e1555abd7bfd0e242d04c93e6017c",
+    )
+    version(
+        "1.1",
+        sha256="63a81e5893571a5e9209e4b6f2fe6d511772675a824cfef105f2df5f18fc6af4",
+    )
+
+    version("1.0pre19", tag="v01-00pre19")
+    version("1.0pre18", tag="v01-00pre18")
+
+    depends_on("c", type="build", when="@:1.2")
+    depends_on("cxx", type="build")
+
+    depends_on("gaudi")
+    conflicts("^gaudi@37: ~gaudialg", when="@:1.0pre19")
+    depends_on("root")
+    depends_on("podio")
+    depends_on("podio@1.0.1:", when="@1.1:")  # linking against podioIO
+    depends_on(
+        "podio@1.3:", when="@1.3:"
+    )  # using edm4hep::edm4hepDataTypes and related
+    depends_on("edm4hep")
+    depends_on("edm4hep@0.10.2:")
+    depends_on("edm4hep@0.99:", when="@1.2:")
+
+    def cmake_args(self):
+        args = [
+            self.define(
+                "CMAKE_CXX_STANDARD", self.spec["root"].variants["cxxstd"].value
+            ),
+            self.define("BUILD_TESTING", self.run_tests),
+        ]
+        return args
+
+    def setup_run_environment(self, env):
+        env.prepend_path("PYTHONPATH", self.prefix.python)
+        env.prepend_path("PATH", self.prefix.scripts)
+        env.prepend_path("LD_LIBRARY_PATH", self.prefix.lib)
