@@ -9,8 +9,7 @@ class K4fwcore(CMakePackage, Ilcsoftpackage):
     url = "https://github.com/madbaron/k4FWCore/archive/v00-01-00.tar.gz"
     git = "https://github.com/madbaron/k4FWCore.git"
 
-    version("main", branch="main")
-    version("mtoverlay", branch="add_overlay_BIB_random_mix")
+    version("main", branch="add_overlay_BIB_random_mix")
     version(
         "1.7", sha256="44a6197019609e635631e413ce7ddb82fdb524ca634a2b744f5566b83f0efad4"
     )
