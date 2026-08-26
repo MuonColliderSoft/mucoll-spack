@@ -106,3 +106,29 @@ jobs:
         with:
           name: spec-${{ inputs.target }}
           path: spec-${{ inputs.target }}.log
+      - name: Check concretized Spack packages
+        if: inputs.target == 'layered'
+        env:
+          OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          check_packages() {
+            local image_type="$1"
+            local spec="$2"
+            docker run --rm \
+              -e SPACK_COLOR=never \
+              -e OCI_PASSWORD \
+              -e IMAGE_TYPE="$image_type" \
+              -e SPEC="$spec" \
+              -v "$PWD/validation:/validation:ro" \
+              mucoll-concretize:${{ inputs.target }} \
+              /bin/bash -c '
+                . "${HOME}/setup_env.sh" > /dev/null 2>&1 &&
+                python3 /validation/image_packages/check.py \
+                  --image-type "${IMAGE_TYPE}" \
+                  --arch amd64 \
+                  --concretized-spec "${SPEC}"
+              '
+          }
+
+          check_packages analysis 'mucoll-stack~devtools+pytools+ml~sim'
+          check_packages sim 'mucoll-stack~devtools+pytools+ml+sim+gen'

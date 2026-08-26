@@ -12,7 +12,13 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-No changes yet on `main` on top of `v3.1`.
+### Added
+- **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines.
+  Unexpected additions or removals now fail the image build.
+
+### Fixed
+- **`vim` is back in the images** ([#81](https://github.com/MuonColliderSoft/mucoll-spack/issues/81)).
+  It was dropped when the base image moved to `ubuntu:24.04`.
 
 ---
 

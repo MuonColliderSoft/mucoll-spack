@@ -33,7 +33,7 @@ RUN apt update && apt install -y wget && \
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
     build-essential git python3 unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev \
-    llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev && \
+    llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev vim && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
