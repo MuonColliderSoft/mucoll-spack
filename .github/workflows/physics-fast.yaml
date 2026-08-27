@@ -71,10 +71,10 @@ jobs:
           testing: false
 
       - name: Check out mucoll-spack
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check out mucoll-benchmarks
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: MuonColliderSoft/mucoll-benchmarks
           ref: ${{ inputs.benchmarks-ref }}

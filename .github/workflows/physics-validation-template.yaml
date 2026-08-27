@@ -83,7 +83,7 @@ jobs:
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
           testing: false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Clone benchmarks
         run: |
           git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
@@ -157,7 +157,7 @@ jobs:
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
           testing: false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Clone benchmarks
         run: |
           git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
@@ -204,7 +204,7 @@ jobs:
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
           testing: false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Clone benchmarks
         run: |
           git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
@@ -251,7 +251,7 @@ jobs:
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
           testing: false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Clone benchmarks
         run: |
           git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
