@@ -102,6 +102,25 @@ jobs:
         with:
           images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
           flavor: latest=false,suffix=-${{ inputs.platform }}
+      - name: Collect build args
+        # Assembled once and reused verbatim by both builds below
+        id: args
+        run: |
+          {
+            echo 'value<<BUILD_ARGS_EOF'
+            echo "OS=${{ inputs.os }}"
+            echo "BASE_IMAGE=${{ inputs.base-image }}"
+            echo "SPEC=${{ inputs.spec }}"
+            echo "GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name || github.repository }}"
+            echo "MUCOLL_SHA=${{ github.event.pull_request.head.sha || github.sha }}"
+            echo "SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache"
+            echo "OCI_USERNAME=${{ github.actor }}"
+            echo "BRANCH=${{ github.ref_name }}"
+            echo "SPACK_COMMIT=${{ steps.pins.outputs.spack }}"
+            echo "SPACK_PACKAGES_COMMIT=${{ steps.pins.outputs.packages }}"
+            echo "KEY4HEP_SPACK_SHA=${{ steps.pins.outputs.k4sha }}"
+            echo 'BUILD_ARGS_EOF'
+          } >> "$GITHUB_OUTPUT"
       - name: Build and Push
         id: build
         uses: docker/build-push-action@v7
@@ -110,45 +129,47 @@ jobs:
           platforms: linux/${{ inputs.platform }}
           context: ./Docker
           file: ./Docker/${{ inputs.dockerfile }}
-          # On pull_request, github.sha is the ephemeral merge commit (absent from
-          # the plain clone the Dockerfile does), so `git checkout` would fail.
-          # Use the PR head repo+SHA instead; fall back to the push context.
-          build-args: |
-            OS=${{ inputs.os }}
-            BASE_IMAGE=${{ inputs.base-image }}
-            SPEC=${{ inputs.spec }}
-            GITHUB_REPOSITORY=${{ github.event.pull_request.head.repo.full_name || github.repository }}
-            MUCOLL_SHA=${{ github.event.pull_request.head.sha || github.sha }}
-            SPACK_BUILDCACHE=oci://ghcr.io/${{ github.repository_owner }}/mucoll-buildcache
-            OCI_USERNAME=${{ github.actor }}
-            BRANCH=${{ github.ref_name }}
-            SPACK_COMMIT=${{ steps.pins.outputs.spack }}
-            SPACK_PACKAGES_COMMIT=${{ steps.pins.outputs.packages }}
-            KEY4HEP_SPACK_SHA=${{ steps.pins.outputs.k4sha }}
+          # Explicit: the check stages sit after the image stage in both
+          # Dockerfiles, so the default (last stage) is not what we publish.
+          target: image
+          build-args: ${{ steps.args.outputs.value }}
           secrets: |
             "ocipass=${{ secrets.GITHUB_TOKEN }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Check image packages
-        env:
-          IMAGE: ${{ steps.imgref.outputs.lowercase }}@${{ steps.build.outputs.digest }}
-        run: |
-          docker run --name image-packages \
-            -v "${GITHUB_WORKSPACE}/validation:/validation:ro" \
-            --entrypoint python3 "${IMAGE}" \
-            /validation/image_packages/check.py \
-              --image-type "${{ inputs.image-type }}" \
-              --arch "${{ inputs.platform }}" \
-              --observed-out /tmp/observed.json
-      - name: Collect and print observed inventory
+        # Runs check.py against the image that was just built, as another stage
+        uses: docker/build-push-action@v7
+        with:
+          push: false
+          platforms: linux/${{ inputs.platform }}
+          context: ./Docker
+          build-contexts: |
+            validation=./validation
+          file: ./Docker/${{ inputs.dockerfile }}
+          target: check-export
+          outputs: type=local,dest=./image-check
+          build-args: |
+            ${{ steps.args.outputs.value }}
+            IMAGE_TYPE=${{ inputs.image-type }}
+          secrets: |
+            "ocipass=${{ secrets.GITHUB_TOKEN }}"
+      - name: Report package check
+        # The check stage records check.py's exit status instead of failing the
+        # build, so the observed inventory is exported (and uploaded below) on
+        # the very run where it is wanted as the new baseline. Fail here on it.
         if: always()
         run: |
-          if docker cp image-packages:/tmp/observed.json observed.json; then
-            echo "::group::Observed package inventory"
-            cat observed.json
-            echo "::endgroup::"
-            echo "Uploading artifact: image-packages-${{ inputs.image-type }}-${{ inputs.platform }}"
+          if [ ! -f image-check/status ]; then
+            echo "::error::the image package check produced no result"
+            exit 1
           fi
+          cp image-check/observed.json observed.json
+          echo "::group::Observed package inventory"
+          cat observed.json
+          echo "::endgroup::"
+          cat image-check/check.log
+          exit "$(cat image-check/status)"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
