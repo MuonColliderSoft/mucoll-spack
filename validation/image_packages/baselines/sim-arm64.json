@@ -404,6 +404,7 @@
     "k4fwcore",
     "k4gaudipandora",
     "k4geo",
+    "k4reccalorimeter",
     "k4reco",
     "k4simgeant4",
     "kbproto",
@@ -447,6 +448,7 @@
     "meson",
     "ms-gsl",
     "mucoll-stack",
+    "muoncvxddigitiser",
     "ncurses",
     "nghttp2",
     "ninja",
@@ -578,6 +580,7 @@
     "renderproto",
     "rngstreams",
     "root",
+    "simsipm",
     "sleef",
     "span-lite",
     "sqlite",
@@ -834,6 +837,9 @@
     "k4geo": [
       "xym77izyxisjjsedirrslmy6tbeqgkde"
     ],
+    "k4reccalorimeter": [
+      "wtfnrkn2r23sor2urfa7h6e7j7wvjnpz"
+    ],
     "k4reco": [
       "yverdbta4xnl2awqerb5l4ixy3rchxer"
     ],
@@ -963,6 +969,9 @@
     "mucoll-stack": [
       "6bccjpkej3ieckrs5pjcqfreb47or46w",
       "n3vabkj52gspj5xqdhqser4hbyqlrd35"
+    ],
+    "muoncvxddigitiser": [
+      "bkmnoz3cni25lwo2x7y7yb4rkc5odx24"
     ],
     "ncurses": [
       "miseljmk4w7sbx6kbugq5jemgohvu47y"
@@ -1356,6 +1365,9 @@
     ],
     "root": [
       "qiwcgnuj4wysfl3py37bxbnrqm3gwusl"
+    ],
+    "simsipm": [
+      "xwstsbgel4u4kk6fdjdbtu7c2uctnbta"
     ],
     "sleef": [
       "4z3aqna2zmijjvponfz36sqwtjwtwbwc"
