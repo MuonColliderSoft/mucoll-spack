@@ -1,0 +1,18 @@
+--- a/RecCaloCommon/CMakeLists.txt
++++ b/RecCaloCommon/CMakeLists.txt
+@@ -2,7 +2,6 @@
+ # Package: RecCaloCommon
+ ################################################################################
+ 
+-find_package(boost_timer REQUIRED)
+ file(GLOB _sources src/*.cpp )
+ 
+ gaudi_add_library(RecCaloCommon
+@@ -27,6 +26,7 @@
+ 
+ 
+ if(BUILD_TESTING)
++  find_package(boost_timer REQUIRED)
+   gaudi_add_executable(IDMap_test.exe
+     SOURCES tests/IDMap_test.cpp
+     LINK DD4hep::DDCore Boost::timer
