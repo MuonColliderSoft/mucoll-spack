@@ -154,7 +154,7 @@ RUN --mount=type=secret,id=ocipass \
 #  only built for the real image. Keep the split at this exact point so the
 #  check mirrors the image bootstrap one-to-one.
 # --------------------------------------------------------------------------- #
-FROM concretize AS install
+FROM concretize AS image
 
 # Install fragments of the dependency tree in separate layers for cached debugging
 ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
@@ -186,3 +186,33 @@ USER mucoll
 WORKDIR /home/mucoll
 
 ENTRYPOINT ["/bin/bash", "-c", "source /opt/setup_mucoll.sh && exec /bin/bash"]
+
+# --------------------------------------------------------------------------- #
+#  Package-inventory check. Kept as a stage of this Dockerfile so CI can verify
+#  the image it has just built without pulling it back from the registry: the
+#  `image` stage is still in the builder's local cache, so the only thing that
+#  actually runs here is check.py. check.py is fed through a named build context
+#  (`--build-context validation=./validation`) rather than the build context, so
+#  the real image build is unaffected by it.
+#
+#  The exit status is recorded instead of propagated so the observed inventory
+#  is exported even when the check fails -- that is exactly the run in which it
+#  is needed as a baseline candidate. The workflow fails on the recorded status.
+# --------------------------------------------------------------------------- #
+FROM image AS check
+ARG IMAGE_TYPE
+# Set by BuildKit; its values (amd64/arm64) are the ones check.py --arch takes.
+ARG TARGETARCH
+USER root
+COPY --from=validation image_packages /image_packages
+RUN : > /observed.json; \
+    python3 /image_packages/check.py \
+        --image-type "${IMAGE_TYPE}" \
+        --arch "${TARGETARCH}" \
+        --observed-out /observed.json > /check.log 2>&1; \
+    echo $? > /status; \
+    cat /check.log
+
+# Sole target of `--output type=local`: the three files above and nothing else.
+FROM scratch AS check-export
+COPY --from=check /observed.json /check.log /status /
