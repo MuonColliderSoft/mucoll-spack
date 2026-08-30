@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: endersonmenezes/free-disk-space@v3
+        uses: endersonmenezes/free-disk-space@v4
         with:
           remove_android: true
           remove_dotnet: true
@@ -44,7 +44,7 @@ jobs:
       # Only the Dockerfile is needed from the checkout: the build itself clones
       # mucoll-spack at MUCOLL_SHA, exactly like the image build does.
       - name: Checkout mucoll-spack
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up Docker Buildx
