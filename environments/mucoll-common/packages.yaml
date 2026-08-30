@@ -188,6 +188,12 @@ packages:
     require: '@main~ddkaltest'
   k4reco:
     require: '@main~conformal_tracking'
+  # Pinned to the tag the local packages/k4reccalorimeter boost_timer patch is
+  # written against (this is also what the solver picks on its own -- spack
+  # deprioritises the `main` branch version). Bump the pin and the patch's
+  # `when=` together, or drop both once the fix is upstream.
+  k4reccalorimeter:
+    require: '@0.1.0pre19'
 
   k4actstracking:
     require: '@main+gnn'
