@@ -77,6 +77,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # workflow loads at runtime (with EnableGeant4Geo=False).
         depends_on('k4simgeant4')
         depends_on('k4clue')
+        depends_on('k4recalorimeter')
+        depends_on('k4rectracker')
         depends_on('muoncvxddigitiser')
 
         ############################### ILCSoft ###############
