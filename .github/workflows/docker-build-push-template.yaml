@@ -103,12 +103,7 @@ jobs:
           images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
           flavor: latest=false,suffix=-${{ inputs.platform }}
       - name: Collect build args
-        # Assembled once and reused verbatim by both builds below: the check
-        # build only skips rebuilding the image if every ARG the shared stages
-        # consume is identical, so the two lists must not be able to drift.
-        # On pull_request, github.sha is the ephemeral merge commit (absent from
-        # the plain clone the Dockerfile does), so `git checkout` would fail.
-        # Use the PR head repo+SHA instead; fall back to the push context.
+        # Assembled once and reused verbatim by both builds below
         id: args
         run: |
           {
@@ -144,12 +139,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
       - name: Check image packages
         # Runs check.py against the image that was just built, as another stage
-        # of the same Dockerfile: every stage it shares with the build above is
-        # a local cache hit, so nothing is pulled back from the registry and
-        # only check.py actually executes. The `check-export` stage is FROM
-        # scratch, so the local output is just observed.json/check.log/status.
-        # IMAGE_TYPE is declared only in the check stage, so adding it here does
-        # not invalidate the cached image stages.
         uses: docker/build-push-action@v7
         with:
           push: false
