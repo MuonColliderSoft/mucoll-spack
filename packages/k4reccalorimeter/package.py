@@ -45,15 +45,23 @@ class K4reccalorimeter(CMakePackage, Key4hepPackage):
     version("0.1.0pre12", tag="v0.1.0pre12")
     version("0.1.0pre11", tag="v0.1.0pre11")
 
-    # RecCaloCommon/CMakeLists.txt calls `find_package(boost_timer REQUIRED)` at
-    # the top level, but Boost::timer is only ever linked by IDMap_test.exe, which
-    # upstream wrapped in `if(BUILD_TESTING)` (HEP-FCC/k4RecCalorimeter#244) --
-    # the find_package was left outside the guard. Nothing in the Key4hep stack
-    # asks for boost+timer (gaudi pulls +test, not +timer) and every boost library
-    # variant defaults to False, so no boost_timer-*/ CMake config is installed and
-    # configuring fails even with tests off. Move the find_package inside the same
-    # guard rather than rebuilding boost (and the whole stack above it) for a
-    # dependency of a test executable we do not build.
+    # RecCaloCommon/CMakeLists.txt calls `find_package(boost_timer REQUIRED)` (and,
+    # on main, `find_package(boost_unit_test_framework REQUIRED)`) at the top level,
+    # but Boost::timer / Boost::unit_test_framework are only ever linked by the test
+    # executables, which upstream wrapped in `if(BUILD_TESTING)`
+    # (HEP-FCC/k4RecCalorimeter#244) -- the find_package calls were left outside the
+    # guard. Nothing in the Key4hep stack asks for boost+timer (gaudi pulls +test,
+    # not +timer) and every boost library variant defaults to False, so no
+    # boost_timer-*/ CMake config is installed and configuring fails even with tests
+    # off. Move the find_package calls inside the same guard rather than rebuilding
+    # boost (and the whole stack above it) for a dependency of test executables we
+    # do not build.
+    #
+    # The @main patch is written against the branch content and will need
+    # regenerating if upstream touches this file; @0.1.0pre19 is kept as a stable
+    # fallback (pin k4reccalorimeter to that tag in mucoll-common/packages.yaml if
+    # the branch drifts).
+    patch("boost-timer-build-testing-only-main.patch", when="@main")
     patch("boost-timer-build-testing-only.patch", when="@0.1.0pre19")
 
     generator = "Ninja"
