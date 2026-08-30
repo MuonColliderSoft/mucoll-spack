@@ -10,7 +10,7 @@
 ###############################################################################
 
 ARG BASE_IMAGE=ghcr.io/muoncollidersoft/mucoll-analysis-ubuntu24:latest
-FROM ${BASE_IMAGE}
+FROM ${BASE_IMAGE} AS image
 
 # e.g. mucoll-stack+devtools+pytools+analysis+sim  or  ...+analysis+sim+ml
 ARG SPEC
@@ -46,3 +46,24 @@ USER mucoll
 WORKDIR /home/mucoll
 
 ENTRYPOINT ["/bin/bash", "-c", "source /opt/setup_mucoll.sh && exec /bin/bash"]
+
+# --------------------------------------------------------------------------- #
+#  Package-inventory check; see the identical stages in Dockerfile.base for why
+#  it lives here (no registry pull -- the `image` stage is still cached locally)
+#  and why the exit status is recorded rather than propagated.
+# --------------------------------------------------------------------------- #
+FROM image AS check
+ARG IMAGE_TYPE
+ARG TARGETARCH
+USER root
+COPY --from=validation image_packages /image_packages
+RUN : > /observed.json; \
+    python3 /image_packages/check.py \
+        --image-type "${IMAGE_TYPE}" \
+        --arch "${TARGETARCH}" \
+        --observed-out /observed.json > /check.log 2>&1; \
+    echo $? > /status; \
+    cat /check.log
+
+FROM scratch AS check-export
+COPY --from=check /observed.json /check.log /status /
