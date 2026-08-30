@@ -15,6 +15,11 @@ baselines before installation. This catches Spack omissions sooner; the image
 check remains authoritative because it also covers Ubuntu packages and the
 actual post-install contents.
 
+Only the link/run closure of the concretized root is compared: the images run
+`spack gc` after installing, so the build-only dependencies in the concretized
+DAG (autoconf, rust, py-hatchling, ...) never reach the finished image and must
+not be counted as additions.
+
 To run the check against an image:
 
 ```bash
