@@ -1,0 +1,107 @@
+from spack.package import *
+from spack.pkg.k4.key4hep_stack import Key4hepPackage
+
+
+class K4reccalorimeter(CMakePackage, Key4hepPackage):
+    """Calorimeter reconstruction components for the Key4hep framework"""
+
+    # Local override of the key4hep-spack recipe. Identical to upstream except
+    # for the boost_timer patch below; drop this package once that is fixed
+    # in k4RecCalorimeter and the fix has landed in a tagged release.
+
+    homepage = "https://github.com/HEP-FCC/k4RecCalorimeter/"
+    url = "https://github.com/HEP-FCC/k4RecCalorimeter/archive/refs/tags/v0.1.0pre04.tar.gz"
+    git = "https://github.com/HEP-FCC/k4RecCalorimeter.git"
+
+    maintainers("jmcarcell")
+
+    version("main", branch="main")
+
+    version(
+        "0.1.0pre19",
+        sha256="604c096fa8fc80eea56852d0c732fac7a304c00537e35c6c5902ae71e9b497dc",
+    )
+    version(
+        "0.1.0pre18",
+        sha256="dd935cc40abd8bafc018fdd127f2190383603dd482fa3e6b25991894b75980f4",
+    )
+    version(
+        "0.1.0pre17",
+        sha256="7e8d73e107d0d715f40a1277e97e0f14f8b5f3ad4dd0c75fc3a52fc1b5c641c2",
+    )
+    version(
+        "0.1.0pre16",
+        sha256="a7c1a92a6bf5d641ddf797d3f8b8d1cb90c8a866956a15fd5dd27ff984755b74",
+    )
+    version(
+        "0.1.0pre15",
+        sha256="8406e7ca3ff78a93ace7ca645f49bea979931b9f268e5d2aaad958886f9e7b55",
+    )
+    version(
+        "0.1.0pre14",
+        sha256="4e3480e02806a708fabcb4014f082e1de89cb4a2fb838994848bef6664ff5168",
+    )
+    version("0.1.0pre13", tag="v0.1.0pre13")
+    version("0.1.0pre12", tag="v0.1.0pre12")
+    version("0.1.0pre11", tag="v0.1.0pre11")
+
+    # RecCaloCommon/CMakeLists.txt calls `find_package(boost_timer REQUIRED)` at
+    # the top level, but Boost::timer is only ever linked by IDMap_test.exe, which
+    # upstream wrapped in `if(BUILD_TESTING)` (HEP-FCC/k4RecCalorimeter#244) --
+    # the find_package was left outside the guard. Nothing in the Key4hep stack
+    # asks for boost+timer (gaudi pulls +test, not +timer) and every boost library
+    # variant defaults to False, so no boost_timer-*/ CMake config is installed and
+    # configuring fails even with tests off. Move the find_package inside the same
+    # guard rather than rebuilding boost (and the whole stack above it) for a
+    # dependency of a test executable we do not build.
+    patch("boost-timer-build-testing-only.patch", when="@0.1.0pre19")
+
+    generator = "Ninja"
+
+    depends_on("cxx", type="build")
+
+    depends_on("ninja", type="build")
+
+    depends_on("dd4hep")
+    depends_on("edm4hep")
+    depends_on("fastjet")
+    depends_on("gaudi")
+    depends_on("k4fwcore@1.6:", when="@0.1.0pre19:")
+    depends_on("k4fwcore@1.5", when="@0.1.0pre18")
+    depends_on("k4fwcore@:1.4", when="@:0.1.0pre17")
+    depends_on("k4geo@:0.24", when="@:0.1.0pre18")
+    depends_on("k4geo@0.25:", when="@0.1.0pre19:")
+    depends_on("k4simgeant4")
+    depends_on("podio")
+    depends_on("py-onnxruntime")
+    depends_on("root")
+    depends_on("simsipm")
+
+    def cmake_args(self):
+        args = [
+            f"-DCMAKE_CXX_STANDARD={self.spec['root'].variants['cxxstd'].value}",
+            "-DCMAKE_INSTALL_LIBDIR=lib",
+            # The project does `include(CTest)`, which defaults BUILD_TESTING to ON;
+            # be explicit so IDMap_test.exe (the only Boost::timer consumer) stays out
+            # of the build unless the tests were actually requested.
+            self.define("BUILD_TESTING", self.run_tests),
+        ]
+        return args
+
+    def setup_run_environment(self, env):
+        env.prepend_path("LD_LIBRARY_PATH", self.spec["k4reccalorimeter"].prefix.lib)
+        env.prepend_path("PYTHONPATH", self.prefix.python)
+        env.prepend_path("PATH", self.prefix.scripts)
+        env.set("K4RECCALORIMETER", self.prefix.share.k4RecCalorimeter)
+
+    def setup_build_environment(self, env):
+        self.setup_run_environment(env)
+
+    def check(self):
+        pass
+
+    @run_after("install")
+    def install_check(self):
+        with working_dir(self.build_directory):
+            if self.run_tests:
+                ninja("test")
