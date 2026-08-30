@@ -125,7 +125,6 @@ jobs:
                 . "${HOME}/setup_env.sh" > /dev/null 2>&1 &&
                 python3 /validation/image_packages/check.py \
                   --image-type "${IMAGE_TYPE}" \
-                  --arch amd64 \
                   --concretized-spec "${SPEC}"
               '
           }

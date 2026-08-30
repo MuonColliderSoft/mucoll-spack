@@ -60,21 +60,22 @@ def collect_spack_packages(root="/"):
 
 
 def collect_concretized_spack_packages(spec):
-    """Return package names in a concrete, not-yet-installed Spack DAG."""
+    """Return package names in a concrete, not-yet-installed Spack DAG.
+
+    The helper runs under `spack python` because it needs Spack's own modules
+    to walk the concretized environment; see concretized_packages.py for why
+    only the link/run closure is reported.
+    """
+    helper = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "concretized_packages.py"
+    )
     result = subprocess.run(
-        [
-            "spack",
-            "find",
-            "--show-concretized",
-            "--deps",
-            "--format",
-            "{name}",
-            spec,
-        ],
-        check=True,
+        ["spack", "python", helper, spec],
         stdout=subprocess.PIPE,
         text=True,
     )
+    if result.returncode:
+        raise SystemExit("could not read the concretized environment (see above)")
     return sorted(set(result.stdout.split()))
 
 
@@ -104,7 +105,13 @@ def write_json(path, value):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--image-type", choices=("analysis", "sim"), required=True)
-    parser.add_argument("--arch", choices=("amd64", "arm64"), required=True)
+    parser.add_argument(
+        "--arch",
+        choices=("amd64", "arm64"),
+        help="required for installed images; optional (and irrelevant) for "
+        "--concretized-spec, where the package names are the same on both "
+        "architectures",
+    )
     parser.add_argument(
         "--concretized-spec",
         help="check this concrete Spack DAG instead of an installed image",
@@ -115,9 +122,13 @@ def main():
     if args.concretized_spec:
         if args.observed_out:
             parser.error("--observed-out is only available for installed images")
+        arch = args.arch or "amd64"
         inventory = {"spack": collect_concretized_spack_packages(args.concretized_spec)}
         package_types = ("spack",)
     else:
+        if not args.arch:
+            parser.error("--arch is required when checking an installed image")
+        arch = args.arch
         spack_packages, spack_hashes = collect_spack_packages()
         inventory = {
             "apt": collect_apt_packages(),
@@ -132,7 +143,7 @@ def main():
     baseline_path = os.path.join(
         os.path.dirname(__file__),
         "baselines",
-        "%s-%s.json" % (args.image_type, args.arch),
+        "%s-%s.json" % (args.image_type, arch),
     )
     with open(baseline_path, encoding="utf-8") as baseline_file:
         baseline = json.load(baseline_file)
