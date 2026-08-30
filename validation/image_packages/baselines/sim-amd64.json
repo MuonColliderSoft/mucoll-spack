@@ -6,8 +6,8 @@
     "base-passwd",
     "bash",
     "binutils",
+    "binutils-aarch64-linux-gnu",
     "binutils-common",
-    "binutils-x86-64-linux-gnu",
     "bsdutils",
     "build-essential",
     "bzip2",
@@ -16,8 +16,8 @@
     "coreutils",
     "cpp",
     "cpp-13",
-    "cpp-13-x86-64-linux-gnu",
-    "cpp-x86-64-linux-gnu",
+    "cpp-13-aarch64-linux-gnu",
+    "cpp-aarch64-linux-gnu",
     "curl",
     "dash",
     "debconf",
@@ -35,18 +35,18 @@
     "fonts-dejavu-mono",
     "g++",
     "g++-13",
-    "g++-13-x86-64-linux-gnu",
-    "g++-x86-64-linux-gnu",
+    "g++-13-aarch64-linux-gnu",
+    "g++-aarch64-linux-gnu",
     "gcc",
     "gcc-13",
+    "gcc-13-aarch64-linux-gnu",
     "gcc-13-base",
-    "gcc-13-x86-64-linux-gnu",
     "gcc-14-base",
-    "gcc-x86-64-linux-gnu",
+    "gcc-aarch64-linux-gnu",
     "gfortran",
     "gfortran-13",
-    "gfortran-13-x86-64-linux-gnu",
-    "gfortran-x86-64-linux-gnu",
+    "gfortran-13-aarch64-linux-gnu",
+    "gfortran-aarch64-linux-gnu",
     "git",
     "git-man",
     "gnupg",
@@ -105,7 +105,6 @@
     "libdpkg-perl",
     "libdrm-amdgpu1",
     "libdrm-common",
-    "libdrm-intel1",
     "libdrm2",
     "libedit2",
     "libegl-dev",
@@ -200,7 +199,6 @@
     "libpam-modules-bin",
     "libpam-runtime",
     "libpam0g",
-    "libpciaccess0",
     "libpcre2-8-0",
     "libperl5.38t64",
     "libpkgconf3",
@@ -213,7 +211,6 @@
     "libpython3.12-minimal",
     "libpython3.12-stdlib",
     "libpython3.12t64",
-    "libquadmath0",
     "libreadline8t64",
     "librtmp1",
     "libsasl2-2",
@@ -408,6 +405,7 @@
     "k4fwcore",
     "k4gaudipandora",
     "k4geo",
+    "k4reccalorimeter",
     "k4reco",
     "k4simgeant4",
     "kbproto",
@@ -445,6 +443,7 @@
     "mesa",
     "mesa-glu",
     "mucoll-stack",
+    "muoncvxddigitiser",
     "ncurses",
     "nghttp2",
     "ninja",
@@ -576,6 +575,7 @@
     "renderproto",
     "rngstreams",
     "root",
+    "simsipm",
     "sleef",
     "sqlite",
     "tar",
@@ -835,6 +835,9 @@
     "k4geo": [
       "mkuzip2floxdmts5kivpvapmghstllpk"
     ],
+    "k4reccalorimeter": [
+      "wtfnrkn2r23sor2urfa7h6e7j7wvjnpz"
+    ],
     "k4reco": [
       "u5ddj3fwhdxrx4kj6mz2xydtd4qpgrfp"
     ],
@@ -946,6 +949,9 @@
     "mucoll-stack": [
       "aysaaxepl2cyxiey2tzq7xh72eqwcx4n",
       "efgpwyyfauquv5dra353yw5s7qrgl4dj"
+    ],
+    "muoncvxddigitiser": [
+      "bkmnoz3cni25lwo2x7y7yb4rkc5odx24"
     ],
     "ncurses": [
       "fkg2zf5of2a3uof65ixat2qj5o26b66z"
@@ -1333,6 +1339,9 @@
     ],
     "root": [
       "js73evka6jkczvqtz5pitredpnpinijf"
+    ],
+    "simsipm": [
+      "xwstsbgel4u4kk6fdjdbtu7c2uctnbta"
     ],
     "sleef": [
       "l54fpfhergp6crtxbbmk47dsbkstiqap"
