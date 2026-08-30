@@ -76,7 +76,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("k4simgeant4")
         depends_on("k4clue")
         depends_on("k4reccalorimeter")
-        depends_on("k4rectracker")
+        #depends_on("k4rectracker")
         depends_on("muoncvxddigitiser")
 
     with when("+gen"):
