@@ -332,17 +332,29 @@
   "spack": [
     "abseil-cpp",
     "acorn",
+    "acts",
+    "aida",
+    "alpaka",
+    "assimp",
+    "berkeley-db",
     "binutils",
+    "boost",
     "bzip2",
     "ccache",
+    "clhep",
+    "cluestering",
     "cmake",
+    "cppgsl",
     "cpuinfo",
     "curl",
     "davix",
+    "dd4hep",
+    "delphes",
     "dlpack",
     "edm4hep",
     "eigen",
     "expat",
+    "fastjet",
     "fcgi",
     "fftw",
     "fmt",
@@ -352,10 +364,30 @@
     "freetype",
     "ftgl",
     "fxdiv",
+    "g4abla",
+    "g4channeling",
+    "g4emlow",
+    "g4ensdfstate",
+    "g4incl",
+    "g4ndl",
+    "g4nudexlib",
+    "g4particlexs",
+    "g4photonevaporation",
+    "g4pii",
+    "g4radioactivedecay",
+    "g4realsurface",
+    "g4saiddata",
+    "g4tendl",
+    "g4urrpt",
+    "gaudi",
     "gcc-runtime",
     "gdbm",
+    "geant4",
+    "geant4-data",
     "gettext",
     "giflib",
+    "git",
+    "git-lfs",
     "gl2ps",
     "glew",
     "glibc",
@@ -363,14 +395,26 @@
     "gmake",
     "gsl",
     "hdf5",
+    "hepmc",
+    "hepmc3",
     "hiredis",
     "hwloc",
     "icu4c",
     "intel-tbb",
     "isa-l",
     "json-c",
+    "k4actstracking",
+    "k4clue",
+    "k4fwcore",
+    "k4gaudipandora",
+    "k4geo",
+    "k4reccalorimeter",
+    "k4reco",
+    "k4simgeant4",
     "kbproto",
     "krb5",
+    "lccontent",
+    "lhapdf",
     "libbsd",
     "libevent",
     "libffi",
@@ -398,9 +442,11 @@
     "libyaml",
     "llvm",
     "lz4",
+    "madgraph5amc",
     "mesa",
     "mesa-glu",
     "mucoll-stack",
+    "muoncvxddigitiser",
     "ncurses",
     "nghttp2",
     "ninja",
@@ -409,12 +455,17 @@
     "nvtx",
     "openblas",
     "openjdk",
+    "openloops",
     "openmpi",
     "openssh",
     "openssl",
+    "pandoramonitoring",
+    "pandorapfa",
+    "pandorasdk",
     "pcre",
     "pcre2",
     "pelican",
+    "perl",
     "pigz",
     "pkgconf",
     "pmix",
@@ -438,6 +489,7 @@
     "py-click",
     "py-coloredlogs",
     "py-contourpy",
+    "py-coverage",
     "py-cramjam",
     "py-cycler",
     "py-filelock",
@@ -451,6 +503,7 @@
     "py-humanfriendly",
     "py-idna",
     "py-importlib-metadata",
+    "py-iniconfig",
     "py-jinja2",
     "py-joblib",
     "py-kiwisolver",
@@ -475,11 +528,15 @@
     "py-particle",
     "py-pillow",
     "py-pip",
+    "py-pluggy",
     "py-propcache",
     "py-protobuf",
     "py-psutil",
     "py-pybind11",
+    "py-pygments",
     "py-pyparsing",
+    "py-pytest",
+    "py-pytest-cov",
     "py-python-dateutil",
     "py-pytorch-lightning",
     "py-pytz",
@@ -507,18 +564,21 @@
     "py-xxhash",
     "py-yarl",
     "py-zipp",
+    "pythia8",
     "python",
     "python-venv",
     "qhull",
     "r",
     "r-rcpp",
     "r-rinside",
+    "range-v3",
     "rapidjson",
     "re2",
     "readline",
     "renderproto",
     "rngstreams",
     "root",
+    "simsipm",
     "sleef",
     "sqlite",
     "tar",
@@ -529,6 +589,8 @@
     "vc",
     "vdt",
     "which",
+    "whizard",
+    "xerces-c",
     "xextproto",
     "xgboost",
     "xproto",
@@ -536,6 +598,7 @@
     "xtrans",
     "xxhash",
     "xz",
+    "yaml-cpp",
     "zlib-ng",
     "zstd"
   ],
@@ -546,8 +609,26 @@
     "acorn": [
       "ewimo2hx33p2ffuwhfb6ahnaia373kcs"
     ],
+    "acts": [
+      "ax4bnwajiq5iamkrzomp4ct3qgkxs2ho"
+    ],
+    "aida": [
+      "r642yn3ivetaenemii4yyz7fmzocpwy7"
+    ],
+    "alpaka": [
+      "zjpvpqiuuioft73brbmktabee766axna"
+    ],
+    "assimp": [
+      "zfmzm6vph4v3lchay77agcpxx6aesbpa"
+    ],
+    "berkeley-db": [
+      "5v3i3hmxyp2se4im2lfifyp4my5hgpb7"
+    ],
     "binutils": [
       "rnyburxvalpoom3gukxut4fwazsxnb77"
+    ],
+    "boost": [
+      "q65hojsywcrv2wdqueele5htxf75usd6"
     ],
     "bzip2": [
       "xhzczzsq6jrxrav7kb534wqbbbh6lzzr"
@@ -555,8 +636,17 @@
     "ccache": [
       "abngnzct6xgxb3nrpfkn4tk6u7e5dqgt"
     ],
+    "clhep": [
+      "djn7bunpgyw6impqb3jlqfkxoyn27uty"
+    ],
+    "cluestering": [
+      "5gailzobv3tbg3xlelnchdymdemkjqiu"
+    ],
     "cmake": [
       "qkddnffjhkzeuthxmixliubvwz4q5zyi"
+    ],
+    "cppgsl": [
+      "gyv6nv5psqrgzbxdo7mi7ffmsfj27hpk"
     ],
     "cpuinfo": [
       "qantlipdujkqkr3ls4wvpg74l4isq4s3"
@@ -566,6 +656,12 @@
     ],
     "davix": [
       "ar5qb5kqbg5xravq3hfzldueffxiuvul"
+    ],
+    "dd4hep": [
+      "5u6u23u2o766n4wqiogltwcqp3nkemlm"
+    ],
+    "delphes": [
+      "tewxhstjns66ndbwddgnf7g7tiu4y3wh"
     ],
     "dlpack": [
       "vzpstbviwh64hhudlbh47bwgfeuj3joa"
@@ -578,6 +674,9 @@
     ],
     "expat": [
       "hhko6e2hxqqflsd2hphwwnuzawrols3k"
+    ],
+    "fastjet": [
+      "zkhvcwefir43uvgoz4ds7izgxeufjjub"
     ],
     "fcgi": [
       "glke7jbj2lsipon2hew6jwvobo2d2y6j"
@@ -606,6 +705,54 @@
     "fxdiv": [
       "27knqvm22vkgborbcz3pe2qbygg2hkhc"
     ],
+    "g4abla": [
+      "jbjdhowqifyg6lawx6j2zb7wlkzo5fqa"
+    ],
+    "g4channeling": [
+      "gly52ewkzmwkwygfopzhh5y44yc5n5ls"
+    ],
+    "g4emlow": [
+      "uiyxynymjtwtdcagw4ayq5fkd7dpmmk4"
+    ],
+    "g4ensdfstate": [
+      "7h4ervtorh3uneavaw4yh3kwzkvyroeh"
+    ],
+    "g4incl": [
+      "hwz4ehllwlihbomvldpkco6w4ozuxrx7"
+    ],
+    "g4ndl": [
+      "m76vbc3z655kxj3ucvn6nrxconpc7inz"
+    ],
+    "g4nudexlib": [
+      "jr7nktkujcal6ms36glhjiw5ypnx544z"
+    ],
+    "g4particlexs": [
+      "eyzjj2gmrvrsbtewxab4t5sjyswqsf2y"
+    ],
+    "g4photonevaporation": [
+      "cvqkrt6yyt3bmzcicvitwptterubjmgn"
+    ],
+    "g4pii": [
+      "662rwbuprdellhmn5whoeur3hjpyd6md"
+    ],
+    "g4radioactivedecay": [
+      "behi4v6zsgmq47feticjsa6uqliu257q"
+    ],
+    "g4realsurface": [
+      "kj4x5hjgdeu7osereiyz2wg6bqdg4t5m"
+    ],
+    "g4saiddata": [
+      "bmhhqn3snszw5bbkqarlvxnqsone2tbc"
+    ],
+    "g4tendl": [
+      "6hqw4ab42m4xcu2dtokmh3a4z7h566lo"
+    ],
+    "g4urrpt": [
+      "yexuex7ndnjyguqcu4xhidupo5qs7xn7"
+    ],
+    "gaudi": [
+      "4tfxalftezytec5kyknodhh3j7g4muiz"
+    ],
     "gcc-runtime": [
       "gpbm7ctut5rkfnvw5ta5kz7nczqeiou6",
       "ouyuqk2khbromlgvqppvknvpf65ojr2m"
@@ -613,11 +760,23 @@
     "gdbm": [
       "ewtd4badjpjnlmm2fbovypqvqxlikprq"
     ],
+    "geant4": [
+      "2ohgarl5femgdwip7yhycc2wpxpyyfeh"
+    ],
+    "geant4-data": [
+      "o6hbaumderisrhieoepqdzsf6r76veuq"
+    ],
     "gettext": [
       "xwiidqtq3iclvffrh5jpfzghdqlkw7yp"
     ],
     "giflib": [
       "cd3r4a6h6qnx73czomsnch2q36m2flgg"
+    ],
+    "git": [
+      "adgac5zi42tk25eh6ehmvemdy45d35v7"
+    ],
+    "git-lfs": [
+      "gxt6vnehhtsgybxdvbnagy2r6hzfr7iz"
     ],
     "gl2ps": [
       "y354yndcu323at4p66px5egnu463mqir"
@@ -640,6 +799,12 @@
     "hdf5": [
       "5aoee25lw5455wqwfkvwolzoekz2xsbo"
     ],
+    "hepmc": [
+      "xwbiuipc3p5vup7hlbxasquce2fhhv5g"
+    ],
+    "hepmc3": [
+      "sgdjstfpc2zfebwk6x4jibw26be3rjda"
+    ],
     "hiredis": [
       "5eebztsd7vmsfpxtyu6rmyuakpf5mbhq"
     ],
@@ -658,11 +823,41 @@
     "json-c": [
       "ib4gf6crlhenlitosufnnpuvhhz64bag"
     ],
+    "k4actstracking": [
+      "xf4goztzmo3guoh6sh73o2mftayhhfls"
+    ],
+    "k4clue": [
+      "zod23ujgnspefcl4sakgvnqtoc2jxdje"
+    ],
+    "k4fwcore": [
+      "mhnsptnjavvlzkxvs57t42sbqusjbp6k"
+    ],
+    "k4gaudipandora": [
+      "53podarspynmbsekonklztrat7nic2hb"
+    ],
+    "k4geo": [
+      "76bsg5leakux7wcppzoqyl3ei6nwejna"
+    ],
+    "k4reccalorimeter": [
+      "oilglp6ed3obmq2wsbvj2movzfswxgs4"
+    ],
+    "k4reco": [
+      "3gj4swfqin7gsdr3zstcs264xoztqwqt"
+    ],
+    "k4simgeant4": [
+      "ccymdfrj7vs2htfrytmttszqwohd4zvi"
+    ],
     "kbproto": [
       "pw5mdqkn4cqyngqqtshsgqt7jb2grqow"
     ],
     "krb5": [
       "gsxf2nl37yfdsyckbselgjcj4a5rbggj"
+    ],
+    "lccontent": [
+      "aiqnyqqcyzfty534sobbupmqx2ui262s"
+    ],
+    "lhapdf": [
+      "keeqmawt5hbvff3p5eldq6ezrq2n42z3"
     ],
     "libbsd": [
       "mfgiwaegrhejo2stlrz3zchr3urzz3ye"
@@ -745,6 +940,9 @@
     "lz4": [
       "eyunegf2k6zrfuuqzpmarpalbekksaxg"
     ],
+    "madgraph5amc": [
+      "5wd3wsoybbev7v47zypevgka5k74d2th"
+    ],
     "mesa": [
       "365jkaa3hvnz4ktihbz4diotu32teciv"
     ],
@@ -754,6 +952,9 @@
     "mucoll-stack": [
       "aysaaxepl2cyxiey2tzq7xh72eqwcx4n",
       "efgpwyyfauquv5dra353yw5s7qrgl4dj"
+    ],
+    "muoncvxddigitiser": [
+      "hpc3cmpt7hz6jldhj75wfl6epqs56mmk"
     ],
     "ncurses": [
       "fkg2zf5of2a3uof65ixat2qj5o26b66z"
@@ -779,6 +980,9 @@
     "openjdk": [
       "6lv5ckve5ageddijgsmh75dvnszehhmk"
     ],
+    "openloops": [
+      "7nqedx5i7yob6gsduy4tefjalccufmta"
+    ],
     "openmpi": [
       "mpos7wzzntp3xd3ptspcbaqltg25jtqu"
     ],
@@ -788,6 +992,15 @@
     "openssl": [
       "amw2eo3fgoebm6ekh7sw5si677nc2qh7"
     ],
+    "pandoramonitoring": [
+      "iu4k4xw4ipz35w7atd5ix5aegzfyjqk4"
+    ],
+    "pandorapfa": [
+      "px4e6fvtdpshzxlkrzdj2y3umcb7zpyh"
+    ],
+    "pandorasdk": [
+      "nrmluv37kntunngmrejw7ojbgytd6jqv"
+    ],
     "pcre": [
       "agxlcp26mffcpl25yeciglebqm3etcpp"
     ],
@@ -796,6 +1009,9 @@
     ],
     "pelican": [
       "456lvzgqb6244febw75u66qqljyzudzd"
+    ],
+    "perl": [
+      "yptghwdya4dt74ekytpjtzkpjdvrokv7"
     ],
     "pigz": [
       "kcpquttz55gawdj7rtybqsxgmaj36sff"
@@ -866,6 +1082,9 @@
     "py-contourpy": [
       "bjlvbz4nv6jbn3ymceo6vojqkzah27wu"
     ],
+    "py-coverage": [
+      "ixjihfecrjcez3p7e3zfkgntdx7z4uag"
+    ],
     "py-cramjam": [
       "dlnign4fgbntwv5h6ihfdgoykbaq4uu2"
     ],
@@ -904,6 +1123,9 @@
     ],
     "py-importlib-metadata": [
       "ycgtf7xg3ow7fu7jkeixlc4rrehqugiv"
+    ],
+    "py-iniconfig": [
+      "xuwltz6r3xli7m22mibhfbe7msqvbsrc"
     ],
     "py-jinja2": [
       "aoqrdkevqjs5xo5nenwwuc5cnef2fbfc"
@@ -971,6 +1193,9 @@
     "py-pip": [
       "xkye322vzsa3emempa375r3vilbw22ag"
     ],
+    "py-pluggy": [
+      "cqafju74bevchlcswtqdq73r42kexjyx"
+    ],
     "py-propcache": [
       "3cjqvs634ywq3jfr3jb7nqlfmdpq7nmr"
     ],
@@ -983,8 +1208,17 @@
     "py-pybind11": [
       "ubnnfbvl645femuq66bk5trslvezu75l"
     ],
+    "py-pygments": [
+      "xt7mgsz7p65igegwfmutjr2mmjpoc3ff"
+    ],
     "py-pyparsing": [
       "i4kbbhptk6nhpok5byny7rrsu36kt2lp"
+    ],
+    "py-pytest": [
+      "66dbvh2itueece44eo3e3dm5ji5pim4r"
+    ],
+    "py-pytest-cov": [
+      "frxs25sdmgl65qe3zn2ua5p7iyu5lz5m"
     ],
     "py-python-dateutil": [
       "l2crqbu4pjidkp7vpe5u4ba7a47qvwej"
@@ -1067,6 +1301,9 @@
     "py-zipp": [
       "525mjvgzik25hww66bwiipi5pjow6ntq"
     ],
+    "pythia8": [
+      "duneejqda5mtzdxezvirg2bskzdrqfoy"
+    ],
     "python": [
       "5wwlblketahpx246guaatp5frtovxbmu"
     ],
@@ -1085,6 +1322,9 @@
     "r-rinside": [
       "gckj577hv7xgr5jlujlh5rzidlutb6zv"
     ],
+    "range-v3": [
+      "odt6ska4gfexfpjpt7ldtf25unhxwva6"
+    ],
     "rapidjson": [
       "24kdll536pfwn7ai2qeb3hdmmdfu5ksg"
     ],
@@ -1102,6 +1342,9 @@
     ],
     "root": [
       "js73evka6jkczvqtz5pitredpnpinijf"
+    ],
+    "simsipm": [
+      "cp6ktorr47jcyu6fipg2kw4dg4ztjerg"
     ],
     "sleef": [
       "l54fpfhergp6crtxbbmk47dsbkstiqap"
@@ -1133,6 +1376,12 @@
     "which": [
       "izbhrn4np6qwmr4adwjgsmei73w4jmjf"
     ],
+    "whizard": [
+      "yop7fpwafb7d3yywzyg6tbjquh7hquhz"
+    ],
+    "xerces-c": [
+      "ypt3bpkdtt7mntajndd7nijmvqodayai"
+    ],
     "xextproto": [
       "r3cls7pzwxdwoouhwn5rmjenbr5gtxts"
     ],
@@ -1153,6 +1402,9 @@
     ],
     "xz": [
       "y2zc7huygri7qq5gcqqn6xqpphygxwru"
+    ],
+    "yaml-cpp": [
+      "mb32altclwplfk4zssfyrihmkzwwtlwz"
     ],
     "zlib-ng": [
       "brpk5as6equwgmfisdcbjvnih2hsfukd"
