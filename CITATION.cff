@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "Muon Collider Software Distribution (mucoll-spack)"
+type: software
+repository-code: "https://github.com/MuonColliderSoft/mucoll-spack"
+license: Apache-2.0
+authors:
+  - family-names: Andreetto
+    given-names: Paolo
+    affiliation: INFN Padova
+    orcid: "https://orcid.org/0000-0002-4996-1393"
+  - family-names: Bartosik
+    given-names: Nazar
+    affiliation: INFN Turin
+    orcid: "https://orcid.org/0000-0002-7196-2237"
+  - family-names: Ferraro
+    given-names: Samuel
+    affiliation: Harvard University
+    orcid: "https://orcid.org/0000-0001-8161-6461"
+  - family-names: Krizka
+    given-names: Karol
+    affiliation: University of Birmingham
+    orcid: "https://orcid.org/0000-0001-6408-2648"
+  - family-names: LeBlanc
+    given-names: Matt
+    affiliation: Brown University
+    orcid: "https://orcid.org/0000-0001-5977-6418"
+  - family-names: Madlener
+    given-names: Thomas
+    affiliation: Deutsches Elektronen-Synchrotron DESY
+    orcid: "https://orcid.org/0000-0002-0128-6536"
+  - family-names: Meloni
+    given-names: Federico
+    affiliation: Deutsches Elektronen-Synchrotron DESY
+    orcid: "https://orcid.org/0000-0001-7075-2214"
+  - family-names: Rosser
+    given-names: Ben
+    affiliation: University of Chicago
+    orcid: "https://orcid.org/0000-0001-7492-831X"
