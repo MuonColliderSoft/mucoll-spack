@@ -303,6 +303,33 @@ jobs:
             submission.json
             plot_work/**/metrics_*.json
           if-no-files-found: error
+      - name: Stage histogram files for the release
+        # make_plots.sh writes plot_work/<particle>/<settings-tag>/histos_<study>.root.
+        # Release assets share one flat namespace across the whole matrix, and the
+        # study names repeat per particle (histos_tracks.root for muon, electron
+        # and pion alike), so stamp the particle into each name before uploading.
+        env:
+          PARTICLE: ${{ needs.meta.outputs.particle }}
+        run: |
+          mkdir -p histos
+          shopt -s nullglob
+          n=0
+          for f in plot_work/"${PARTICLE}"/*/histos_*.root; do
+            base="$(basename "${f}" .root)"
+            cp "${f}" "histos/${base}_${PARTICLE}.root"
+            n=$((n + 1))
+          done
+          if [ "${n}" -eq 0 ]; then
+            echo "ERROR: the studies wrote no histos_*.root under plot_work/${PARTICLE}" >&2
+            exit 1
+          fi
+          ls -l histos
+      - name: Upload histogram files
+        uses: actions/upload-artifact@v7
+        with:
+          name: histos-${{ needs.meta.outputs.particle }}
+          path: histos
+          if-no-files-found: error
       - name: Upload plots (per-particle Pages fragment)
         uses: actions/upload-artifact@v7
         with:
