@@ -1,0 +1,63 @@
+{
+  "title": "Muon Collider Software Distribution (mucoll-spack)",
+  "upload_type": "software",
+  "description": "Spack-based build and distribution of the Muon Collider core software stack (simulation, reconstruction, and analysis packages).",
+  "license": "Apache-2.0",
+  "keywords": [
+    "muon collider",
+    "high energy physics",
+    "spack",
+    "detector simulation",
+    "event reconstruction",
+    "software distribution"
+  ],
+  "creators": [
+    {
+      "name": "Andreetto, Paolo",
+      "affiliation": "INFN Padova",
+      "orcid": "0000-0002-4996-1393"
+    },
+    {
+      "name": "Bartosik, Nazar",
+      "affiliation": "INFN Turin",
+      "orcid": "0000-0002-7196-2237"
+    },
+    {
+      "name": "Ferraro, Samuel",
+      "affiliation": "Harvard University",
+      "orcid": "0000-0001-8161-6461"
+    },
+    {
+      "name": "Krizka, Karol",
+      "affiliation": "University of Birmingham",
+      "orcid": "0000-0001-6408-2648"
+    },
+    {
+      "name": "LeBlanc, Matt",
+      "affiliation": "Brown University",
+      "orcid": "0000-0001-5977-6418"
+    },
+    {
+      "name": "Madlener, Thomas",
+      "affiliation": "DESY",
+      "orcid": "0000-0002-0128-6536"
+    },
+    {
+      "name": "Meloni, Federico",
+      "affiliation": "DESY",
+      "orcid": "0000-0001-7075-2214"
+    },
+    {
+      "name": "Rosser, Ben",
+      "affiliation": "University of Chicago",
+      "orcid": "0000-0001-7492-831X"
+    }
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/MuonColliderSoft/mucoll-spack",
+      "scheme": "url"
+    }
+  ]
+}
