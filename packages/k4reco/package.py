@@ -5,11 +5,11 @@ from spack.pkg.mucoll.mucoll_stack import Key4hepPackage
 class K4reco(CMakePackage, Key4hepPackage):
     """Reconstruction algorithms using Gaudi in native key4hep"""
 
-    homepage = "https://github.com/MuonColliderSoft/k4Reco"
-    url = "https://github.com/MuonColliderSoft/k4Reco/archive/v00-01-00.tar.gz"
-    git = "https://github.com/MuonColliderSoft/k4Reco.git"
+    homepage = "https://github.com/jburzy/k4Reco"
+    url = "https://github.com/jburzy/k4Reco/archive/v00-01-00.tar.gz"
+    git = "https://github.com/jburzy/k4Reco.git"
 
-    version("main", branch="main")
+    version("main", branch="jburzyns-DDPlanarHitTimeDigi")
     version("0.3", sha256="59584e758c8f73838495f8411b3d6da22b05dd0244623e7d74f77ff221100004", preferred=True)
     version("0.2", sha256="a5b02425b6970777f9f2982fd2907d38599c00996d24ff0be839a0e315509cd4")
     version("0.1", sha256="b0fa2c7decfa140159e09e271074ba03ba49eeccfcbb2bfb1c464e719d8373c3")

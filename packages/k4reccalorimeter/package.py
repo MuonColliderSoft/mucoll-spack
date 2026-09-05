@@ -9,13 +9,13 @@ class K4reccalorimeter(CMakePackage, Key4hepPackage):
     # for the boost_timer patch below; drop this package once that is fixed
     # in k4RecCalorimeter and the fix has landed in a tagged release.
 
-    homepage = "https://github.com/HEP-FCC/k4RecCalorimeter/"
-    url = "https://github.com/HEP-FCC/k4RecCalorimeter/archive/refs/tags/v0.1.0pre04.tar.gz"
-    git = "https://github.com/HEP-FCC/k4RecCalorimeter.git"
+    homepage = "https://github.com/madbaron/k4RecCalorimeter/"
+    url = "https://github.com/madbaron/k4RecCalorimeter/archive/refs/tags/v0.1.0pre04.tar.gz"
+    git = "https://github.com/madbaron/k4RecCalorimeter.git"
 
     maintainers("jmcarcell")
 
-    version("main", branch="main")
+    version("main", branch="ILD_MAIA_digitisers")
 
     version(
         "0.1.0pre19",
