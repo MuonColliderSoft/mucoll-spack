@@ -3,6 +3,7 @@ message: "If you use this software, please cite it using the metadata from this 
 title: "Muon Collider Software Distribution (mucoll-spack)"
 type: software
 repository-code: "https://github.com/MuonColliderSoft/mucoll-spack"
+doi: 10.5281/zenodo.22666768
 license: Apache-2.0
 authors:
   - family-names: Andreetto

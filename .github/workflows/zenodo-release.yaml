@@ -1,0 +1,73 @@
+name: Archive release on Zenodo
+
+# Archives every new GitHub release into the concept-DOI lineage created by the
+# historical backfill.
+#
+# Required repository Actions secrets:
+#   ZENODO_TOKEN        - a production Zenodo token with deposit:write and
+#                         deposit:actions scopes
+#   ZENODO_CONCEPT_DOI  - 10.5281/zenodo.22666768
+#
+# Do not also enable Zenodo's native GitHub integration for this repository;
+# running both would archive each release twice.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # Gate: require the reviewed license and a checksum-valid ORCID for every
+      # creator before making the permanent deposit.
+      - name: Require complete metadata (ORCIDs, license)
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+
+          metadata = json.load(open(".zenodo.json"))
+          assert metadata.get("title"), "title is missing"
+          assert metadata.get("license") == "Apache-2.0", "license must be Apache-2.0"
+          creators = metadata.get("creators", [])
+          assert creators, "no creators listed"
+
+          pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
+          for creator in creators:
+              name = creator.get("name", "unnamed creator")
+              assert creator.get("name"), "creator name is missing"
+              orcid = creator.get("orcid", "")
+              assert pattern.fullmatch(orcid), f"{name}: invalid ORCID format"
+              digits = orcid.replace("-", "")
+              total = 0
+              for digit in digits[:15]:
+                  total = (total + int(digit)) * 2
+              check = (12 - total % 11) % 11
+              expected = "X" if check == 10 else str(check)
+              assert digits[15] == expected, f"{name}: invalid ORCID checksum"
+          PY
+
+      - name: Fetch release tarball
+        env:
+          tarball: ${{ github.event.release.tarball_url }}
+          repo_name: ${{ github.event.repository.name }}
+          tag_name: ${{ github.event.release.tag_name }}
+        run: |
+          archive="${repo_name}-${tag_name//\//-}.tar.gz"
+          curl --fail-with-body -L "$tarball" --output "$archive"
+          echo "archive=$archive" >> "$GITHUB_ENV"
+
+      - name: Deposit new version on Zenodo
+        uses: rseng/zenodo-release@a9c88701a0176df755015f8ca4cf8cc754162f27
+        with:
+          token: ${{ secrets.ZENODO_TOKEN }}
+          version: ${{ github.event.release.tag_name }}
+          zenodo_json: .zenodo.json
+          archive: ${{ env.archive }}
+          doi: ${{ secrets.ZENODO_CONCEPT_DOI }}
