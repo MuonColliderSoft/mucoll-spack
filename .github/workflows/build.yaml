@@ -4,8 +4,11 @@ on:
   # Build/publish the image when changes land on main; run on pull requests (so
   # the required checks report on PRs); allow manual runs via the "Run workflow"
   # button. No push trigger on other branches -- use dispatch for those.
+  # Release tags run the same build, plus the full physics validation and the
+  # Pages deployment (both gated on refs/tags below).
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
   pull_request:
 
@@ -107,12 +110,11 @@ jobs:
   # ------------------------------------------------------ physics validation --
   physics-validation:
     # Run the sim -> digi -> reco -> plot chain against the freshly published
-    # multi-arch sim image after merges, manual builds, and same-repository pull
-    # requests. Pull requests also get the quicker validation above.
+    # multi-arch sim image. This is the expensive, full matrix, so it only runs
+    # for release tags; pushes to main and pull requests get the quick pion-only
+    # physics-fast job above instead.
     needs: manifest-sim
-    # Skip on fork PRs: the image isn't pushed there, so there is nothing to pull
-    # and validate (fork PRs build the image but cannot push it).
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     strategy:
       fail-fast: false
       matrix:
@@ -127,9 +129,42 @@ jobs:
       image: ${{ needs.manifest-sim.outputs.image }}
       pdg: ${{ matrix.pdg }}
 
-  deploy-pages:
+  # ------------------------------------------------------------ release assets --
+  release-assets:
+    # Attach the per-particle histogram files from physics-validation to the
+    # release for this tag. Tag-only, like the job it consumes.
     needs: physics-validation
-    if: github.ref == 'refs/heads/main'
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Collect histogram files
+        uses: actions/download-artifact@v8
+        with:
+          pattern: histos-*
+          path: histos
+          merge-multiple: true
+      - name: Upload histograms as release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ls -l histos
+          # A release published from the GitHub UI already exists by the time the
+          # tag push lands here; a tag pushed with plain `git push` has none, so
+          # create one in that case. --clobber makes re-runs idempotent.
+          if ! gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "No release for ${TAG} yet -- creating one."
+            gh release create "${TAG}" --verify-tag --generate-notes
+          fi
+          gh release upload "${TAG}" histos/*.root --clobber
+
+  deploy-pages:
+    # Publishes the plots produced by physics-validation, so it is tag-only too.
+    needs: physics-validation
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
