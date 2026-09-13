@@ -1,6 +1,6 @@
 packages:
   all:
-    target: [x86_64, aarch64]
+    target: [m4]
     variants: build_type=Release cxxstd=20
     buildable: true
 
@@ -20,41 +20,7 @@ packages:
     externals:
     - spec: openglu@99
       prefix: /usr
-  mesa:
-    buildable: False
-    externals:
-    - spec: mesa@99
-      prefix: /usr
-  mesa-glu:
-    buildable: False
-    externals:
-    - spec: mesa-glu@99
-      prefix: /usr
-  # Use the system kerberos, otherwise the tickets obtained at login with the
-  # system version don't appear for the spack kerberos (happening on lxplus at least)
-  krb5:
-    buildable: False
-    externals:
-    - spec: krb5@99
-      prefix: /usr
-  # Use the system ssh, otherwise the configuration for the provided ssh will likely be
-  # different and things like ssh using kerberos won't work (by extension authentication
-  # for git with ssh with kerberos)
-  openssh:
-    buildable: False
-    externals:
-    - spec: openssh@99
-      prefix: /usr
-
-  # Take external llvm as it won't compile within 6 hours limit
-  # llvm@20 (not a newer major) because py-llvmlite (via py-numba, pulled in by
-  # acorn) caps at llvm@20; the rest of the stack has no hard llvm version need.
-  llvm:
-    buildable: False
-    externals:
-    - spec: llvm@20.1.8 +clang +lld
-      prefix: /usr/lib/llvm-20
-
+ 
   boost:
     require: +python
     buildable: true
@@ -78,7 +44,7 @@ packages:
     require: +krb5 cxxstd=20
 
   root:
-    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo cxxstd=20'
+    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui~x+xml+xrootd cxxstd=20'
 
   hdf5:
     require: +cxx+hl
@@ -197,4 +163,4 @@ packages:
     require: '@main'
 
   lccontent:
-    require: +monitoring
+    require: ~monitoring
