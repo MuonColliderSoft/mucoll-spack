@@ -1,0 +1,75 @@
+--- a/external/fastjet/internal/ClosestPair2D.hh
++++ b/external/fastjet/internal/ClosestPair2D.hh
+@@ -134,6 +134,35 @@
+   typedef Tree::const_circulator  const_circulator;
+ 
+ 
++  //----------------------------------------------------------------------
++  /// \if internal_doc
++  /// @ingroup internal
++  /// \class ClosestPair2D::Point
++  /// class for representing all info needed about a point
++  /// \endif
++  class Point {
++  public:
++    /// the point's coordinates
++    Coord2D coord;
++    /// a pointer to its closest neighbour in our structure
++    Point * neighbour;
++    /// the corresponding squared distance
++    double  neighbour_dist2;
++    /// circulators for each of the shifts of the shuffles
++    triplet<circulator> circ;
++
++    /// indicates that something special is currently happening to this point
++    unsigned int review_flag;
++
++    /// returns the distance between two of these objects
++    double distance2(const Point & other) const {
++      return coord.distance2(other.coord);
++    };
++
++    /// creates a shuffle for us with a given shift
++    //void set_shuffle(Shuffle & shuffle);
++  };
++
+   triplet<SharedPtr<Tree> >  _trees;
+   SharedPtr<MinHeap>     _heap;
+   std::vector<Point>     _points;
+@@ -185,36 +214,8 @@
+ };
+ 
+ 
+-//----------------------------------------------------------------------
+-/// \if internal_doc
+-/// @ingroup internal
+-/// \class ClosestPair2D::Point
+-/// class for representing all info needed about a point
+-/// \endif
+-class ClosestPair2D::Point {
+-public:
+-  /// the point's coordinates
+-  Coord2D coord;
+-  /// a pointer to its closest neighbour in our structure
+-  Point * neighbour;
+-  /// the corresponding squared distance
+-  double  neighbour_dist2;
+-  /// circulators for each of the shifts of the shuffles
+-  triplet<circulator> circ;
+ 
+-  /// indicates that something special is currently happening to this point
+-  unsigned int review_flag;
+ 
+-  /// returns the distance between two of these objects
+-  double distance2(const Point & other) const {
+-    return coord.distance2(other.coord);
+-  };
+-
+-  /// creates a shuffle for us with a given shift
+-  //void set_shuffle(Shuffle & shuffle);
+-};
+-
+-
+ //----------------------------------------------------------------------
+ /// returns true if floor(ln_base2(x)) < floor(ln_base2(y)), using
+ /// Chan's neat trick...

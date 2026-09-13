@@ -1,0 +1,29 @@
+--- a/GaudiPluginService/python/GaudiPluginService/cpluginsvc.py
++++ b/GaudiPluginService/python/GaudiPluginService/cpluginsvc.py
+@@ -44,6 +44,7 @@
+ def _get_filename():
+     if _libname:
+         return _libname
++    import os
+     import platform
+ 
+     name = platform.system()
+@@ -53,6 +54,18 @@
+         "Windows": "libGaudiPluginService.dll",
+         "Linux": "libGaudiPluginService.so",
+     }[name]
++    # Search the library path variables explicitly: on macOS, SIP strips
++    # DYLD_LIBRARY_PATH across protected binaries (/bin/sh, /usr/bin/env), so a
++    # bare-name dlopen cannot find the library (backport of Gaudi master).
++    search_vars = (
++        ["DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"]
++        if name == "Darwin"
++        else ["LD_LIBRARY_PATH"]
++    )
++    for var in search_vars:
++        for directory in os.environ.get(var, "").split(os.pathsep):
++            if directory and os.path.exists(os.path.join(directory, fname)):
++                return os.path.join(directory, fname)
+     return fname
+ 
+ 
