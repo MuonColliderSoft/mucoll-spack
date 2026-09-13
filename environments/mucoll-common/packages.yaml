@@ -1,18 +1,8 @@
 packages:
   all:
-    target: [x86_64, aarch64]
-    variants: build_type=Release cxxstd=23
+    target: [m4]
+    variants: build_type=Release cxxstd=20
     buildable: true
-
-  # Build the whole stack with the system gcc-14 (installed in
-  # Docker/Dockerfile.base). The image also has Ubuntu's default gcc 13, which
-  # does not fully support cxxstd=23 (it reports __cplusplus as 202100L).
-  c:
-    require: [gcc@14]
-  cxx:
-    require: [gcc@14]
-  fortran:
-    require: [gcc@14]
 
   # Use the system OpenGL as recommended by spack
   # See https://github.com/key4hep/key4hep-spack/issues/318 and
@@ -30,32 +20,6 @@ packages:
     externals:
     - spec: openglu@99
       prefix: /usr
-  mesa:
-    buildable: False
-    externals:
-    - spec: mesa@99
-      prefix: /usr
-  mesa-glu:
-    buildable: False
-    externals:
-    - spec: mesa-glu@99
-      prefix: /usr
-  # Use the system kerberos, otherwise the tickets obtained at login with the
-  # system version don't appear for the spack kerberos (happening on lxplus at least)
-  krb5:
-    buildable: False
-    externals:
-    - spec: krb5@99
-      prefix: /usr
-  # Use the system ssh, otherwise the configuration for the provided ssh will likely be
-  # different and things like ssh using kerberos won't work (by extension authentication
-  # for git with ssh with kerberos)
-  openssh:
-    buildable: False
-    externals:
-    - spec: openssh@99
-      prefix: /usr
-
   # llvm is built inside the stack, slimmed down so it fits the free GitHub
   # runners (4 cores, 16 GB RAM, 6 h job limit):
   #  - build_type=Release: the environment default (RelWithDebInfo) makes the
@@ -99,10 +63,10 @@ packages:
     require: +python+tui+source-highlight~debuginfod
 
   xrootd:
-    require: +krb5
+    require: +krb5 cxxstd=20
 
   root:
-    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo'
+    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui~x+xml+xrootd cxxstd=20'
 
   hdf5:
     require: +cxx+hl
@@ -185,41 +149,49 @@ packages:
     require: '~shared'
 
   geant4:
-    require: ~opengl~qt~vecgeom~examples +ipo
+    require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
 
   pythia8:
     require: +python+lhapdf+gzip
 
   edm4hep:
-    require: '@1.3'
+    require: '@1.2'
 
   k4fwcore:
     require: '@main'
 
   dd4hep:
-    require: '@master +edm4hep+xercesc+hepmc3'
+    require: '+edm4hep+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json+edm4hep+geant4+hepmc3'
+    # +examples+python: the ACTS python bindings (acts.examples.*) are the entry
+    # point for the material mapping workflow. +hepmc3 keeps hepmc3 explicitly in
+    # the DAG for acts.examples.hepmc3, which material_recording.py imports (the
+    # matching cmake option no longer exists upstream, so it is otherwise a no-op).
+    # The packages/acts overlay is what actually makes the bindings get built and
+    # installs the Examples/Scripts/Python helper scripts -- see the comment there.
+    require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20'
+  # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
+  # which MuColl does not use (and which intermittently breaks the build). The
+  # variant used to be carried by a local packages/k4geo overlay; it has since
+  # landed upstream, so the plain upstream recipe is enough.
   k4geo:
-    require: '@00-27~beampipe_stl'
+    require: '@main~beampipe_stl'
   k4gaudipandora:
     require: '@main~ddkaltest'
   k4reco:
     require: '@main~conformal_tracking'
 
   k4reccalorimeter:
-    require: '@0.1.0pre21'
+    require: '@main'
   k4rectracker:
-    require: '@0.8.0~tracking'
+    require: '@main~tracking'
 
   k4actstracking:
     require: '@main+gnn'
   k4simgeant4:
-    require: '@0.1.0pre19'
+    require: '@main'
   k4clue:
-    require: '@01-01-02'
-  muoncvxddigitiser:
-    require: '@0.5.0'
+    require: '@main'
 
   lccontent:
-    require: '@5.1.1+monitoring'
+    require: '@master~monitoring'
