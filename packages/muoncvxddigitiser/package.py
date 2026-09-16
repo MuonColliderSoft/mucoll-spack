@@ -10,11 +10,11 @@ from spack.pkg.mucoll.mucoll_stack import Key4hepPackage
 class Muoncvxddigitiser(CMakePackage, Key4hepPackage):
     """Realistic digitiser of pixelated sensors for Muon Collider"""
 
-    homepage = "https://github.com/spg-berkeleylab/MuonCVXDDigitiser"
-    git      = "https://github.com/spg-berkeleylab/MuonCVXDDigitiser.git"
-    url      = "https://github.com/spg-berkeleylab/MuonCVXDDigitiser/archive/refs/tags/v0.2.0.tar.gz"
+    homepage = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser"
+    git      = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser.git"
+    url      = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser/archive/refs/tags/v0.2.0.tar.gz"
 
-    version("master", branch="K4FWC")
+    version("master", branch="gaudification")
     
     depends_on('edm4hep')
     depends_on('gaudi')
