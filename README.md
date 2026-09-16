@@ -1,5 +1,7 @@
 # [Spack](https://github.com/spack/spack) package repository for Muon Collider software stack
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22666768.svg)](https://doi.org/10.5281/zenodo.22666768)
+
 ### Note: the main branch is now used for the 3.x release series.
 
 This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack. It is built on top of the key4hep-dev-external environment from the [key4hep-stack](https://github.com/key4hep/key4hep-spack) repository, which is required for installation.
