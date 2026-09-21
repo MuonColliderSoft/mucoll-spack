@@ -66,7 +66,7 @@ packages:
     require: "@3.12: +optimizations"
 
   madgraph5amc:
-    require: '@3.5.9:'
+    require: '@3.5.9: +pythia8'
 
   # needed by Alma9 to support AVX2 instructions
   binutils:
@@ -159,6 +159,9 @@ packages:
     
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
+
+  pythia8:
+    require: +python+lhapdf+gzip+madgraph5amc
 
   edm4hep:
     require: '@1.1'
