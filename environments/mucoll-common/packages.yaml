@@ -160,6 +160,12 @@ packages:
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
 
+  pythia8:
+    require: +python+lhapdf+gzip+madgraph5amc
+
+  madgraph5amc:
+    require: +pythia8
+
   edm4hep:
     require: '@1.1'
 
