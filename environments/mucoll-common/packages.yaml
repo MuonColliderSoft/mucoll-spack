@@ -46,14 +46,26 @@ packages:
     - spec: openssh@99
       prefix: /usr
 
-  # Take external llvm as it won't compile within 6 hours limit
-  # llvm@20 (not a newer major) because py-llvmlite (via py-numba, pulled in by
-  # acorn) caps at llvm@20; the rest of the stack has no hard llvm version need.
+  # llvm is built inside the stack, slimmed down so it fits the free GitHub
+  # runners (4 cores, 16 GB RAM, 6 h job limit):
+  #  - build_type=Release: the environment default (RelWithDebInfo) makes the
+  #    LLVM links huge and is what OOM-kills the build.
+  #  - targets=none: only the host backend (X86 or AArch64, added automatically
+  #    by the recipe), instead of all ~20 backends.
+  #  - ~llvm_dylib: py-llvmlite links the static LLVM libraries, so the extra
+  #    libLLVM.so (one very large link) is not needed.
+  #  - ~clang: nothing in the stack needs clang (py-llvmlite only needs the
+  #    LLVM libraries), and it is the largest part of the build. Without clang
+  #    there is also no openmp, compiler-rt, libc++ or libunwind to build.
+  #  - no lldb/polly/mlir/flang/offload/gold plugin.
+  #  - the packages/llvm overlay also caps parallel link jobs and skips
+  #    tests/benchmarks.
   llvm:
-    buildable: False
-    externals:
-    - spec: llvm@20.1.2 +clang +lld
-      prefix: /usr/lib/llvm-20
+    require: >-
+      build_type=Release targets=none
+      ~clang +lld ~lldb ~lua ~polly ~mlir ~flang ~offload ~libomptarget ~gold
+      ~llvm_dylib ~python ~z3 ~cuda
+      compiler-rt=none libcxx=none libunwind=none
 
   boost:
     require: +python

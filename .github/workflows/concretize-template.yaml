@@ -1,7 +1,7 @@
 # Concretization-only check. It builds Docker/Dockerfile.base up to (and only
 # up to) its `concretize` stage, i.e. the very same bootstrap the published
 # images use -- pinned spack + spack-packages, key4hep-spack and its
-# .cherry-pick, our .cherry-pick, the LLVM-20/rust externals and the buildcache
+# .cherry-pick, our .cherry-pick, the rust external and the buildcache
 # mirror -- and then concretizes the requested environment. Nothing is
 # installed, so the job stays cheap while still failing on exactly the
 # concretization problems a real build would hit.
