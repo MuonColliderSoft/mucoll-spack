@@ -3,14 +3,11 @@
 #  Tag:        ${VERSION}-${OS}
 #
 #  Base layer of the layered Muon Collider images. Starting from a plain
-#  ubuntu:24.04 it bootstraps spack + spack-packages + key4hep-spack from
-#  scratch (the relevant steps of key4hep-images/ubuntu24-build and
-#  key4hep-spack/Dockerfile-externals), then clones the mucoll repo and the
-#  toolchain, concretizes the WHOLE layered environment (analysis + sim + ml
-#  roots together, so shared packages get a single hash) but installs ONLY
-#  the analysis root. The mucoll-sim / mucoll-ml images are built FROM this
-#  image with Dockerfile.layer and install their extra specs, reusing this
-#  layer's already-installed store.
+#  ubuntu:24.04 it concretizes the WHOLE layered environment 
+#  (analysis + sim roots together, so shared packages get a single hash) 
+#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images 
+#  are built FROM this image with Dockerfile.layer and install their extra 
+#  specs.
 ###############################################################################
 
 ARG OS=ubuntu24
@@ -20,20 +17,17 @@ ARG OS=ubuntu24
 FROM ubuntu:24.04 AS concretize
 
 # --------------------------------------------------------------------------- #
-#  System packages 
+#  System packages
 # --------------------------------------------------------------------------- #
-RUN apt update && apt install -y wget && \
-    wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
-    echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" | tee /etc/apt/sources.list.d/llvm-20.list
-
-# Install pre-compiled LLVM binaries to avoid expensive source builds in CI.
-# libzstd-dev/zlib1g-dev are needed so LLVM's CMake exports (LLVMSupport ->
-# zstd::libzstd_shared, ZLIB::ZLIB) resolve when py-llvmlite links against LLVM.
-
+# llvm-20/clang-20/lld-20 come from the Ubuntu archive and back the `llvm`
+# external in packages.yaml (prefix /usr/lib/llvm-20), avoiding an expensive
+# source build. libzstd-dev/zlib1g-dev are needed so LLVM's CMake exports
+# (LLVMSupport -> zstd::libzstd_shared, ZLIB::ZLIB) resolve when py-llvmlite
+# links against LLVM.
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    build-essential git python3 unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev \
-    llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev vim && \
+    build-essential git python3 unzip gfortran file curl pkg-config tzdata libgl1-mesa-dev libglu1-mesa-dev libkrb5-dev \
+    llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev vim wget rsync&& \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
