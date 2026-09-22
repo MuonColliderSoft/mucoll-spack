@@ -17,12 +17,17 @@ ARG OS=ubuntu24
 FROM ubuntu:24.04 AS concretize
 
 # --------------------------------------------------------------------------- #
-#  System packages 
+#  System packages
 # --------------------------------------------------------------------------- #
+# llvm-20/clang-20/lld-20 come from the Ubuntu archive and back the `llvm`
+# external in packages.yaml (prefix /usr/lib/llvm-20), avoiding an expensive
+# source build. libzstd-dev/zlib1g-dev are needed so LLVM's CMake exports
+# (LLVMSupport -> zstd::libzstd_shared, ZLIB::ZLIB) resolve when py-llvmlite
+# links against LLVM.
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    build-essential git python3 unzip gfortran file curl wget pkg-config rsync tzdata libgl1-mesa-dev libglu1-mesa libglu1-mesa-dev libkrb5-dev \
-    libzstd-dev zlib1g-dev vim && \
+    build-essential git python3 unzip gfortran file curl pkg-config tzdata libgl1-mesa-dev libglu1-mesa-dev libkrb5-dev \
+    llvm-20 clang-20 lld-20 libzstd-dev zlib1g-dev vim wget rsync&& \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
