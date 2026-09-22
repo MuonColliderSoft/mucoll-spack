@@ -52,7 +52,7 @@ packages:
   llvm:
     buildable: False
     externals:
-    - spec: llvm@20.1.8 +clang +lld
+    - spec: llvm@20.1.2 +clang +lld
       prefix: /usr/lib/llvm-20
 
   boost:
