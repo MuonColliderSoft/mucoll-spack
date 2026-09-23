@@ -333,6 +333,7 @@
     "alpaka",
     "assimp",
     "berkeley-db",
+    "binutils",
     "boost",
     "bzip2",
     "ccache",

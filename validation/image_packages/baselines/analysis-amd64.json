@@ -331,6 +331,7 @@
   ],
   "spack": [
     "abseil-cpp",
+    "binutils",
     "bzip2",
     "ccache",
     "cmake",
