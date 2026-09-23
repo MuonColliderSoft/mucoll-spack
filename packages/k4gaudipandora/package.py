@@ -10,13 +10,13 @@ from spack.pkg.k4.key4hep_stack import Key4hepPackage
 class K4gaudipandora(CMakePackage, Key4hepPackage):
     """Interface between Gaudi and PandoraPFA."""
 
-    url = "https://github.com/Jullianwatts/k4GaudiPandora/archive/v00-11.tar.gz"
-    homepage = "https://github.com/Jullianwatts/k4GaudiPandora.git"
-    git = "https://github.com/Jullianwatts/k4GaudiPandora.git"
+    url = "https://github.com/tmadlener/k4GaudiPandora/archive/v00-11.tar.gz"
+    homepage = "https://github.com/tmadlener/k4GaudiPandora.git"
+    git = "https://github.com/tmadlener/k4GaudiPandora.git"
 
     maintainers("jmcarcell")
 
-    version("main", branch="maia/theta-energy")
+    version("main", branch="lccalohit")
     version(
         "0.3.0",
         sha256="8dd1218696e6866f0bda59637793726596a202bad0c90e9969dd57fbe467e500",
