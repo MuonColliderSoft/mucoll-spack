@@ -356,6 +356,7 @@
     "fastjet",
     "fcgi",
     "fftw",
+    "fjcontrib",
     "fmt",
     "font-util",
     "fontconfig",
