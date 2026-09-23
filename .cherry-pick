@@ -1,13 +1,19 @@
-# Pull latest py-numba (0.66.0) + py-llvmlite (0.48.0) recipes. Those newest
-# releases need llvm@22, so with the llvm@20 external the concretizer settles on
-# py-numba 0.65.1 + py-llvmlite 0.47.0 (acorn -> py-numba pulls it in).
+# Pull latest py-numba (0.66.0) + py-llvmlite (0.48.0) recipes (acorn ->
+# py-numba pulls them in). py-llvmlite@0.48 needs llvm@22, which the llvm recipe
+# below provides.
 # The upstream commits don't cherry-pick cleanly onto this image's older
-# spack-packages, so check out the two package files at that commit instead.
+# spack-packages, so check out the package files at that commit instead.
 git remote add upstream https://github.com/spack/spack-packages.git 2>/dev/null || true
 git fetch --depth 50 upstream a2c63786aa875edbef612dd506d7a855c28b0cca
 git checkout a2c63786aa875edbef612dd506d7a855c28b0cca -- \
   repos/spack_repo/builtin/packages/py_numba/package.py \
   repos/spack_repo/builtin/packages/py_llvmlite/package.py
+
+# Pull the latest llvm recipe (adds llvm@22 and @23), which is built inside the
+# stack. The whole package directory is checked out so its patches come along.
+git fetch --depth 50 upstream 27d366be7b94044f06915797fe99db9de7a171be
+git checkout 27d366be7b94044f06915797fe99db9de7a171be -- \
+  repos/spack_repo/builtin/packages/llvm
 
 # geant4 examples
 git cherry-pick 334aeef7ffd810fe7c15c9ba9b6c3033ba4bf899 -X theirs --no-commit

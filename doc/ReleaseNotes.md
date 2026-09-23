@@ -16,6 +16,15 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines.
   Unexpected additions or removals now fail the image build.
 
+### Changed
+- **LLVM is built inside the stack** instead of taken from the Ubuntu `llvm-20`/`clang-20`/`lld-20`
+  packages as an external. The latest upstream `llvm` recipe is taken via `.cherry-pick`, so
+  `py-numba@0.66`/`py-llvmlite@0.48` can use `llvm@22`. The build is slimmed down to fit the free
+  GitHub runners: `build_type=Release`, host backend only, no `libLLVM.so`, and no
+  clang/lldb/polly/mlir/flang/offload or runtimes. The images therefore no longer ship `clang`. A
+  new `llvm` overlay recipe (`packages/llvm`) caps the parallel link jobs to avoid OOM kills and
+  adds `~clang_tools_extra`/`~static_analyzer` switches for slimmer `+clang` builds.
+
 ### Fixed
 - **`vim` is back in the images** ([#81](https://github.com/MuonColliderSoft/mucoll-spack/issues/81)).
   It was dropped when the base image moved to `ubuntu:24.04`.
