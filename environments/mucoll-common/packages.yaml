@@ -209,10 +209,8 @@ packages:
     require: '@main~ddkaltest'
   k4reco:
     require: '@main~conformal_tracking'
-  # Tracks the branch, like the other k4 reco packages. packages/k4reccalorimeter
-  # carries a boost_timer patch for it; regenerate that patch if upstream touches
-  # RecCaloCommon/CMakeLists.txt, or fall back to require '@0.1.0pre19' (which has
-  # its own patch) until it is fixed upstream.
+  # Tracks the branch, like the other k4 reco packages. Needs the key4hep-spack
+  # recipe to pass BUILD_TESTING, otherwise configuring requires boost+timer.
   k4reccalorimeter:
     require: '@main'
 
