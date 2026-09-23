@@ -9,15 +9,15 @@ from spack.package import *
 class Lccontent(CMakePackage):
     """Pandora algorithms and tools for Linear Collider event reconstruction."""
 
-    url = "https://github.com/Jullianwatts/lccontent/archive/v03-01-05.tar.gz"
-    homepage = "https://github.com/Jullianwatts/lccontent"
-    git = "https://github.com/Jullianwatts/lccontent.git"
+    url = "https://github.com/tmadlener/lccontent/archive/v03-01-05.tar.gz"
+    homepage = "https://github.com/tmadlener/lccontent"
+    git = "https://github.com/tmadlener/lccontent.git"
 
     tags = ["hep"]
 
     maintainers("jmcarcell")
 
-    version("master", branch="maia/theta-energy")
+    version("master", branch="bib-flag")
     version(
         "3.2.0",
         sha256="37a5b7dbc6d9f7cc9d010294a3f75dd30e9dad591ae4e88784e410868deabae6",
