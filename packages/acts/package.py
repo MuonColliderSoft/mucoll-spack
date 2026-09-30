@@ -19,6 +19,13 @@
 #
 # Drop the cmake_args override once the builtin package catches up with the
 # acts@main option names; the install/environment bits are still needed.
+#
+# On macOS, Plugins/Gnn/CMakeLists.txt also passes the GNU ld flag
+# -Wl,-no-as-needed (to keep libtorchscatter linked), which Apple's ld rejects
+# ("ld: unknown options: -no-as-needed"). Apple's ld never drops dylibs given on
+# the command line unless -dead_strip_dylibs is used, so the flag is skipped there.
+
+import os
 
 from spack_repo.builtin.packages.acts.package import Acts as BuiltinActs
 
@@ -31,6 +38,16 @@ class Acts(BuiltinActs):
     @property
     def examples_scripts_dir(self):
         return join_path(self.prefix.share.acts, "Examples", "Scripts", "Python")
+
+    def patch(self):
+        gnn_cmake = join_path("Plugins", "Gnn", "CMakeLists.txt")
+        if self.spec.satisfies("platform=darwin") and os.path.exists(gnn_cmake):
+            filter_file(
+                r'"-Wl,-no-as-needed"',
+                r'"$<$<NOT:$<PLATFORM_ID:Darwin>>:-Wl,-no-as-needed>"',
+                gnn_cmake,
+                string=True,
+            )
 
     def cmake_args(self):
         args = super().cmake_args()

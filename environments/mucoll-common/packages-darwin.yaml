@@ -1,0 +1,24 @@
+packages:
+  # On macOS spack's defaults prefer apple-clang for C/C++ but mark it
+  # non-buildable, so it must be registered as an external. Without it the only
+  # compiler is Homebrew gcc, and python cannot be concretized ("CPython does
+  # not compile with GCC on macOS yet, use clang"). gcc is still used for
+  # Fortran. Adjust the version to match `clang --version` on the host.
+  apple-clang:
+    buildable: false
+    externals:
+    - spec: apple-clang@21.0.0
+      prefix: /usr
+      extra_attributes:
+        compilers:
+          c: /usr/bin/clang
+          cxx: /usr/bin/clang++
+
+  # openssh@10.3p1 does not compile against the macOS 27 SDK: sandbox-darwin.c
+  # uses kSBXProfilePureComputation, which the SDK no longer declares. Use the
+  # OpenSSH that ships with macOS instead (check with `ssh -V`).
+  openssh:
+    buildable: false
+    externals:
+    - spec: openssh@10.3p1
+      prefix: /usr

@@ -1,3 +1,5 @@
+import glob
+import os
 from datetime import datetime
 
 from spack.package import *
@@ -148,6 +150,47 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         if "py-torch" in self.spec:
             for path in self["py-torch"].cmake_prefix_paths:
                 env.prepend_path("CMAKE_PREFIX_PATH", path)
+
+        if self.spec.satisfies("platform=darwin"):
+            self.setup_darwin_plugin_paths(env)
+
+    def setup_darwin_plugin_paths(self, env):
+        """Plugin search paths on macOS.
+
+        On macOS Gaudi finds its components through GAUDI_PLUGIN_PATH only, not
+        LD_LIBRARY_PATH as on Linux, and only gaudi and k4actstracking add
+        themselves to it. So add every package built on Gaudi that ships
+        ".components" files (k4FWCore, k4SimGeant4's GeoSvc, k4Reco, ...).
+
+        DD4hep uses DD4HEP_LIBRARY_PATH on macOS, because System Integrity
+        Protection strips DYLD_LIBRARY_PATH (see packages/dd4hep): its plugin
+        manager searches it for ".components" files, and dd4hep_base.py replaces
+        ROOT's dynamic library path with it. So it holds the DD4hep plugin
+        directories first (DD4hep, k4geo, ...), then every other library
+        directory of the stack, as thisdd4hep.sh sets it to all of
+        DYLD_LIBRARY_PATH.
+        """
+        gaudi_plugin_dirs, dd4hep_plugin_dirs, lib_dirs = [], [], []
+        for dep in self.spec.traverse(root=False, deptype=("link", "run")):
+            if dep.external:
+                continue
+            # lib/root is where ROOT keeps its libraries
+            dirs = [
+                d
+                for d in (dep.prefix.lib, dep.prefix.lib64, dep.prefix.lib.root)
+                if os.path.isdir(d)
+            ]
+            plugin_dirs = [d for d in dirs if glob.glob(os.path.join(d, "*.components"))]
+            if dep.name != "gaudi" and "gaudi" in dep:
+                gaudi_plugin_dirs += plugin_dirs
+            if "dd4hep" in dep:
+                dd4hep_plugin_dirs += plugin_dirs
+            lib_dirs += dirs
+        for d in gaudi_plugin_dirs:
+            env.append_path("GAUDI_PLUGIN_PATH", d)
+        # prepend_path puts each entry first, so go backwards to keep the order
+        for d in reversed(dd4hep_plugin_dirs + lib_dirs):
+            env.prepend_path("DD4HEP_LIBRARY_PATH", d)
 
     def install(self, spec: Spec, prefix: Prefix) -> None:
         install_setup_script(self, spec, prefix, "MUCOLL_LATEST_SETUP_PATH")

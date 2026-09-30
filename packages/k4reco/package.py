@@ -1,3 +1,5 @@
+import os
+
 from spack.package import *
 from spack.pkg.k4.key4hep_stack import Key4hepPackage
 
@@ -37,6 +39,21 @@ class K4reco(CMakePackage, Key4hepPackage):
     depends_on("ilcutil", when="+conformal_tracking")
     depends_on("kaltest", when="+conformal_tracking")
     depends_on("ddkaltest", when="+conformal_tracking")
+
+    def patch(self):
+        # CaloDigi/src/CalorimeterHitType.cc defines caloIDFromString() and friends
+        # used by RealisticCaloDigi.cc, but it is missing from the k4RecoPlugins
+        # source list. Linux links modules with undefined symbols, so this goes
+        # unnoticed there; macOS refuses to link the bundle
+        # ("Undefined symbols ... caloIDFromString").
+        cml = join_path("k4Reco", "CMakeLists.txt")
+        hit_type = join_path("k4Reco", "CaloDigi", "src", "CalorimeterHitType.cc")
+        if os.path.exists(hit_type) and "CalorimeterHitType.cc" not in open(cml).read():
+            filter_file(
+                r"^(\s*)CaloDigi/src/RealisticCaloDigi\.cc$",
+                r"\1CaloDigi/src/RealisticCaloDigi.cc CaloDigi/src/CalorimeterHitType.cc",
+                cml,
+            )
 
     def cmake_args(self):
         args = [
