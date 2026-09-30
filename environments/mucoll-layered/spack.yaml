@@ -1,7 +1,7 @@
 spack:
   packages:
     all:
-      target: [m4]
+      target: [m1,m2,m3,m4,m5,m6]
       variants:
         - build_type=RelWithDebInfo
         - 'cxxstd=20'
@@ -9,6 +9,25 @@ spack:
       providers:
         gl: [mesa]
         glu: [mesa]
+
+    # Keep the commits of the existing install, so that rebuilding against the
+    # CoreML-enabled onnxruntime does not also move these to today's main.
+    # These replace the requirements in ../mucoll-common/packages.yaml, so they
+    # repeat them.
+    acts:
+      require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20 commit=bf36cf82c85d2e7d749a0b6f4ff4de26d2d8bcfb'
+    k4actstracking:
+      require: '@main+gnn commit=1fcc00acd715446c5719fedb057cb4dfbabe7a2c'
+    # Same for the other dd4hep dependents, rebuilt for the macOS plugin-search
+    # patch in ../../packages/dd4hep.
+    k4geo:
+      require: '@main~beampipe_stl commit=44708851ab03c2194a19e18699a93eb1ff923cc1'
+    k4gaudipandora:
+      require: '@main~ddkaltest commit=e38f1175a3be4b94963d755163f4465b7f048e86'
+    k4simgeant4:
+      require: '@main commit=9efe2e7707315f103b7dbe5f9428a6dea629ce7c'
+    k4clue:
+      require: '@main commit=e69ad0da0e19acfbe4f5e575551bf54ad2299d8b'
 
   concretizer:
     unify: true
@@ -19,6 +38,8 @@ spack:
 
   include:
   - ../mucoll-common/packages.yaml
+  - path: ../mucoll-common/packages-darwin.yaml
+    when: platform == "darwin"
 
   specs:
   - mucoll-stack~devtools+pytools+ml+sim
