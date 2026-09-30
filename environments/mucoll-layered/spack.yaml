@@ -15,19 +15,19 @@ spack:
     # These replace the requirements in ../mucoll-common/packages.yaml, so they
     # repeat them.
     acts:
-      require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20 commit=bf36cf82c85d2e7d749a0b6f4ff4de26d2d8bcfb'
+      require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20'
     k4actstracking:
-      require: '@main+gnn commit=1fcc00acd715446c5719fedb057cb4dfbabe7a2c'
+      require: '@main+gnn'
     # Same for the other dd4hep dependents, rebuilt for the macOS plugin-search
     # patch in ../../packages/dd4hep.
     k4geo:
-      require: '@main~beampipe_stl commit=44708851ab03c2194a19e18699a93eb1ff923cc1'
+      require: '@main~beampipe_stl'
     k4gaudipandora:
-      require: '@main~ddkaltest commit=e38f1175a3be4b94963d755163f4465b7f048e86'
+      require: '@main~ddkaltest'
     k4simgeant4:
-      require: '@main commit=9efe2e7707315f103b7dbe5f9428a6dea629ce7c'
+      require: '@main'
     k4clue:
-      require: '@main commit=e69ad0da0e19acfbe4f5e575551bf54ad2299d8b'
+      require: '@main'
 
   concretizer:
     unify: true

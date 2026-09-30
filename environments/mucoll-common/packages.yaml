@@ -98,9 +98,6 @@ packages:
   py-onnxruntime:
     require:
     - '@1.18:'
-    # CoreML execution provider, to run the GNN models on the Apple GPU
-    - spec: '+coreml'
-      when: 'platform=darwin'
 
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
