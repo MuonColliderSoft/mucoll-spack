@@ -1,0 +1,218 @@
+diff --git a/GaudiPluginService/doc/README.md b/GaudiPluginService/doc/README.md
+index a8d84d04..b299532d 100644
+--- a/GaudiPluginService/doc/README.md
++++ b/GaudiPluginService/doc/README.md
+@@ -61,6 +61,14 @@ listcomponents lib/libBar.so >> lib/MyApp.components
+ Note that the `.components` file does not need to be in the same directory as
+ `libBar.so`.
+ 
++On macOS the `.components` files are searched for in the directories of
++`DD4HEP_LIBRARY_PATH`, `DYLD_LIBRARY_PATH` and `LD_LIBRARY_PATH`, in that order.
++System Integrity Protection removes `DYLD_LIBRARY_PATH` from the environment of
++any process started through a protected binary (e.g. `/usr/bin/env`, as in a
++`#!/usr/bin/env python` script), so on its own it is not a reliable search path
++there. For the same reason, a library that sits in the same directory as the
++`.components` file listing it is loaded by its full path on macOS.
++
+ The application code, linked against the library providing `Foo` can now
+ instantiate objects of class `Bar` like this:
+ ```cpp
+diff --git a/GaudiPluginService/src/PluginSearchPath.h b/GaudiPluginService/src/PluginSearchPath.h
+new file mode 100644
+index 00000000..379f5182
+--- /dev/null
++++ b/GaudiPluginService/src/PluginSearchPath.h
+@@ -0,0 +1,92 @@
++/*****************************************************************************\
++* (c) Copyright 2013 CERN                                                     *
++*                                                                             *
++* This software is distributed under the terms of the GNU General Public      *
++* Licence version 3 (GPL Version 3), copied verbatim in the file "LICENCE".   *
++*                                                                             *
++* In applying this licence, CERN does not waive the privileges and immunities *
++* granted to it by virtue of its status as an Intergovernmental Organization  *
++* or submit itself to any jurisdiction.                                       *
++\*****************************************************************************/
++#ifndef GAUDIPLUGINSERVICE_SRC_PLUGINSEARCHPATH_H
++#define GAUDIPLUGINSERVICE_SRC_PLUGINSEARCHPATH_H
++
++#include <sys/stat.h>
++
++#include <cstdlib>
++#include <set>
++#include <string>
++
++// Only included by the PluginService sources in this directory
++namespace {
++  /// The directories searched for ".components" files.
++  struct SearchPath {
++    /// The environment variable(s) the path was read from, for the debug output
++    std::string variables;
++    /// Directories separated by `separator`
++    std::string path;
++    char        separator;
++  };
++
++  /// Return the search path for the ".components" files.
++  ///
++  /// On macOS next to DYLD_LIBRARY_PATH also search DD4HEP_LIBRARY_PATH 
++  /// and LD_LIBRARY_PATH. A directory listed in several of them is searched 
++  /// only once, at its first appearance.
++  inline SearchPath pluginSearchPath() {
++    const std::string defaultPath = "/usr/lib64:/usr/lib:/usr/local/lib";
++#if defined( _WIN32 )
++    const char* envPtr = std::getenv( "PATH" );
++    return {"PATH", envPtr ? envPtr : defaultPath, ';'};
++#elif defined( __APPLE__ )
++    const char  sep       = ':';
++    const char* envVars[] = {"DD4HEP_LIBRARY_PATH", "DYLD_LIBRARY_PATH", "LD_LIBRARY_PATH"};
++    SearchPath  result{"", "", sep};
++    std::set<std::string> seen;
++    bool anySet = false;
++    for ( const char* envVar : envVars ) {
++      result.variables += ( result.variables.empty() ? "" : ", " ) + std::string( envVar );
++      const char* envPtr = std::getenv( envVar );
++      if ( !envPtr ) continue;
++      anySet = true;
++      const std::string value( envPtr );
++      std::string::size_type pos = 0;
++      while ( pos <= value.size() ) {
++        auto end = value.find( sep, pos );
++        if ( end == std::string::npos ) end = value.size();
++        const std::string dir = value.substr( pos, end - pos );
++        if ( !dir.empty() && seen.insert( dir ).second ) {
++          if ( !result.path.empty() ) result.path += sep;
++          result.path += dir;
++        }
++        pos = end + 1;
++      }
++    }
++    if ( !anySet ) result.path = defaultPath;
++    return result;
++#else
++    const char* envPtr = std::getenv( "LD_LIBRARY_PATH" );
++    return {"LD_LIBRARY_PATH", envPtr ? envPtr : defaultPath, ':'};
++#endif
++  }
++
++  /// Return how to dlopen the library `lib`, listed in a ".components" file found in
++  /// the directory `dir`.
++  ///
++  /// On macOS, a library that sits next to its ".components" file is loaded by its
++  /// full path. 
++  inline std::string componentLibrary( const std::string& dir, const std::string& lib ) {
++#if defined( __APPLE__ )
++    if ( !dir.empty() && lib.find( '/' ) == std::string::npos ) {
++      const std::string full = dir + '/' + lib;
++      struct stat       buf;
++      if ( 0 == ::stat( full.c_str(), &buf ) && S_ISREG( buf.st_mode ) ) return full;
++    }
++#else
++    (void)dir;
++#endif
++    return lib;
++  }
++} // namespace
++
++#endif // GAUDIPLUGINSERVICE_SRC_PLUGINSEARCHPATH_H
+diff --git a/GaudiPluginService/src/PluginServiceV1.cpp b/GaudiPluginService/src/PluginServiceV1.cpp
+index 2ec602b7..41d79dc4 100644
+--- a/GaudiPluginService/src/PluginServiceV1.cpp
++++ b/GaudiPluginService/src/PluginServiceV1.cpp
+@@ -14,6 +14,8 @@
+ #define GAUDI_PLUGIN_SERVICE_V1
+ #include <Gaudi/PluginService.h>
+ 
++#include "PluginSearchPath.h"
++
+ #include <dirent.h>
+ #include <dlfcn.h>
+ 
+@@ -145,19 +147,10 @@ namespace Gaudi {
+           REG_SCOPE_LOCK
+           if ( m_initialized ) return;
+           m_initialized = true;
+-#if defined( _WIN32 )
+-          const char* envVar = "PATH";
+-          const char  sep    = ';';
+-#elif defined( __APPLE__ )
+-          const char* envVar = "DYLD_LIBRARY_PATH";
+-          const char  sep    = ':';
+-#else
+-          const char* envVar = "LD_LIBRARY_PATH";
+-          const char  sep    = ':';
+-#endif
+-          char* search_path = ::getenv( envVar );
+-          logger().debug( std::string( "searching factories in " ) + envVar );
+-          std::string path = search_path ? std::string(search_path) : "/usr/lib64:/usr/lib:/usr/local/lib";
++          const auto        searchPath = pluginSearchPath();
++          const char        sep        = searchPath.separator;
++          logger().debug( std::string( "searching factories in " ) + searchPath.variables );
++          const std::string path = searchPath.path;
+           std::string::size_type pos    = 0;
+           std::string::size_type newpos = 0;
+           while ( pos != std::string::npos ) {
+@@ -212,7 +205,7 @@ namespace Gaudi {
+                       logger().warning( "failed to parse line " + fullPath + ':' + std::to_string( lineCount ) );
+                       continue;
+                     }
+-                    const std::string lib( line, 0, pos );
++                    const std::string lib = componentLibrary( dirName, std::string( line, 0, pos ) );
+                     const std::string fact( line, pos + 1 );
+                     m_factories.emplace( fact, FactoryInfo( lib ) );
+ #ifdef GAUDI_REFLEX_COMPONENT_ALIASES
+diff --git a/GaudiPluginService/src/PluginServiceV2.cpp b/GaudiPluginService/src/PluginServiceV2.cpp
+index 7075d542..d1bc181a 100644
+--- a/GaudiPluginService/src/PluginServiceV2.cpp
++++ b/GaudiPluginService/src/PluginServiceV2.cpp
+@@ -14,6 +14,8 @@
+ #define GAUDI_PLUGIN_SERVICE_V2
+ #include <Gaudi/PluginService.h>
+ 
++#include "PluginSearchPath.h"
++
+ #include <boost/algorithm/string.hpp>
+ 
+ #include <dirent.h>
+@@ -135,28 +137,18 @@ namespace Gaudi {
+ 
+         void Registry::initialize() {
+           REG_SCOPE_LOCK
+-#if defined( _WIN32 )
+-          const std::string envVar = "PATH";
+-          const std::string sep    = ";";
+-#elif defined( __APPLE__ )
+-          const std::string envVar = "DYLD_LIBRARY_PATH";
+-          const std::string sep    = ":";
+-#else
+-          const std::string envVar = "LD_LIBRARY_PATH";
+-          const std::string sep    = ":";
+-#endif
++          const auto        searchPath = pluginSearchPath();
++          const std::string sep( 1, searchPath.separator );
+ 
+           std::regex  line_format{"^(?:[[:space:]]*(?:(v[0-9]+)::)?([^:]+):(.*[^[:space:]]))?[[:space:]]*(?:#.*)?$"};
+           std::smatch matches;
+ 
+-          std::string search_path;
+-          const char* envPtr = std::getenv( envVar.c_str() );
+-          search_path = envPtr ? envPtr : "/usr/lib64:/usr/lib:/usr/local/lib";
++          const std::string& search_path = searchPath.path;
+           if ( search_path.empty() ) {
+             return;
+           }
+ 
+-          logger().debug("searching factories in " + envVar);
++          logger().debug("searching factories in " + searchPath.variables);
+           logger().debug("searching factories in " + search_path);
+ 
+           std::vector<std::string> directories;
+@@ -182,7 +174,7 @@ namespace Gaudi {
+                   std::getline( factories, line );
+                   if ( regex_match( line, matches, line_format ) ) {
+                     if ( matches[1] == "v2" ) { // ignore non "v2" and "empty" lines
+-                      const std::string lib{matches[2]};
++                      const std::string lib = componentLibrary( dirName.string(), matches[2] );
+                       const std::string fact{matches[3]};
+                       m_factories.emplace( fact, FactoryInfo{lib, {}, {{"ClassName", fact}}} );
+ #ifdef GAUDI_REFLEX_COMPONENT_ALIASES
