@@ -244,6 +244,7 @@
     "libuuid1",
     "libvulkan1",
     "libwayland-client0",
+    "libwayland-server0",
     "libwebp7",
     "libx11-6",
     "libx11-data",
