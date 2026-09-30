@@ -5,9 +5,9 @@ from spack.pkg.k4.key4hep_stack import Key4hepPackage
 class K4reco(CMakePackage, Key4hepPackage):
     """Reconstruction algorithms using Gaudi in native key4hep"""
 
-    homepage = "https://github.com/madbaron/k4Reco"
-    url = "https://github.com/madbaron/k4Reco/archive/v00-01-00.tar.gz"
-    git = "https://github.com/madbaron/k4Reco.git"
+    homepage = "https://github.com/MuonColliderSoft/k4Reco"
+    url = "https://github.com/MuonColliderSoft/k4Reco/archive/v00-01-00.tar.gz"
+    git = "https://github.com/MuonColliderSoft/k4Reco.git"
 
     version("main", branch="last-bits")
 
