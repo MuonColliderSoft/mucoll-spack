@@ -43,6 +43,7 @@ class MucollStack(BundlePackage, Key4hepPackage):
             values=('Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel'))
     variant('llvm', default=False, description='Build with LLVM')
     variant('ml', default=False, description='Build with machine learning tools')
+    variant('cuda', default=False, description='Build the stack with CUDA support')
     variant('pytools', default=False, description='Build with python tools')
     variant('sim', default=False, description='Build with reconstruction and simulation tools')
     variant('gen', default=False, description='Build with generators')
@@ -73,53 +74,21 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('k4reco')
         depends_on('k4gaudipandora')
         depends_on('k4actstracking')
-        # k4SimGeant4 provides the GeoSvc that the MAIA/MuColl reconstruction
-        # workflow loads at runtime (with EnableGeant4Geo=False).
         depends_on('k4simgeant4')
         depends_on('k4clue')
-        #depends_on('k4marlinwrapper')
-
-        ############################### ILCSoft ###############
-        #######################################################
-        #depends_on('aidatt')
-        #depends_on('raida')
-        #depends_on('sio')
-        #depends_on('ced')
-        #depends_on('cedviewer')
-        #depends_on('garlic')
-        #depends_on('generalbrokenlines')
-        #depends_on('gear')
-        #depends_on('ilcutil')
-        #depends_on('lcfiplus')
-        #depends_on('lcfivertex')
-        #depends_on('marlin')
-        #depends_on('marlinutil')
-        #depends_on('marlindd4hep')
-        #depends_on('marlinreco')
-        #depends_on('marlinfastjet')
-        #depends_on('marlinkinfit')
-        # depends_on('marlinkinfitprocessors')
-        # depends_on('marlintrk')
-        # depends_on('kaldet')
-        # depends_on('ddkaltest')
-        #depends_on('kitrackmarlin')
-        #depends_on('kaltest')
-        #depends_on('kitrack')
-        #depends_on('fcalclusterer')
-        #depends_on('pandoraanalysis')
-        #depends_on('pandorapfa')
-        #depends_on('clicperformance')
-
-        ############ custom Muon Collider packages ############
-        #######################################################
         #depends_on('muoncvxddigitiser')
-        #depends_on('mybibutils')
         #depends_on('acorn')
 
     with when('+gen'):
         depends_on('whizard +openloops')
         depends_on('madgraph5amc')
         depends_on('pythia8')
+
+    with when('+cuda'):
+        depends_on('cuda')
+        depends_on('k4actstracking+cuda')
+        depends_on('py-torch+cuda')
+        depends_on('py-onnxruntime+cuda')
 
     ##################### developer tools #################
     #######################################################
