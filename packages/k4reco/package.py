@@ -11,7 +11,7 @@ class K4reco(CMakePackage, Key4hepPackage):
     url = "https://github.com/MuonColliderSoft/k4Reco/archive/v00-01-00.tar.gz"
     git = "https://github.com/MuonColliderSoft/k4Reco.git"
 
-    version("main", branch="main")
+    version("main", branch="last-bits")
     version(
         "0.3",
         sha256="59584e758c8f73838495f8411b3d6da22b05dd0244623e7d74f77ff221100004",
