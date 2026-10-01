@@ -35,6 +35,19 @@ class K4reco(CMakePackage, Key4hepPackage):
     depends_on("root")
     depends_on("fastjet")
 
+    # The branch built as @main (last-bits) added find_package(k4SimGeant4 REQUIRED)
+    # to the top-level CMakeLists.txt; without the dependency the configure step
+    # fails with "Could not find a package configuration file provided by
+    # k4SimGeant4". The tagged releases do not need it.
+    depends_on("k4simgeant4", when="@main")
+    # ...and its cmake/FindFastJet.cmake additionally requires the fastjet
+    # contribs (fastjet/contrib/ValenciaPlugin.hh plus the fastjetcontribfragile
+    # library), which the fastjet package does not install; without fjcontrib the
+    # configure step fails with "Could NOT find FastJet (missing:
+    # FASTJET_CONTRIB_INCLUDE_DIR FASTJETCONTRIB_LIBRARY)". The FindFastJet.cmake
+    # of the tagged releases does not look for the contribs.
+    depends_on("fjcontrib", when="@main")
+
     depends_on("lcio", when="+conformal_tracking")
     depends_on("ilcutil", when="+conformal_tracking")
     depends_on("kaltest", when="+conformal_tracking")
