@@ -87,7 +87,6 @@ class MucollStack(BundlePackage, Key4hepPackage):
     with when('+cuda'):
         depends_on('cuda')
         depends_on('k4actstracking+cuda')
-        depends_on('py-torch+cuda')
         depends_on('py-onnxruntime+cuda')
 
     ##################### developer tools #################
@@ -104,7 +103,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('xgboost')
         depends_on('py-onnxruntime')
         depends_on('py-onnx')
-        depends_on("py-torch")
+        # spack's py-torch defaults to +cuda on Linux; only enable it with mucoll-stack+cuda
+        depends_on("py-torch~cuda", when='~cuda')
+        depends_on("py-torch+cuda", when='+cuda')
         depends_on('torch-scatter')
         depends_on('py-torch-scatter')
         depends_on('py-scikit-learn')
