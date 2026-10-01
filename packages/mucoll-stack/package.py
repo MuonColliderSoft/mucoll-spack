@@ -10,9 +10,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from mucoll_utils import *
 
 from spack.package import *
+from spack_repo.builtin.build_systems.cuda import CudaPackage
 from spack.pkg.k4.key4hep_stack import *
 
-class MucollStack(BundlePackage, Key4hepPackage):
+class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     """Bundle package to install Muon Collider Software Stack"""
     
     homepage = 'https://github.com/MuonColliderSoft'
@@ -43,7 +44,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
             values=('Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel'))
     variant('llvm', default=False, description='Build with LLVM')
     variant('ml', default=False, description='Build with machine learning tools')
-    variant('cuda', default=False, description='Build the stack with CUDA support')
+    # 'cuda' and 'cuda_arch' variants come from CudaPackage
+    # (cuda_arch must be given with +cuda, e.g. cuda_arch=80)
     variant('pytools', default=False, description='Build with python tools')
     variant('sim', default=False, description='Build with reconstruction and simulation tools')
     variant('gen', default=False, description='Build with generators')
@@ -85,9 +87,9 @@ class MucollStack(BundlePackage, Key4hepPackage):
         depends_on('pythia8')
 
     with when('+cuda'):
-        depends_on('cuda')
         depends_on('k4actstracking+cuda')
-        depends_on('py-onnxruntime+cuda')
+        for arch in CudaPackage.cuda_arch_values:
+            depends_on(f'py-onnxruntime+cuda cuda_arch={arch}', when=f'cuda_arch={arch}')
 
     ##################### developer tools #################
     #######################################################
@@ -106,6 +108,8 @@ class MucollStack(BundlePackage, Key4hepPackage):
         # spack's py-torch defaults to +cuda on Linux; only enable it with mucoll-stack+cuda
         depends_on("py-torch~cuda", when='~cuda')
         depends_on("py-torch+cuda", when='+cuda')
+        for arch in CudaPackage.cuda_arch_values:
+            depends_on(f'py-torch+cuda cuda_arch={arch}', when=f'+cuda cuda_arch={arch}')
         depends_on('torch-scatter')
         depends_on('py-torch-scatter')
         depends_on('py-scikit-learn')
