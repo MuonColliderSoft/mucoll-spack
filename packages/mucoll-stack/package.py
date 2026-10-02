@@ -90,6 +90,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on('k4actstracking+cuda')
         for arch in CudaPackage.cuda_arch_values:
             depends_on(f'py-onnxruntime+cuda cuda_arch={arch}', when=f'cuda_arch={arch}')
+            depends_on(f'acts+cuda cuda_arch={arch}', when=f'cuda_arch={arch}')
 
     ##################### developer tools #################
     #######################################################
