@@ -17,19 +17,14 @@ class Acorn(PythonPackage, CudaPackage):
     # Default branch upstream is 'dev'. Named 'develop' so spack treats it as
     # newer than every tagged release (a plain 'dev' would sort below 1.0.0).
     version("develop", branch="dev")
-    # Release tags. The other upstream tags (CTD25, EggNet_CHEP2024,
-    # data_reading_v9, ...) are analysis snapshots, not releases, and v0.1
-    # predates the rename (it ships the 'gnn4itk_cf' module), so they are not
-    # listed. The model_store submodule is ssh-only and is not fetched.
+
+    # The model_store submodule is ssh-only and is not fetched.
     version("2.0.1", tag="2.0.1", commit="353c6370db22ee1efe5a52531cd10f473c59f266")
     version("2.0.0", tag="2.0.0", commit="0145a7054196237819fd7d8b07af19637bf8da79")
     version("1.2.0", tag="1.2.0", commit="8582ba06adc18679d407d438fefbd1e6720639fe")
     version("1.1.0", tag="1.1.0", commit="3d2c0727b4473b7d1c79933627e0316e855dbe9e")
     version("1.0.0", tag="1.0.0", commit="de637a2fec66ff554bad29e503d57cd488784200")
 
-    # 'cuda' and 'cuda_arch' variants come from CudaPackage. +cuda compiles the
-    # acorn.cuda_ext track-building kernels (connected components, reverse
-    # topological DP, path tracing), which only exist after 2.0.1.
     conflicts("+cuda", when="@:2.0.1", msg="acorn CUDA extensions are only available on develop")
     variant("wandb", default=False, description="Enable Weights & Biases logging")
 
