@@ -28,6 +28,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 - **`vim` is back in the images** ([#81](https://github.com/MuonColliderSoft/mucoll-spack/issues/81)).
   It was dropped when the base image moved to `ubuntu:24.04`.
+- **`py-matplotlib` builds with gcc LTO against a system make 4.3.** `.cherry-pick` takes the
+  upstream `gmake` build dependency for `%gcc`
+  ([spack/spack-packages#2526](https://github.com/spack/spack-packages/pull/2526)), so gcc's
+  lto-wrapper gets a jobserver format its `make` understands instead of failing with
+  `invalid --jobserver-auth string`.
 
 ---
 

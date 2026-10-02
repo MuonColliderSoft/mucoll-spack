@@ -17,3 +17,11 @@ git checkout 27d366be7b94044f06915797fe99db9de7a171be -- \
 
 # geant4 examples
 git cherry-pick 334aeef7ffd810fe7c15c9ba9b6c3033ba4bf899 -X theirs --no-commit
+
+# py-matplotlib: depend on gmake when %gcc (spack/spack-packages#2526). gcc's
+# lto-wrapper runs `make` from PATH while linking the extension modules; without
+# a gmake dep Spack's new installer exports the fifo jobserver form, which the
+# system make 4.3 (RHEL 9, Ubuntu 24.04) cannot parse ("invalid
+# --jobserver-auth string"). Drop once the spack-packages pin includes #2526.
+git fetch --depth 50 upstream c09b3343a23069e9e309dfee4083a05327c827bc
+git cherry-pick c09b3343a23069e9e309dfee4083a05327c827bc --no-commit
