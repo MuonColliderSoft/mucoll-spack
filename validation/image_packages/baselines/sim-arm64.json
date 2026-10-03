@@ -448,7 +448,6 @@
     "nlohmann-json",
     "numactl",
     "nvtx",
-    "onnx",
     "openblas",
     "openjdk",
     "openloops",
@@ -486,7 +485,6 @@
     "py-coloredlogs",
     "py-contourpy",
     "py-coverage",
-    "py-cppy",
     "py-cramjam",
     "py-cycler",
     "py-filelock",
@@ -962,9 +960,6 @@
     "nvtx": [
       "fllhvogmldy7pfh5tohhpc2ibbgfcgr6"
     ],
-    "onnx": [
-      "xemlqfxujqvvoyoshlgxvo4t7dost4xk"
-    ],
     "openblas": [
       "luld6blun6n45upam3zjthjob7i4663f"
     ],
@@ -1075,9 +1070,6 @@
     ],
     "py-coverage": [
       "wd2vfkgvmeht2ranamtfv4ycmjq6bjw7"
-    ],
-    "py-cppy": [
-      "r23pcy7bxwszowy546c57mg5vcqyf6gx"
     ],
     "py-cramjam": [
       "mejvxmv3rkjoiz5gomg2lvkppvafgmbe"

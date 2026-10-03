@@ -25,7 +25,20 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   new `llvm` overlay recipe (`packages/llvm`) caps the parallel link jobs to avoid OOM kills and
   adds `~clang_tools_extra`/`~static_analyzer` switches for slimmer `+clang` builds.
 
+- **`acorn` moved from `+sim` to `+ml`**, so it (and `py-torch-geometric`, `py-torch-scatter`, …)
+  is now also part of the analysis image, which is built `+ml`.
+- **`mucoll-stack` recipe cleanup.** Dropped direct dependencies that nothing uses or that are already
+  pulled in: `torch-scatter` and `py-torch-scatter` (still brought in by `acts+gnn` and `acorn`),
+  `onnx` (C++), `xgboost` (via `py-xgboost`) and `py-cppy`. Tools and Python packages are now
+  `type="run"` dependencies. Removed the unused `MCIlcsoftpackage` helper (`mucoll_utils.py`), the
+  obsolete `%gcc@8.3.1` conflict and commented-out code.
+- **Local `torch-scatter` overlay removed** in favour of the builtin recipe, which is a
+  `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`.
+
 ### Fixed
+- **`+cuda` combinations of `mucoll-stack`.** `+sim~ml+cuda` failed to concretize (no `cuda_arch`
+  reached `py-torch`), `~sim+cuda` pulled `acts`/`k4actstracking` into the analysis root, and
+  `+sim~ml~cuda` could get a CUDA-enabled `py-torch`.
 - **`vim` is back in the images** ([#81](https://github.com/MuonColliderSoft/mucoll-spack/issues/81)).
   It was dropped when the base image moved to `ubuntu:24.04`.
 - **`py-matplotlib` builds with gcc LTO against a system make 4.3.** `.cherry-pick` takes the

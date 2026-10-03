@@ -1,18 +1,8 @@
 from datetime import datetime
-import os
-
-# import common methods for use in recipe from mucoll_utils.py
-# (so other recipe can import from spack.pkg.mucoll.mucoll_stack)
-# (which is the most convenient way to make that code available
-#  without creation of a new module
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from mucoll_utils import *
 
 from spack.package import *
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack.pkg.k4.key4hep_stack import *
+from spack.pkg.k4.key4hep_stack import Key4hepPackage, install_setup_script
 
 
 class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
@@ -25,13 +15,10 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     ##################### versions ########################
     #######################################################
     ###  nightly build
-    # to install the latest version of every dependency
-    # should use `environments/mucoll-common/packages.yaml`
+    # dependency versions are set in environments/mucoll-common/packages.yaml
     version(datetime.today().strftime("%Y-%m-%d"))
 
     ### stable build
-    # to install exact specified version for every dependecy
-    # should use `environments/mucoll-release/packages.yaml`
     version("3.1")
 
     # this bundle package installs a custom setup script,
@@ -68,10 +55,11 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
 
-    depends_on("cmake")
-    depends_on("pelican")
-    depends_on("ccache")
-    depends_on("ninja")
+    with default_args(type="run"):
+        depends_on("cmake")
+        depends_on("pelican")
+        depends_on("ccache")
+        depends_on("ninja")
 
     # Minimal build for analysis only
     depends_on("edm4hep")
@@ -90,93 +78,71 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("k4actstracking")
         depends_on("k4simgeant4")
         depends_on("k4clue")
-        # depends_on('muoncvxddigitiser')
-        depends_on("acorn")
 
     with when("+gen"):
         depends_on("whizard +openloops")
         depends_on("madgraph5amc")
         depends_on("pythia8")
 
+    # py-torch is pulled in by +ml and by +sim (k4actstracking+gnn).
+    # spack's py-torch defaults to +cuda on Linux; only enable it with mucoll-stack+cuda
     with when("+cuda"):
-        depends_on("k4actstracking+cuda")
         for arch in CudaPackage.cuda_arch_values:
-            depends_on(
-                f"py-onnxruntime+cuda cuda_arch={arch}", when=f"cuda_arch={arch}"
-            )
-            depends_on(f"acts+cuda cuda_arch={arch}", when=f"cuda_arch={arch}")
+            with when(f"cuda_arch={arch}"):
+                depends_on(f"py-torch+cuda cuda_arch={arch}", when="+ml")
+                depends_on(f"py-torch+cuda cuda_arch={arch}", when="+sim")
+                depends_on(f"py-onnxruntime+cuda cuda_arch={arch}", when="+ml")
+                depends_on(f"py-onnxruntime+cuda cuda_arch={arch}", when="+sim")
+                depends_on(f"acts+cuda cuda_arch={arch}", when="+sim")
+                # acts requires torch-scatter+cuda but does not forward cuda_arch
+                depends_on(f"torch-scatter+cuda cuda_arch={arch}", when="+sim")
+        depends_on("k4actstracking+cuda", when="+sim")
+    depends_on("py-torch~cuda", when="~cuda+ml")
+    depends_on("py-torch~cuda", when="~cuda+sim")
 
     ##################### developer tools #################
     #######################################################
-    with when("+devtools"):
+    with when("+devtools"), default_args(type="run"):
         depends_on("doxygen")
         depends_on("gdb")
 
     depends_on("llvm", when="+llvm")
 
-    with when("+ml"):
+    with when("+ml"), default_args(type="run"):
         # ML tools
-        depends_on("onnx")
-        depends_on("xgboost")
+        depends_on("acorn")
         depends_on("py-onnxruntime")
         depends_on("py-onnx")
-        # spack's py-torch defaults to +cuda on Linux; only enable it with mucoll-stack+cuda
-        depends_on("py-torch~cuda", when="~cuda")
-        depends_on("py-torch+cuda", when="+cuda")
-        for arch in CudaPackage.cuda_arch_values:
-            depends_on(
-                f"py-torch+cuda cuda_arch={arch}", when=f"+cuda cuda_arch={arch}"
-            )
-        depends_on("torch-scatter")
-        depends_on("py-torch-scatter")
+        depends_on("py-torch")
         depends_on("py-scikit-learn")
         depends_on("py-xgboost")
 
-    with when("+pytools"):
+    with when("+pytools"), default_args(type="run"):
         # Python tools
         depends_on("py-h5py")
-        # depends_on('py-ipython')
-        # depends_on('py-jupytext') # this requires rust and node-js which take too long to compile
         depends_on("py-matplotlib")
         depends_on("py-pandas")
         depends_on("py-particle")
         depends_on("py-pip")
         depends_on("py-scipy")
         depends_on("py-uproot")
-        depends_on("py-cppy")
 
-    ##################### conflicts #######################
-    #######################################################
-    conflicts(
-        "%gcc@8.3.1",
-        msg="There are known issues with compilers from redhat's devtoolsets"
-        "which are therefore not supported."
-        "See https://root-forum.cern.ch/t/devtoolset-gcc-toolset-compatibility/38286",
-    )
-
-    def setup_run_environment(self, env):
+    def setup_run_environment(self, env: EnvironmentModifications) -> None:
         # set locale to avoid certain issues with xerces-c
         # (see https://github.com/key4hep/key4hep-spack/issues/170)
         env.set("LC_ALL", "C")
-        env.set("MUCOLL_STACK", os.path.join(self.spec.prefix, "setup.sh"))
-        env.set("MUCOLL_RELEASE_VERSION", self.spec.version)
+        env.set("MUCOLL_STACK", join_path(self.prefix, "setup.sh"))
+        env.set("MUCOLL_RELEASE_VERSION", str(self.spec.version))
 
-        # Set MUCOLL_GEO for backward compatibility.
-        # This now points to the geometry directory provided by k4geo.
-        # If you previously used MUCOLL_GEO, please update your scripts to use k4geo configuration directly.
+        # Set MUCOLL_GEO for backward compatibility; prefer the k4geo configuration directly.
         if "k4geo" in self.spec:
-            env.set("MUCOLL_GEO", os.path.join(self.spec["k4geo"].prefix.share))
+            env.set("MUCOLL_GEO", self.spec["k4geo"].prefix.share)
         if "k4actstracking" in self.spec:
-            env.set(
-                "ACTSTRACKING_DATA",
-                os.path.join(self.spec["k4actstracking"].prefix.share),
-            )
+            env.set("ACTSTRACKING_DATA", self.spec["k4actstracking"].prefix.share)
 
         # ROOT needs to be in LD_LIBRARY_PATH to find cxxmodules
-        env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
-
-        # See https://github.com/root-project/root/issues/18949
-        # env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
+        if "root" in self.spec:
+            env.prepend_path("LD_LIBRARY_PATH", self.spec["root"].prefix.lib.root)
 
         # set vdt, needed for root, see https://github.com/spack/spack/pull/37278
         if "vdt" in self.spec:
@@ -184,15 +150,11 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
             # When building podio with +rntuple there are warnings constantly without this
             env.prepend_path("LD_LIBRARY_PATH", self.spec["vdt"].libs.directories[0])
 
-        # Add the correct path in pytorch to CMAKE_PREFIX_PATH
-        # This could be deleted (to be tested) once https://github.com/spack/spack/pull/49267 is merged
+        # py-torch's cmake_prefix_paths only reaches dependents' *build* environment;
+        # users building against libtorch from the setup script need it here too.
         if "py-torch" in self.spec:
-            env.prepend_path(
-                "CMAKE_PREFIX_PATH",
-                join_path(
-                    self["py-torch"].module.python_platlib, "torch", "share", "cmake"
-                ),
-            )
+            for path in self["py-torch"].cmake_prefix_paths:
+                env.prepend_path("CMAKE_PREFIX_PATH", path)
 
-    def install(self, spec, prefix):
-        return install_setup_script(self, spec, prefix, "MUCOLL_LATEST_SETUP_PATH")
+    def install(self, spec: Spec, prefix: Prefix) -> None:
+        install_setup_script(self, spec, prefix, "MUCOLL_LATEST_SETUP_PATH")
