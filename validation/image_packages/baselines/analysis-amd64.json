@@ -458,7 +458,6 @@
     "py-llvmlite",
     "py-markupsafe",
     "py-matplotlib",
-    "py-ml-dtypes",
     "py-mpi4py",
     "py-mpmath",
     "py-multidict",
@@ -917,9 +916,6 @@
     ],
     "py-matplotlib": [
       "p3dlb6uzrbmz5tmakgny3w4il4oonpff"
-    ],
-    "py-ml-dtypes": [
-      "yka7cmhehkvs3ay7fhy7f4ddamzc7wye"
     ],
     "py-mpi4py": [
       "oe2wnkseugqe6h7uqmdynmtvv3zy7co3"

@@ -34,8 +34,16 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   obsolete `%gcc@8.3.1` conflict and commented-out code.
 - **Local `torch-scatter` overlay removed** in favour of the builtin recipe, which is a
   `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`.
+- **Dropped the `py-fsspec +http` requirement.** With `acorn` in both roots, both already get `+http`.
 
 ### Fixed
+- **`import onnx` and `import onnxruntime` in the same process no longer abort.** Both modules
+  registered `onnx/onnx-ml.proto` in the shared `libprotobuf` ("File already exists in database"),
+  which also broke `onnxruntime.quantization`. `protobuf` is now built static (`~shared`).
+- **`py-onnx` matches `py-onnxruntime`.** `py-onnx` is pinned to 1.17, the ONNX version
+  `onnxruntime@1.22` is built against. `py-onnx@1.19` wrote IR version 12 / opset 24 models by
+  default, which `onnxruntime@1.22` refuses to load.
+- **`acorn` is pinned to 2.0.1.** A fresh concretization otherwise picked `acorn@1.2.0`.
 - **`+cuda` combinations of `mucoll-stack`.** `+sim~ml+cuda` failed to concretize (no `cuda_arch`
   reached `py-torch`), `~sim+cuda` pulled `acts`/`k4actstracking` into the analysis root, and
   `+sim~ml~cuda` could get a CUDA-enabled `py-torch`.
