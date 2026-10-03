@@ -3,10 +3,10 @@
 #  Tag:        ${VERSION}-${OS}
 #
 #  Base layer of the layered Muon Collider images. Starting from a plain
-#  ubuntu:24.04 it concretizes the WHOLE layered environment 
-#  (analysis + sim roots together, so shared packages get a single hash) 
-#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images 
-#  are built FROM this image with Dockerfile.layer and install their extra 
+#  ubuntu:24.04 it concretizes the WHOLE layered environment
+#  (analysis + sim roots together, so shared packages get a single hash)
+#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images
+#  are built FROM this image with Dockerfile.layer and install their extra
 #  specs.
 ###############################################################################
 
@@ -64,7 +64,7 @@ RUN . /opt/setup_spack.sh && \
 
 # --------------------------------------------------------------------------- #
 #  Add the key4hep-spack repository (the `k4` namespace mucoll-stack imports
-#  from, and where most externals / key4hep packages are defined). 
+#  from, and where most externals / key4hep packages are defined).
 # --------------------------------------------------------------------------- #
 ARG KEY4HEP_SPACK_REPO=key4hep/key4hep-spack
 ARG KEY4HEP_SPACK_SHA
@@ -84,7 +84,7 @@ RUN . /opt/setup_spack.sh && \
     spack repo add ${SPACK_ROOT}/var/key4hep-spack
 
 # --------------------------------------------------------------------------- #
-#  MuColl-specific bootstrap 
+#  MuColl-specific bootstrap
 # --------------------------------------------------------------------------- #
 ARG MUCOLL_SHA=e49a0639ff987a84fa0c6263e068776f9d7b6f67
 ARG GITHUB_REPOSITORY=muoncollidersoft/mucoll-spack

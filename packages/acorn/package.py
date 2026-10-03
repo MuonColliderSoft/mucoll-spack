@@ -25,7 +25,11 @@ class Acorn(PythonPackage, CudaPackage):
     version("1.1.0", tag="1.1.0", commit="3d2c0727b4473b7d1c79933627e0316e855dbe9e")
     version("1.0.0", tag="1.0.0", commit="de637a2fec66ff554bad29e503d57cd488784200")
 
-    conflicts("+cuda", when="@:2.0.1", msg="acorn CUDA extensions are only available on develop")
+    conflicts(
+        "+cuda",
+        when="@:2.0.1",
+        msg="acorn CUDA extensions are only available on develop",
+    )
     variant("wandb", default=False, description="Enable Weights & Biases logging")
 
     depends_on("py-setuptools@42:", type="build")

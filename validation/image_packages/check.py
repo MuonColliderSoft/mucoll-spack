@@ -163,16 +163,22 @@ def main():
                 % baseline_path
             )
         elif args.observed_out:
-            print("\nIf this is intentional, replace %s with %s."
-                  % (baseline_path, args.observed_out))
+            print(
+                "\nIf this is intentional, replace %s with %s."
+                % (baseline_path, args.observed_out)
+            )
         else:
-            print("\nIf this is intentional, rerun with --observed-out and replace %s."
-                  % baseline_path)
+            print(
+                "\nIf this is intentional, rerun with --observed-out and replace %s."
+                % baseline_path
+            )
         return 1
 
     if args.concretized_spec:
-        print("Concretized Spack packages match %s (%d packages)."
-              % (baseline_path, len(inventory["spack"])))
+        print(
+            "Concretized Spack packages match %s (%d packages)."
+            % (baseline_path, len(inventory["spack"]))
+        )
     else:
         print(
             "Package inventory matches %s (%d apt, %d Spack)."

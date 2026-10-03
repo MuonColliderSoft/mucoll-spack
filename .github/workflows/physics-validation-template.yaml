@@ -89,7 +89,7 @@ jobs:
           git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
           git -C benchmarks submodule update --init --recursive --depth 1
       - name: Download generated input
-        # Pre-generated particle-gun file. 
+        # Pre-generated particle-gun file.
         # Stored as asset on the 'phys-val-inputs' release; one
         # file per particle label inferred from the PDG id.
         run: |

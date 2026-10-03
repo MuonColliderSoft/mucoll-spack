@@ -31,8 +31,7 @@ def main():
     ]
     if len(roots) != 1:
         sys.exit(
-            "%d concretized roots match '%s', expected exactly one"
-            % (len(roots), spec)
+            "%d concretized roots match '%s', expected exactly one" % (len(roots), spec)
         )
 
     names = {
