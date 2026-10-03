@@ -99,7 +99,7 @@ packages:
     require: +cxx+hl
   hepmc3:
     require: +python+rootio
-  
+
   py-pandas:
     require: ~excel~parquet
   # Cap numpy at the acts-compatible ceiling: the builtin acts recipe requires

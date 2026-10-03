@@ -10,9 +10,17 @@ class K4reco(CMakePackage, Key4hepPackage):
     git = "https://github.com/MuonColliderSoft/k4Reco.git"
 
     version("main", branch="main")
-    version("0.3", sha256="59584e758c8f73838495f8411b3d6da22b05dd0244623e7d74f77ff221100004", preferred=True)
-    version("0.2", sha256="a5b02425b6970777f9f2982fd2907d38599c00996d24ff0be839a0e315509cd4")
-    version("0.1", sha256="b0fa2c7decfa140159e09e271074ba03ba49eeccfcbb2bfb1c464e719d8373c3")
+    version(
+        "0.3",
+        sha256="59584e758c8f73838495f8411b3d6da22b05dd0244623e7d74f77ff221100004",
+        preferred=True,
+    )
+    version(
+        "0.2", sha256="a5b02425b6970777f9f2982fd2907d38599c00996d24ff0be839a0e315509cd4"
+    )
+    version(
+        "0.1", sha256="b0fa2c7decfa140159e09e271074ba03ba49eeccfcbb2bfb1c464e719d8373c3"
+    )
 
     variant("conformal_tracking", default=True, description="Build Conformal Tracking")
 
@@ -23,7 +31,7 @@ class K4reco(CMakePackage, Key4hepPackage):
     depends_on("k4fwcore")
     depends_on("k4geo")
     depends_on("root")
-    depends_on("fastjet") 
+    depends_on("fastjet")
 
     depends_on("lcio", when="+conformal_tracking")
     depends_on("ilcutil", when="+conformal_tracking")

@@ -24,9 +24,18 @@ class Pelican(GoPackage):
 
     maintainers("turetske", "jhiemstrawisc", "joereuss12")
 
-    version("7.24.3", sha256="fd73d4c9193f3a25d82c696e7269d10f84f4941786e957c8dffa1562d4b605a0")
-    version("7.24.2", sha256="fbb92fc3d515317be7c6763f51061628d8a8140b758e3f8c253479b69208fa7d")
-    version("7.23.3", sha256="e485038633aa03c149bcc76311f2f4a4d9d9e89faccd87a304377384f5f94930")
+    version(
+        "7.24.3",
+        sha256="fd73d4c9193f3a25d82c696e7269d10f84f4941786e957c8dffa1562d4b605a0",
+    )
+    version(
+        "7.24.2",
+        sha256="fbb92fc3d515317be7c6763f51061628d8a8140b758e3f8c253479b69208fa7d",
+    )
+    version(
+        "7.23.3",
+        sha256="e485038633aa03c149bcc76311f2f4a4d9d9e89faccd87a304377384f5f94930",
+    )
 
     # Pelican is a pure-Go binary; no C/C++ compiler needed at runtime.
     # The Go toolchain must be >= 1.21 (required by go.mod as of v7.x).
@@ -55,10 +64,7 @@ class Pelican(GoPackage):
         super().setup_build_environment(env)
         # Embed version information the same way goreleaser does.
         version_pkg = "github.com/pelicanplatform/pelican/version"
-        env.append_flags(
-            "GOFLAGS",
-            "-ldflags=-s -w"
-        )
+        env.append_flags("GOFLAGS", "-ldflags=-s -w")
         # Disable CGO: the Pelican client binary is built with CGO_ENABLED=0
         # by upstream (see .goreleaser.yaml).
         env.set("CGO_ENABLED", "0")
@@ -92,6 +98,6 @@ class Pelican(GoPackage):
     def check_install(self):
         pelican = which(self.prefix.bin.pelican)
         out = pelican("--version", output=str, error=str)
-        assert str(self.spec.version) in out, (
-            f"pelican --version output does not contain {self.spec.version}:\n{out}"
-        )
+        assert (
+            str(self.spec.version) in out
+        ), f"pelican --version output does not contain {self.spec.version}:\n{out}"
