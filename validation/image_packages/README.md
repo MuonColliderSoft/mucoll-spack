@@ -1,8 +1,11 @@
 # Image package check
 
 CI records the names of every Ubuntu and Spack package installed in each image
-and compares them with the matching file in [`baselines/`](baselines). An added
-or removed package fails the image build and CI uploads the observed inventory.
+and compares them with the matching file in [`baselines/`](baselines). The
+check runs per architecture against the published multi-arch image, after its
+manifest is pushed, so it never blocks the image build. An added or removed
+package fails the `image-packages-<type>` job, and CI uploads the observed
+inventory as the `image-packages-<type>-<arch>` artifact.
 
 Versions are intentionally excluded: Ubuntu security updates and rebuilt Spack
 dependencies should not require routine baseline updates. The check is for

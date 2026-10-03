@@ -93,6 +93,40 @@ jobs:
       amd64-image: ${{ needs.sim-amd64.outputs.image-uri }}
       arm64-image: ${{ needs.sim-arm64.outputs.image-uri }}
 
+  # ---------------------------------------------------------- package checks --
+  # Compare each published architecture's package inventory with its baseline.
+  # These run after the manifests are published and nothing depends on them, so
+  # a package change is reported without blocking the images or validation.
+  image-packages-analysis:
+    needs: manifest-analysis
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: amd64, runner: ubuntu-latest }
+          - { platform: arm64, runner: ubuntu-24.04-arm }
+    uses: ./.github/workflows/image-packages-template.yaml
+    with:
+      image: ${{ needs.manifest-analysis.outputs.image }}
+      image-type: analysis
+      platform: ${{ matrix.platform }}
+      runner: ${{ matrix.runner }}
+
+  image-packages-sim:
+    needs: manifest-sim
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: amd64, runner: ubuntu-latest }
+          - { platform: arm64, runner: ubuntu-24.04-arm }
+    uses: ./.github/workflows/image-packages-template.yaml
+    with:
+      image: ${{ needs.manifest-sim.outputs.image }}
+      image-type: sim
+      platform: ${{ matrix.platform }}
+      runner: ${{ matrix.runner }}
+
   # ------------------------------------------------------ PR fast validation --
   physics-fast:
     # Pull requests get one fast, report-only pion chain against the freshly
