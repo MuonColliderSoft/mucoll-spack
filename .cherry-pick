@@ -25,3 +25,17 @@ git cherry-pick 334aeef7ffd810fe7c15c9ba9b6c3033ba4bf899 -X theirs --no-commit
 # --jobserver-auth string"). Drop once the spack-packages pin includes #2526.
 git fetch --depth 50 upstream c09b3343a23069e9e309dfee4083a05327c827bc
 git cherry-pick c09b3343a23069e9e309dfee4083a05327c827bc --no-commit
+
+# Pull the latest py-pytorch-lightning recipe (adds 2.5.3 / 2.6.x and deprecates
+# the releases with CVEs); the pinned spack-packages stops at 2.0.7. acorn
+# imports `pytorch_lightning`, which the unified py-lightning package does not
+# ship, and acorn 2.x targets lightning 2.4.
+git fetch --depth 50 upstream fba5ebd6e68757285d97e14050addc5ecf1e4b6f
+git checkout fba5ebd6e68757285d97e14050addc5ecf1e4b6f -- \
+  repos/spack_repo/builtin/packages/py_pytorch_lightning/package.py
+
+# Pull the py-uv-build recipe (not in the pinned spack-packages): the build
+# backend of py-class-resolver@0.7: (acorn -> py-class-resolver).
+git fetch --depth 50 upstream 5ee3e6b85e10f1ff8189f549dae13198f5cec4ac
+git checkout 5ee3e6b85e10f1ff8189f549dae13198f5cec4ac -- \
+  repos/spack_repo/builtin/packages/py_uv_build/package.py

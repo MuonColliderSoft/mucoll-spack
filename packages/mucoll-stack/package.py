@@ -79,7 +79,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on('k4simgeant4')
         depends_on('k4clue')
         #depends_on('muoncvxddigitiser')
-        #depends_on('acorn')
+        depends_on('acorn')
 
     with when('+gen'):
         depends_on('whizard +openloops')

@@ -168,9 +168,6 @@ packages:
   py-onnxruntime:
     require: '@1.18:'
 
-  pyatlasify:
-    require: '@master'
-    
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
 
