@@ -74,9 +74,7 @@ packages:
   delphes:
     require: "@master"
 
-  # Ask for Python > 3.11
-  # Since many packages depend on setuptools that was dropped in 3.12,
-  # without asking explicitly the version used will be 3.11
+  # Ask for Python >= 3.12 (acts@44: requires it for its python bindings)
   python:
     require: "@3.12: +optimizations"
 
@@ -119,16 +117,16 @@ packages:
   py-particle:
     require: '@0.24'
 
-  # The pins below (py-sympy, eigen, py-fsspec, valgrind) exist for the SAME
+  # The pins below (py-sympy, eigen, valgrind) exist for the SAME
   # reason as the numpy cap above: under unify:when_possible the lean analysis
   # root takes the newest version/variant of a shared package while the richer
-  # +sim root is capped (by acts, acorn's ML deps, geant4, ...), so the two
-  # roots cannot share a hash and the package -- plus everything above it -- is
-  # duplicated. py-torch depends on ALL of py-sympy, eigen, py-fsspec and
-  # valgrind, so each split forks the (expensive) py-torch/onnxruntime subtree.
+  # +sim root is capped (by acts, geant4, ...), so the two roots cannot share
+  # a hash and the package -- plus everything above it -- is duplicated.
+  # py-torch depends on ALL of py-sympy, eigen and valgrind, so each split
+  # forks the (expensive) py-torch/onnxruntime subtree.
   # Forcing one shared config collapses it to a single build per package.
 
-  # sim caps sympy at 1.13.3 (via acorn -> py-torch-geometric / py-lightning);
+  # sim caps sympy at the 1.13 series (acts@44: requires py-sympy@1.13);
   # analysis is free to take 1.14.0. py-torch (@2.7:) and py-onnxruntime both
   # accept 1.13.3, so pinning it unifies py-onnxruntime AND one py-torch edge.
   py-sympy:
@@ -139,13 +137,6 @@ packages:
   # proves it), so pin the 3.4 series everywhere.
   eigen:
     require: '@3.4'
-
-  # sim pulls py-fsspec+http (acorn -> py-lightning / py-torch-geometric need
-  # remote-dataset support); analysis takes ~http. Force +http so both agree;
-  # this unifies py-uproot / py-awkward and another py-torch edge. The extra
-  # py-aiohttp dependency is cheap.
-  py-fsspec:
-    require: '+http'
 
   # py-torch is built +valgrind, and valgrind is built +boost by default. boost
   # legitimately has two configs (a rich +filesystem/+program_options/... build
@@ -161,12 +152,26 @@ packages:
   py-torch:
     require: '@2.8:+custom-protobuf'
 
-  # The versions of py-onnx and py-onnxruntime should be consistent based on this table
-  # https://onnxruntime.ai/docs/reference/compatibility.html#onnx-opset-support
+  # Keep py-onnx in step with py-onnxruntime. The C++ runtime is built against
+  # the onnx version vendored in onnxruntime's cmake/deps.txt (onnx 1.17 for
+  # onnxruntime 1.22, i.e. IR version 10 / opset 22). A newer py-onnx writes
+  # models with a higher IR version and opset by default, which this runtime
+  # refuses to load ("Unsupported model IR version"). onnxruntime@1.22.2 is the
+  # newest version in spack-packages; bump both together when that changes.
   py-onnx:
-    require: '@1.16:'
+    require: '@1.17'
   py-onnxruntime:
-    require: '@1.18:'
+    require: '@1.22'
+
+  # Build protobuf as a static (PIC) library. py-onnx and py-onnxruntime each
+  # compile in the generated code for onnx/onnx-ml.proto; with a shared
+  # libprotobuf both register it in the one global descriptor pool, and
+  # importing the two modules in the same process aborts with
+  # "File already exists in database: onnx/onnx-ml.proto" (this also breaks
+  # onnxruntime.quantization, which imports onnx). Linking protobuf statically
+  # gives each module its own copy, as the PyPI wheels do.
+  protobuf:
+    require: '~shared'
 
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
@@ -200,6 +205,10 @@ packages:
     require: '@0.1pre16'
   k4gaudipandora:
     require: '@main~ddkaltest'
+  # Without a requirement a fresh concretization (no installed specs to reuse)
+  # picks acorn@1.2.0 instead of the latest release.
+  acorn:
+    require: '@2.0.1'
   k4reco:
     require: '@0.3~conformal_tracking'
 
