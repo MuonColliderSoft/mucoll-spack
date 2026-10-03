@@ -37,10 +37,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         description="CMake build type",
         values=("Debug", "Release", "RelWithDebInfo", "MinSizeRel"),
     )
-    variant("llvm", default=False, description="Build with LLVM")
     variant("ml", default=False, description="Build with machine learning tools")
-    # 'cuda' and 'cuda_arch' variants come from CudaPackage
-    # (cuda_arch must be given with +cuda, e.g. cuda_arch=80)
     variant("pytools", default=False, description="Build with python tools")
     variant(
         "sim",
@@ -66,8 +63,6 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     depends_on("podio")
 
     with when("+sim"):
-        ############################### Key4hep ###############
-        #######################################################
         depends_on("dd4hep")
         depends_on("delphes")
         depends_on("hepmc3")
@@ -84,7 +79,6 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("madgraph5amc")
         depends_on("pythia8")
 
-    # py-torch is pulled in by +ml and by +sim (k4actstracking+gnn).
     # spack's py-torch defaults to +cuda on Linux; only enable it with mucoll-stack+cuda
     with when("+cuda"):
         for arch in CudaPackage.cuda_arch_values:
@@ -100,13 +94,10 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     depends_on("py-torch~cuda", when="~cuda+ml")
     depends_on("py-torch~cuda", when="~cuda+sim")
 
-    ##################### developer tools #################
-    #######################################################
     with when("+devtools"), default_args(type="run"):
+        # Developer tools
         depends_on("doxygen")
         depends_on("gdb")
-
-    depends_on("llvm", when="+llvm")
 
     with when("+ml"), default_args(type="run"):
         # ML tools
