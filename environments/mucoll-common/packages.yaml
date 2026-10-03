@@ -1,8 +1,18 @@
 packages:
   all:
     target: [x86_64, aarch64]
-    variants: build_type=Release cxxstd=20
+    variants: build_type=Release cxxstd=23
     buildable: true
+
+  # Build the whole stack with the system gcc-14 (installed in
+  # Docker/Dockerfile.base). The image also has Ubuntu's default gcc 13, which
+  # does not fully support cxxstd=23 (it reports __cplusplus as 202100L).
+  c:
+    require: [gcc@14]
+  cxx:
+    require: [gcc@14]
+  fortran:
+    require: [gcc@14]
 
   # Use the system OpenGL as recommended by spack
   # See https://github.com/key4hep/key4hep-spack/issues/318 and
@@ -89,10 +99,10 @@ packages:
     require: +python+tui+source-highlight~debuginfod
 
   xrootd:
-    require: +krb5 cxxstd=20
+    require: +krb5
 
   root:
-    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo cxxstd=20'
+    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo'
 
   hdf5:
     require: +cxx+hl
@@ -118,16 +128,16 @@ packages:
   py-particle:
     require: '@0.24'
 
-  # The pins below (py-sympy, eigen, py-fsspec, valgrind) exist for the SAME
+  # The pins below (py-sympy, eigen, valgrind) exist for the SAME
   # reason as the numpy cap above: under unify:when_possible the lean analysis
   # root takes the newest version/variant of a shared package while the richer
-  # +sim root is capped (by acts, acorn's ML deps, geant4, ...), so the two
-  # roots cannot share a hash and the package -- plus everything above it -- is
-  # duplicated. py-torch depends on ALL of py-sympy, eigen, py-fsspec and
-  # valgrind, so each split forks the (expensive) py-torch/onnxruntime subtree.
+  # +sim root is capped (by acts, geant4, ...), so the two roots cannot share
+  # a hash and the package -- plus everything above it -- is duplicated.
+  # py-torch depends on ALL of py-sympy, eigen and valgrind, so each split
+  # forks the (expensive) py-torch/onnxruntime subtree.
   # Forcing one shared config collapses it to a single build per package.
 
-  # sim caps sympy at 1.13.3 (via acorn -> py-torch-geometric / py-lightning);
+  # sim caps sympy at the 1.13 series (acts@44: requires py-sympy@1.13);
   # analysis is free to take 1.14.0. py-torch (@2.7:) and py-onnxruntime both
   # accept 1.13.3, so pinning it unifies py-onnxruntime AND one py-torch edge.
   py-sympy:
@@ -138,13 +148,6 @@ packages:
   # proves it), so pin the 3.4 series everywhere.
   eigen:
     require: '@3.4'
-
-  # sim pulls py-fsspec+http (acorn -> py-lightning / py-torch-geometric need
-  # remote-dataset support); analysis takes ~http. Force +http so both agree;
-  # this unifies py-uproot / py-awkward and another py-torch edge. The extra
-  # py-aiohttp dependency is cheap.
-  py-fsspec:
-    require: '+http'
 
   # py-torch is built +valgrind, and valgrind is built +boost by default. boost
   # legitimately has two configs (a rich +filesystem/+program_options/... build
@@ -160,57 +163,63 @@ packages:
   py-torch:
     require: '@2.14:+custom-protobuf'
 
-  # The versions of py-onnx and py-onnxruntime should be consistent based on this table
-  # https://onnxruntime.ai/docs/reference/compatibility.html#onnx-opset-support
+  # Keep py-onnx in step with py-onnxruntime. The C++ runtime is built against
+  # the onnx version vendored in onnxruntime's cmake/deps.txt (onnx 1.17 for
+  # onnxruntime 1.22, i.e. IR version 10 / opset 22). A newer py-onnx writes
+  # models with a higher IR version and opset by default, which this runtime
+  # refuses to load ("Unsupported model IR version"). onnxruntime@1.22.2 is the
+  # newest version in spack-packages; bump both together when that changes.
   py-onnx:
-    require: '@1.16:'
+    require: '@1.17'
   py-onnxruntime:
-    require: '@1.18:'
+    require: '@1.22'
+
+  # Build protobuf as a static (PIC) library. py-onnx and py-onnxruntime each
+  # compile in the generated code for onnx/onnx-ml.proto; with a shared
+  # libprotobuf both register it in the one global descriptor pool, and
+  # importing the two modules in the same process aborts with
+  # "File already exists in database: onnx/onnx-ml.proto" (this also breaks
+  # onnxruntime.quantization, which imports onnx). Linking protobuf statically
+  # gives each module its own copy, as the PyPI wheels do.
+  protobuf:
+    require: '~shared'
 
   geant4:
-    require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
+    require: ~opengl~qt~vecgeom~examples +ipo
 
   pythia8:
     require: +python+lhapdf+gzip
 
   edm4hep:
-    require: '@1.2'
+    require: '@1.3'
 
   k4fwcore:
     require: '@main'
 
   dd4hep:
-    require: '+edm4hep+xercesc+hepmc3'
+    require: '@master +edm4hep+xercesc+hepmc3'
   acts:
-    # +examples+python: the ACTS python bindings (acts.examples.*) are the entry
-    # point for the material mapping workflow. +hepmc3 keeps hepmc3 explicitly in
-    # the DAG for acts.examples.hepmc3, which material_recording.py imports (the
-    # matching cmake option no longer exists upstream, so it is otherwise a no-op).
-    # The packages/acts overlay is what actually makes the bindings get built and
-    # installs the Examples/Scripts/Python helper scripts -- see the comment there.
-    require: '@main+dd4hep+json+edm4hep+examples+geant4+hepmc3+python cxxstd=20'
-  # ~beampipe_stl: skip the network download of the FCC-ee MDI beampipe CAD,
-  # which MuColl does not use (and which intermittently breaks the build). The
-  # variant used to be carried by a local packages/k4geo overlay; it has since
-  # landed upstream, so the plain upstream recipe is enough.
+    require: '@main+dd4hep+json+edm4hep+geant4+hepmc3'
   k4geo:
-    require: '@main~beampipe_stl'
+    require: '@00-27~beampipe_stl'
   k4gaudipandora:
     require: '@main~ddkaltest'
   k4reco:
     require: '@main~conformal_tracking'
 
   k4reccalorimeter:
-    require: '@main'
+    require: '@0.1.0pre21'
   k4rectracker:
-    require: '@main~tracking'
+    require: '@0.8.0~tracking'
 
   k4actstracking:
     require: '@main+gnn'
   k4simgeant4:
-    require: '@main'
+    require: '@0.1.0pre19'
   k4clue:
-    require: '@main'
+    require: '@01-01-02'
+  muoncvxddigitiser:
+    require: '@0.5.0'
 
   lccontent:
-    require: '@master+monitoring'
+    require: '@5.1.1+monitoring'
