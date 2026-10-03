@@ -506,6 +506,7 @@
     "py-llvmlite",
     "py-markupsafe",
     "py-matplotlib",
+    "py-ml-dtypes",
     "py-mpi4py",
     "py-mpmath",
     "py-multidict",
@@ -514,7 +515,9 @@
     "py-numexpr",
     "py-numpy",
     "py-onnx",
+    "py-onnx-ir",
     "py-onnxruntime",
+    "py-onnxscript",
     "py-packaging",
     "py-pandas",
     "py-particle",
@@ -1132,6 +1135,9 @@
     ],
     "py-matplotlib": [
       "af65yuxwylhsgatvywzu3bhtzt27biv6"
+    ],
+    "py-ml-dtypes": [
+      "gzovyzfwekkmu7hy45zwn544pg4p5jny"
     ],
     "py-mpi4py": [
       "yhadtfwadjfxtpmfi5pkwsbtkv44if3c"

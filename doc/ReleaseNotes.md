@@ -15,6 +15,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines.
   Unexpected additions or removals now fail the image build.
+- **`py-onnxscript` in the `+ml` layer** (new `py-onnxscript` and `py-onnx-ir` recipes), so
+  `torch.onnx.export` works with its default exporter (`dynamo=True` since PyTorch 2.9) instead of
+  failing with `No module named 'onnxscript'`.
 
 ### Changed
 - **LLVM is built inside the stack** instead of taken from the Ubuntu `llvm-20`/`clang-20`/`lld-20`

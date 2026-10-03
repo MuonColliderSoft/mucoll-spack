@@ -104,6 +104,8 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("acorn")
         depends_on("py-onnxruntime")
         depends_on("py-onnx")
+        # needed by torch.onnx.export, whose default (dynamo) exporter uses it
+        depends_on("py-onnxscript")
         depends_on("py-torch")
         depends_on("py-scikit-learn")
         depends_on("py-xgboost")
