@@ -1,6 +1,6 @@
 packages:
   all:
-    target: [m1,m2,m3,m4,m5,m6]
+    target: [x86_64, aarch64]
     variants: build_type=Release cxxstd=20
     buildable: true
 
@@ -20,6 +20,32 @@ packages:
     externals:
     - spec: openglu@99
       prefix: /usr
+  mesa:
+    buildable: False
+    externals:
+    - spec: mesa@99
+      prefix: /usr
+  mesa-glu:
+    buildable: False
+    externals:
+    - spec: mesa-glu@99
+      prefix: /usr
+  # Use the system kerberos, otherwise the tickets obtained at login with the
+  # system version don't appear for the spack kerberos (happening on lxplus at least)
+  krb5:
+    buildable: False
+    externals:
+    - spec: krb5@99
+      prefix: /usr
+  # Use the system ssh, otherwise the configuration for the provided ssh will likely be
+  # different and things like ssh using kerberos won't work (by extension authentication
+  # for git with ssh with kerberos)
+  openssh:
+    buildable: False
+    externals:
+    - spec: openssh@99
+      prefix: /usr
+
   # llvm is built inside the stack, slimmed down so it fits the free GitHub
   # runners (4 cores, 16 GB RAM, 6 h job limit):
   #  - build_type=Release: the environment default (RelWithDebInfo) makes the
@@ -67,7 +93,7 @@ packages:
     require: +krb5 cxxstd=20
 
   root:
-    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui~x+xml+xrootd cxxstd=20'
+    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo cxxstd=20'
 
   hdf5:
     require: +cxx+hl
@@ -76,7 +102,50 @@ packages:
 
   py-pandas:
     require: ~excel~parquet
-  
+  # Cap numpy at the acts-compatible ceiling: the builtin acts recipe requires
+  # py-numpy@2.2 for acts@44: (incl. @main), pulled in by k4actstracking in the
+  # +sim layer. Without this cap the sim root concretizes numpy@2.2.6 while the
+  # analysis root is free to take numpy@2.3.x; under unify:when_possible those
+  # cannot share a hash, so numpy AND everything depending on it (py-torch,
+  # py-onnxruntime, py-scipy, py-pandas, py-numba, py-xgboost, ...) get
+  # duplicated across the two layered roots. Pinning both roots to <=2.2
+  # collapses that subtree to a single shared build. Use a ceiling (not an exact
+  # pin) so patch updates within 2.2.x are picked up automatically.
+  py-numpy:
+    require: '@:2.2 ^openblas'
+
+  # Same reason as the numpy cap: acts@44: requires py-particle@0.24, so without
+  # this the analysis root takes 0.25.x and py-particle is built twice.
+  py-particle:
+    require: '@0.24'
+
+  # The pins below (py-sympy, eigen, py-fsspec, valgrind) exist for the SAME
+  # reason as the numpy cap above: under unify:when_possible the lean analysis
+  # root takes the newest version/variant of a shared package while the richer
+  # +sim root is capped (by acts, acorn's ML deps, geant4, ...), so the two
+  # roots cannot share a hash and the package -- plus everything above it -- is
+  # duplicated. py-torch depends on ALL of py-sympy, eigen, py-fsspec and
+  # valgrind, so each split forks the (expensive) py-torch/onnxruntime subtree.
+  # Forcing one shared config collapses it to a single build per package.
+
+  # sim caps sympy at 1.13.3 (via acorn -> py-torch-geometric / py-lightning);
+  # analysis is free to take 1.14.0. py-torch (@2.7:) and py-onnxruntime both
+  # accept 1.13.3, so pinning it unifies py-onnxruntime AND one py-torch edge.
+  py-sympy:
+    require: '@1.13.3'
+
+  # sim caps eigen at the 3.4 series (acts does not support eigen@5); analysis
+  # would otherwise take eigen@5.0.1. py-torch works with 3.4 (the sim root
+  # proves it), so pin the 3.4 series everywhere.
+  eigen:
+    require: '@3.4'
+
+  # sim pulls py-fsspec+http (acorn -> py-lightning / py-torch-geometric need
+  # remote-dataset support); analysis takes ~http. Force +http so both agree;
+  # this unifies py-uproot / py-awkward and another py-torch edge. The extra
+  # py-aiohttp dependency is cheap.
+  py-fsspec:
+    require: '+http'
 
   # py-torch is built +valgrind, and valgrind is built +boost by default. boost
   # legitimately has two configs (a rich +filesystem/+program_options/... build
@@ -97,8 +166,7 @@ packages:
   py-onnx:
     require: '@1.16:'
   py-onnxruntime:
-    require:
-    - '@1.18:'
+    require: '@1.18:'
 
   geant4:
     require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
@@ -133,7 +201,7 @@ packages:
   k4gaudipandora:
     require: '@main~ddkaltest'
   k4reco:
-    require: '@main~conformal_tracking'
+    require: '@0.3~conformal_tracking'
 
   k4actstracking:
     require: '@main+gnn'
@@ -143,4 +211,4 @@ packages:
     require: '@main'
 
   lccontent:
-    require: ~monitoring
+    require: +monitoring

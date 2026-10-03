@@ -19,6 +19,50 @@ packages:
   # OpenSSH that ships with macOS instead (check with `ssh -V`).
   openssh:
     buildable: false
-    externals:
+    # "externals::" (double colon) REPLACES the list inherited from
+    # packages.yaml; a plain "externals:" would append, leaving the Linux
+    # /usr entry in place alongside this one.
+    externals::
     - spec: openssh@10.3p1
       prefix: /usr
+
+  # The remaining Linux /usr externals in packages.yaml do not exist on macOS,
+  # so clear them here instead of deleting them from the shared file (which
+  # would break the Linux images and conflict with upstream on every merge).
+  # buildable restores spack's freedom to build them should anything need them.
+  mesa:
+    buildable: true
+    externals:: []
+  mesa-glu:
+    buildable: true
+    externals:: []
+  krb5:
+    buildable: true
+    externals:: []
+
+  # Apple silicon targets; packages.yaml carries the Linux x86_64/aarch64 list.
+  all:
+    target: [m1, m2, m3, m4, m5, m6]
+
+  # "require::" REPLACES upstream's root requirement rather than adding a second,
+  # contradictory one. Two macOS differences:
+  #  - no +ipo: the ROOT recipe conflicts with LTO ("LTO is not a supported
+  #    configuration for building ROOT"); the key4hep images patch that conflict
+  #    out via key4hep-spack/.cherry-pick, which is not applied on the host.
+  #  - ~x instead of +x: ROOT uses the native Cocoa (aqua) backend on macOS, and
+  #    +x would pull in libglx -> a source build of mesa and llvm for X11.
+  root:
+    require:: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui~x+xml+xrootd cxxstd=20'
+
+  # ~monitoring: lccontent+monitoring pulls in pandoramonitoring, which requires
+  # root+x -- and on macOS the only libglx provider is mesa, so +x means a source
+  # build of mesa and llvm purely for X11. ROOT uses the Cocoa backend here
+  # instead (see the root override above), so the two cannot both be satisfied:
+  # "'root' requires conflicting variant values '~x' and '+x'".
+  lccontent:
+    require:: ~monitoring
+
+  # Build k4Reco from the development branch (see packages/k4reco), rather than
+  # the tagged release packages.yaml pins for the Linux images.
+  k4reco:
+    require:: '@main~conformal_tracking'
