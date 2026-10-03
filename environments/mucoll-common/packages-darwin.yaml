@@ -40,10 +40,6 @@ packages:
     buildable: true
     externals:: []
 
-  # Apple silicon targets; packages.yaml carries the Linux x86_64/aarch64 list.
-  all:
-    target: [m1, m2, m3, m4, m5, m6]
-
   # "require::" REPLACES upstream's root requirement rather than adding a second,
   # contradictory one. Two macOS differences:
   #  - no +ipo: the ROOT recipe conflicts with LTO ("LTO is not a supported
