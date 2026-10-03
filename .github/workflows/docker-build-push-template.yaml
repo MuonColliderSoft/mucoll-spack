@@ -137,42 +137,6 @@ jobs:
             "ocipass=${{ secrets.GITHUB_TOKEN }}"
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Check image packages
-        # Runs check.py against the image that was just built, as another stage
-        uses: docker/build-push-action@v7
-        with:
-          push: false
-          platforms: linux/${{ inputs.platform }}
-          context: ./Docker
-          build-contexts: |
-            validation=./validation
-          file: ./Docker/${{ inputs.dockerfile }}
-          target: check-export
-          outputs: type=local,dest=./image-check
-          build-args: |
-            ${{ steps.args.outputs.value }}
-            IMAGE_TYPE=${{ inputs.image-type }}
-          secrets: |
-            "ocipass=${{ secrets.GITHUB_TOKEN }}"
-      - name: Report package check
-        # The check stage records check.py's exit status instead of failing the
-        # build, so the observed inventory is exported (and uploaded below) on
-        # the very run where it is wanted as the new baseline. Fail here on it.
-        if: always()
-        run: |
-          if [ ! -f image-check/status ]; then
-            echo "::error::the image package check produced no result"
-            exit 1
-          fi
-          cp image-check/observed.json observed.json
-          echo "::group::Observed package inventory"
-          cat observed.json
-          echo "::endgroup::"
-          cat image-check/check.log
-          exit "$(cat image-check/status)"
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: image-packages-${{ inputs.image-type }}-${{ inputs.platform }}
-          path: observed.json
-          if-no-files-found: warn
+      # The package inventory check is not run here: it runs against the
+      # published multi-arch manifest (image-packages-template.yaml), so a
+      # baseline change never blocks the layered build or the manifests.

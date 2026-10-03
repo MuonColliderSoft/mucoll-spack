@@ -1,0 +1,94 @@
+name: Image package check
+description: |
+  Compares the Ubuntu and Spack package names installed in one architecture of a
+  published multi-arch image with the committed baseline (check.py), and uploads
+  the observed inventory so it can be reviewed and adopted as the new baseline.
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: "Digest-pinned multi-arch image reference (registry/owner/name@sha256:...)"
+        required: true
+        type: string
+      image-type:
+        required: true
+        type: string
+      platform:
+        description: "Architecture to check (amd64 or arm64)"
+        required: true
+        type: string
+      runner:
+        description: "Runner native to the platform, so the image runs without emulation"
+        required: true
+        type: string
+      registry:
+        required: false
+        type: string
+        default: ghcr.io
+
+permissions:
+  contents: read
+  packages: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          sparse-checkout: validation
+      - name: Login to Docker Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check image packages
+        # check.py's exit status is recorded rather than failing this step, so
+        # the observed inventory is still printed and uploaded on the very run
+        # where it is wanted as the new baseline. The last step fails on it.
+        id: check
+        env:
+          IMAGE: ${{ inputs.image }}
+          IMAGE_TYPE: ${{ inputs.image-type }}
+          PLATFORM: ${{ inputs.platform }}
+        run: |
+          mkdir -p out
+          chmod 777 out
+          status=0
+          docker run --rm --platform "linux/${PLATFORM}" --user root \
+            -v "$PWD/validation:/validation:ro" \
+            -v "$PWD/out:/out" \
+            --entrypoint python3 "${IMAGE}" \
+            /validation/image_packages/check.py \
+              --image-type "${IMAGE_TYPE}" \
+              --arch "${PLATFORM}" \
+              --observed-out /out/observed.json || status=$?
+          echo "status=${status}" >> "$GITHUB_OUTPUT"
+          if [ -f out/observed.json ]; then
+            echo "::group::Observed package inventory"
+            cat out/observed.json
+            echo "::endgroup::"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: image-packages-${{ inputs.image-type }}-${{ inputs.platform }}
+          path: out/observed.json
+          if-no-files-found: warn
+      - name: Report package check
+        env:
+          STATUS: ${{ steps.check.outputs.status }}
+          IMAGE_TYPE: ${{ inputs.image-type }}
+          PLATFORM: ${{ inputs.platform }}
+        run: |
+          if [ "${STATUS}" != "0" ]; then
+            echo "::error::package inventory of ${IMAGE_TYPE}-${PLATFORM} differs from validation/image_packages/baselines/${IMAGE_TYPE}-${PLATFORM}.json (see the check step log; observed inventory uploaded as image-packages-${IMAGE_TYPE}-${PLATFORM})"
+            exit 1
+          fi
