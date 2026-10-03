@@ -10,7 +10,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
 
     homepage = "https://github.com/MuonColliderSoft"
 
-    maintainers = ["bartosik-hep", "madbaron"]
+    maintainers = ["madbaron"]
 
     ##################### versions ########################
     #######################################################
