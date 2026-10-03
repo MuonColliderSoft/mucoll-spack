@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22666768.svg)](https://doi.org/10.5281/zenodo.22666768)
 
-This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack. 
+This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack.
 
 See [doc/ReleaseNotes.md](doc/ReleaseNotes.md) for the changelog of tagged releases and the work in progress on the 3.x series.
 
