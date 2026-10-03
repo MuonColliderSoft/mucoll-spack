@@ -2,9 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22666768.svg)](https://doi.org/10.5281/zenodo.22666768)
 
-### Note: the main branch is now used for the 3.x release series.
-
-This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack. It is built on top of the key4hep-dev-external environment from the [key4hep-stack](https://github.com/key4hep/key4hep-spack) repository, which is required for installation.
+This repository holds a set of Spack recipes for Muon Collider software (under namespace `mucoll`) based on [Key4hep](https://key4hep.github.io/key4hep-doc/) stack. 
 
 See [doc/ReleaseNotes.md](doc/ReleaseNotes.md) for the changelog of tagged releases and the work in progress on the 3.x series.
 
@@ -25,21 +23,9 @@ spack install --only-concrete --no-add --fail-fast mucoll-stack+devtools+pytools
 source $MUCOLL_STACK
 ```
 
-## Setting up the environment
-
-When signing in to a machine with the installed sofware stack (VM or Docker container), it has to be loaded into the environment:
-
-```bash
-spack env activate ./mucoll-spack/environments/mucoll-layered
-source $MUCOLL_STACK
-```
-
 ## Package versioning
 
 Preferred convention for version names in Spack is numbers separated by dots, without leading zeros, e.g. `1.2.13`.
-
-Muon Collider forks of ILCSoft packages historically used dashed, zero-padded tags with an `-MC` suffix (e.g. version `0.2.2` mapped to tag `v00-02-02-MC`). Since the Marlin/ILCSoft chain was dropped in the 3.x series (see the release notes), the stack no longer ships any package that relies on this convention, and the `MCIlcsoftpackage` conversion helper has been removed — the remaining `mucoll` packages (e.g. [`k4reco`](https://github.com/MuonColliderSoft/k4Reco)) declare plain `version(...)` entries with explicit checksums.
-
 
 ## Adding new versions for individual packages
 
@@ -146,13 +132,13 @@ are installed once and reused down the chain:
   simulation, and generator stack (`+sim+gen`, the latter pulling in `whizard`, `madgraph5amc`, and
   `pythia8`).
 
-There is no separate `reco`, `ml`, or `gen` image: the `+sim` variant covers both reconstruction and
+There is no separate `ml` or `gen` image: the `+sim` variant covers both reconstruction and
 simulation, the generators ride along in the same layer via `+gen`, and the machine-learning tools
 are part of the base analysis layer.
 
 ## Physics validation
 
-On every push to `main` the CI runs a per-particle `sim -> digi -> reco -> plot` chain
+On every tag the CI runs a per-particle `sim -> digi -> reco -> plot` chain
 (see `validation/` and `.github/workflows/physics-validation-template.yaml`) against the freshly
 published `mucoll-sim` image and publishes the resulting performance plots to GitHub Pages:
 
