@@ -1,7 +1,12 @@
 spack:
   packages:
     all:
-      target: [m1,m2,m3,m4,m5,m6]
+      # Ordered preference list: spack takes the first host-compatible entry and
+      # silently skips the rest (x86_64 on Apple silicon, m6/m5 until those
+      # exist), so the Linux targets MUST stay last -- aarch64 is compatible on
+      # Apple silicon and would otherwise win over the tuned m-series targets.
+      # Most-specific first, so each host builds for itself.
+      target: [m6, m5, m4, m3, m2, m1, x86_64, aarch64]
       variants:
         - build_type=RelWithDebInfo
         - 'cxxstd=20'
