@@ -331,6 +331,7 @@
   ],
   "spack": [
     "abseil-cpp",
+    "acorn",
     "binutils",
     "bzip2",
     "ccache",
@@ -406,7 +407,6 @@
     "nlohmann-json",
     "numactl",
     "nvtx",
-    "onnx",
     "openblas",
     "openjdk",
     "openmpi",
@@ -426,6 +426,7 @@
     "py-aiohappyeyeballs",
     "py-aiohttp",
     "py-aiosignal",
+    "py-atlasify",
     "py-attrs",
     "py-awkward",
     "py-awkward-cpp",
@@ -433,9 +434,10 @@
     "py-cerberus",
     "py-certifi",
     "py-charset-normalizer",
+    "py-class-resolver",
+    "py-click",
     "py-coloredlogs",
     "py-contourpy",
-    "py-cppy",
     "py-cramjam",
     "py-cycler",
     "py-filelock",
@@ -452,6 +454,7 @@
     "py-jinja2",
     "py-joblib",
     "py-kiwisolver",
+    "py-lightning-utilities",
     "py-llvmlite",
     "py-markupsafe",
     "py-matplotlib",
@@ -472,22 +475,28 @@
     "py-pip",
     "py-propcache",
     "py-protobuf",
+    "py-psutil",
     "py-pybind11",
     "py-pyparsing",
     "py-python-dateutil",
+    "py-pytorch-lightning",
     "py-pytz",
     "py-pyyaml",
     "py-requests",
     "py-scikit-learn",
     "py-scipy",
+    "py-seaborn",
     "py-setuptools",
     "py-six",
     "py-sympy",
     "py-tabulate",
     "py-threadpoolctl",
     "py-torch",
+    "py-torch-geometric",
     "py-torch-scatter",
+    "py-torchmetrics",
     "py-tqdm",
+    "py-trackml",
     "py-typing-extensions",
     "py-tzdata",
     "py-uproot",
@@ -511,7 +520,6 @@
     "sleef",
     "sqlite",
     "tar",
-    "torch-scatter",
     "unuran",
     "util-linux-uuid",
     "valgrind",
@@ -531,6 +539,9 @@
   "spack_hashes": {
     "abseil-cpp": [
       "thicilzf5qmhh6roo6n7gccepor54m4s"
+    ],
+    "acorn": [
+      "ewimo2hx33p2ffuwhfb6ahnaia373kcs"
     ],
     "bzip2": [
       "euniw2lnvblwy2d75mqvh4bqgiugbq6i"
@@ -754,9 +765,6 @@
     "nvtx": [
       "2mo6ejz4s7gjagbto6tuqotg2sqfyxs2"
     ],
-    "onnx": [
-      "sojnes6hkotrjmbki366ud5ec53do2qx"
-    ],
     "openblas": [
       "4gc3yftviw2n65y3277kg4lk625ijc7s"
     ],
@@ -814,6 +822,9 @@
     "py-aiosignal": [
       "ud3lsdmbkqxjscj7u4zl2rfszpaegp6q"
     ],
+    "py-atlasify": [
+      "qxxy4jzhvbrqhxxc4vsf4yqfirpdyg5q"
+    ],
     "py-attrs": [
       "c3yyztn5rdlustwydzb6otnospa675f5"
     ],
@@ -835,14 +846,17 @@
     "py-charset-normalizer": [
       "2t4dsprkhms7rllj5sw4wolo5tm6ergq"
     ],
+    "py-class-resolver": [
+      "gptltwz7cjkcq5s4advxw4eogdj5gqea"
+    ],
+    "py-click": [
+      "7airafa77da7l44divfp37sl6p7xbgzy"
+    ],
     "py-coloredlogs": [
       "k7zb76kqlizz3y65m7ginny224p6za3u"
     ],
     "py-contourpy": [
       "zuewjzwmw6txdtq24i5qqmq6du5po5x5"
-    ],
-    "py-cppy": [
-      "z6qvfg3r3mqv67dlhceivtlu75sij3hh"
     ],
     "py-cramjam": [
       "vzjfvwas4gwivrzntwr4qrdfnyhbvsnh"
@@ -891,6 +905,9 @@
     ],
     "py-kiwisolver": [
       "phsx2jflruq23p4v2mqsiz5o2dfdmcl6"
+    ],
+    "py-lightning-utilities": [
+      "pxp3lon47zqsh2z7eqpy2ukjmqbvlxex"
     ],
     "py-llvmlite": [
       "sabq7xno5kgipizscewfvwttaojg5ltn"
@@ -952,6 +969,9 @@
     "py-protobuf": [
       "jorxhenpkydi2vsexqagheveug6alsel"
     ],
+    "py-psutil": [
+      "fhdciywt55s7msbspwevpu2umcgdeu43"
+    ],
     "py-pybind11": [
       "c7xp5iu54zd2ni73eaotjatbiqkugc47"
     ],
@@ -960,6 +980,9 @@
     ],
     "py-python-dateutil": [
       "zerrwa5q55ioa3uuw5xbyig5kvtavjlo"
+    ],
+    "py-pytorch-lightning": [
+      "7wppeido5sqp2i7alol2thmh5njfkr27"
     ],
     "py-pytz": [
       "jen4oqm7nyekyzmz2u2y7qz77kcq46ge"
@@ -975,6 +998,9 @@
     ],
     "py-scipy": [
       "ili2ajvcojaz7e4emvdbh5ez4euqt4lx"
+    ],
+    "py-seaborn": [
+      "e6boj4auqtqjlzfxa7vujsadupvo2y7g"
     ],
     "py-setuptools": [
       "wshj3vqtw5dtiwfcmosk6npdet33y4qo"
@@ -994,11 +1020,20 @@
     "py-torch": [
       "ehaggavrn7nqjh7dyjoi35pkobi5g2cy"
     ],
+    "py-torch-geometric": [
+      "z3pavoozvopdrm2gfipdronqlvd2obk6"
+    ],
     "py-torch-scatter": [
       "lkugtiy4htozd4qg2lmekybllysbk7u5"
     ],
+    "py-torchmetrics": [
+      "ahmn2dr3ftawh2dnckyewxzbocheke3t"
+    ],
     "py-tqdm": [
       "fytimo3s6wqrn2443p5fy3hubnqbu5zj"
+    ],
+    "py-trackml": [
+      "gtj6kcz257fmtjqqwoskzv6m2zjlozct"
     ],
     "py-typing-extensions": [
       "s4hl4f7pccegm6mmyfrqgno66zyiwd2s"
@@ -1068,9 +1103,6 @@
     ],
     "tar": [
       "zastf7btpjos4zvrrhbemuaolgvrdph3"
-    ],
-    "torch-scatter": [
-      "2o3c7rtdeaaoibd2mmquf6laprn3dxgs"
     ],
     "unuran": [
       "oigvhkcj3rjyxuxzemgfjgcn4ls3s674"

@@ -38,7 +38,7 @@ source $MUCOLL_STACK
 
 Preferred convention for version names in Spack is numbers separated by dots, without leading zeros, e.g. `1.2.13`.
 
-Muon Collider forks of ILCSoft packages historically used dashed, zero-padded tags with an `-MC` suffix (e.g. version `0.2.2` maps to tag `v00-02-02-MC`); the conversion helper `MCIlcsoftpackage` in [`packages/mucoll-stack/mucoll_utils.py`](packages/mucoll-stack/mucoll_utils.py) performs this mapping. Since the Marlin/ILCSoft chain was dropped in the 3.x series (see the release notes), the stack no longer ships any package that relies on this convention — the remaining `mucoll` packages (e.g. [`k4reco`](https://github.com/MuonColliderSoft/k4Reco)) declare plain `version(...)` entries with explicit checksums.
+Muon Collider forks of ILCSoft packages historically used dashed, zero-padded tags with an `-MC` suffix (e.g. version `0.2.2` mapped to tag `v00-02-02-MC`). Since the Marlin/ILCSoft chain was dropped in the 3.x series (see the release notes), the stack no longer ships any package that relies on this convention, and the `MCIlcsoftpackage` conversion helper has been removed — the remaining `mucoll` packages (e.g. [`k4reco`](https://github.com/MuonColliderSoft/k4Reco)) declare plain `version(...)` entries with explicit checksums.
 
 
 ## Adding new versions for individual packages
