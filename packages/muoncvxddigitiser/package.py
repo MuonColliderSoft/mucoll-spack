@@ -4,23 +4,23 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 from spack.package import *
-from spack.pkg.mucoll.mucoll_stack import Key4hepPackage
-    
+from spack.pkg.k4.key4hep_stack import Key4hepPackage
+
 
 class Muoncvxddigitiser(CMakePackage, Key4hepPackage):
     """Realistic digitiser of pixelated sensors for Muon Collider"""
 
     homepage = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser"
-    git      = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser.git"
-    url      = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser/archive/refs/tags/v0.2.0.tar.gz"
+    git = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser.git"
+    url = "https://github.com/MuonColliderSoft/MuonCVXDDigitiser/archive/refs/tags/v0.2.0.tar.gz"
 
     version("master", branch="gaudification")
-    
-    depends_on('edm4hep')
-    depends_on('gaudi')
-    depends_on('dd4hep')
-    depends_on('k4fwcore')
-    depends_on('gsl')
+
+    depends_on("edm4hep")
+    depends_on("gaudi")
+    depends_on("dd4hep")
+    depends_on("k4fwcore")
+    depends_on("gsl")
 
     def cmake_args(self):
         args = [
