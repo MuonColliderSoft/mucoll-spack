@@ -215,6 +215,8 @@ packages:
   # recipe to pass BUILD_TESTING, otherwise configuring requires boost+timer.
   k4reccalorimeter:
     require: '@main'
+  k4rectracker:
+    require: '@main~tracking'
 
   k4actstracking:
     require: '@main+gnn'
