@@ -19,7 +19,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     version(datetime.today().strftime("%Y-%m-%d"))
 
     ### stable build
-    version("3.1")
+    version("3.2")
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase
@@ -76,7 +76,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("k4simgeant4")
         depends_on("k4clue")
         depends_on("k4reccalorimeter")
-        #depends_on("k4rectracker")
+        depends_on("k4rectracker")
         depends_on("muoncvxddigitiser")
 
     with when("+gen"):
