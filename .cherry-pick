@@ -39,3 +39,20 @@ git checkout fba5ebd6e68757285d97e14050addc5ecf1e4b6f -- \
 git fetch --depth 50 upstream 5ee3e6b85e10f1ff8189f549dae13198f5cec4ac
 git checkout 5ee3e6b85e10f1ff8189f549dae13198f5cec4ac -- \
   repos/spack_repo/builtin/packages/py_uv_build/package.py
+
+# Pull the py-onnxscript and py-onnx-ir recipes (spack/spack-packages#6948, not
+# in the pinned spack-packages): mucoll-stack +ml depends on py-onnxscript for
+# torch.onnx.export's default (dynamo) exporter. Drop once the spack-packages
+# pin includes #6948.
+git fetch --depth 50 upstream f8a4ca01224d1ab0e6081e886c4bf9940a09c288
+git checkout f8a4ca01224d1ab0e6081e886c4bf9940a09c288 -- \
+  repos/spack_repo/builtin/packages/py_onnxscript/package.py \
+  repos/spack_repo/builtin/packages/py_onnx_ir/package.py
+
+# py-onnxruntime: pass cuda_arch to CMake and stop treating warnings as errors
+# (spack/spack-packages#6834). Without it +cuda builds with `-arch=all`, which
+# fails with CUDA 12.9's CCCL ("_CCCL_PP_SPLICE_WITH_IMPL1 passed 3 arguments"),
+# as do its deprecation warnings. Drop once the spack-packages pin includes
+# #6834.
+git fetch --depth 50 upstream 2ad70e9531ec3d10bce20cf3136d7a37bee80c73
+git cherry-pick 2ad70e9531ec3d10bce20cf3136d7a37bee80c73 --no-commit

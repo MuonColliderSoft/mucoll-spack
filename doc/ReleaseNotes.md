@@ -15,7 +15,8 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines.
   Unexpected additions or removals now fail the image build.
-- **`py-onnxscript` in the `+ml` layer** (new `py-onnxscript` and `py-onnx-ir` recipes), so
+- **`py-onnxscript` in the `+ml` layer** (`py-onnxscript` and `py-onnx-ir` recipes taken from
+  [spack/spack-packages#6948](https://github.com/spack/spack-packages/pull/6948) via `.cherry-pick`), so
   `torch.onnx.export` works with its default exporter (`dynamo=True` since PyTorch 2.9) instead of
   failing with `No module named 'onnxscript'`.
 
