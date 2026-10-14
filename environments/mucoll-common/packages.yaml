@@ -183,7 +183,7 @@ packages:
     require: '@1.1'
 
   k4fwcore:
-    require: '@1.7'
+    require: '@main'
 
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
@@ -210,7 +210,7 @@ packages:
   acorn:
     require: '@2.0.1'
   k4reco:
-    require: '@0.3~conformal_tracking'
+    require: '@main~conformal_tracking'
 
   k4actstracking:
     require: '@main+gnn'
