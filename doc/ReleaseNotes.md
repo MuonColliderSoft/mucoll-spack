@@ -35,8 +35,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `onnx` (C++), `xgboost` (via `py-xgboost`) and `py-cppy`. Tools and Python packages are now
   `type="run"` dependencies. Removed the unused `MCIlcsoftpackage` helper (`mucoll_utils.py`), the
   obsolete `%gcc@8.3.1` conflict and commented-out code.
-- **Local `torch-scatter` overlay removed** in favour of the builtin recipe, which is a
-  `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`.
+- **Local `torch-scatter` overlay reduced to a thin subclass** of the builtin recipe, which is a
+  `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`. The overlay only builds it as
+  C++20 (see Fixed).
 - **Dropped the `py-fsspec +http` requirement.** With `acorn` in both roots, both already get `+http`.
 - **EDM4hep 1.2** (was 1.1). spack-packages has no `edm4hep@1.2` yet, so `.cherry-pick` adds the
   version to the builtin recipe.
@@ -50,6 +51,9 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   still concretizes without duplicate packages.
 
 ### Fixed
+- **`torch-scatter` builds against current `py-torch` again.** `py-torch@2.14` headers require C++20,
+  but upstream's `CMakeLists.txt` hardcodes `CMAKE_CXX_STANDARD 17`, overriding the recipe's
+  `-DCMAKE_CXX_STANDARD=20`. The `packages/torch-scatter` overlay rewrites it before CMake runs.
 - **`import onnx` and `import onnxruntime` in the same process no longer abort.** Both modules
   registered `onnx/onnx-ml.proto` in the shared `libprotobuf` ("File already exists in database"),
   which also broke `onnxruntime.quantization`. `protobuf` is now built static (`~shared`).
