@@ -1,58 +1,7 @@
-# Pull latest py-numba (0.66.0) + py-llvmlite (0.48.0) recipes (acorn ->
-# py-numba pulls them in). py-llvmlite@0.48 needs llvm@22, which the llvm recipe
-# below provides.
-# The upstream commits don't cherry-pick cleanly onto this image's older
-# spack-packages, so check out the package files at that commit instead.
-git remote add upstream https://github.com/spack/spack-packages.git 2>/dev/null || true
-git fetch --depth 50 upstream a2c63786aa875edbef612dd506d7a855c28b0cca
-git checkout a2c63786aa875edbef612dd506d7a855c28b0cca -- \
-  repos/spack_repo/builtin/packages/py_numba/package.py \
-  repos/spack_repo/builtin/packages/py_llvmlite/package.py
+# Patches applied to the pinned spack-packages checkout (after key4hep-spack's
+# own .cherry-pick), sourced from the spack-packages root by Docker/Dockerfile.base.
 
-# Pull the latest llvm recipe (adds llvm@22 and @23), which is built inside the
-# stack. The whole package directory is checked out so its patches come along.
-git fetch --depth 50 upstream 27d366be7b94044f06915797fe99db9de7a171be
-git checkout 27d366be7b94044f06915797fe99db9de7a171be -- \
-  repos/spack_repo/builtin/packages/llvm
-
-# geant4 examples
-git cherry-pick 334aeef7ffd810fe7c15c9ba9b6c3033ba4bf899 -X theirs --no-commit
-
-# py-matplotlib: depend on gmake when %gcc (spack/spack-packages#2526). gcc's
-# lto-wrapper runs `make` from PATH while linking the extension modules; without
-# a gmake dep Spack's new installer exports the fifo jobserver form, which the
-# system make 4.3 (RHEL 9, Ubuntu 24.04) cannot parse ("invalid
-# --jobserver-auth string"). Drop once the spack-packages pin includes #2526.
-git fetch --depth 50 upstream c09b3343a23069e9e309dfee4083a05327c827bc
-git cherry-pick c09b3343a23069e9e309dfee4083a05327c827bc --no-commit
-
-# Pull the latest py-pytorch-lightning recipe (adds 2.5.3 / 2.6.x and deprecates
-# the releases with CVEs); the pinned spack-packages stops at 2.0.7. acorn
-# imports `pytorch_lightning`, which the unified py-lightning package does not
-# ship, and acorn 2.x targets lightning 2.4.
-git fetch --depth 50 upstream fba5ebd6e68757285d97e14050addc5ecf1e4b6f
-git checkout fba5ebd6e68757285d97e14050addc5ecf1e4b6f -- \
-  repos/spack_repo/builtin/packages/py_pytorch_lightning/package.py
-
-# Pull the py-uv-build recipe (not in the pinned spack-packages): the build
-# backend of py-class-resolver@0.7: (acorn -> py-class-resolver).
-git fetch --depth 50 upstream 5ee3e6b85e10f1ff8189f549dae13198f5cec4ac
-git checkout 5ee3e6b85e10f1ff8189f549dae13198f5cec4ac -- \
-  repos/spack_repo/builtin/packages/py_uv_build/package.py
-
-# Pull the py-onnxscript and py-onnx-ir recipes (spack/spack-packages#6948, not
-# in the pinned spack-packages): mucoll-stack +ml depends on py-onnxscript for
-# torch.onnx.export's default (dynamo) exporter. Drop once the spack-packages
-# pin includes #6948.
-git fetch --depth 50 upstream f8a4ca01224d1ab0e6081e886c4bf9940a09c288
-git checkout f8a4ca01224d1ab0e6081e886c4bf9940a09c288 -- \
-  repos/spack_repo/builtin/packages/py_onnxscript/package.py \
-  repos/spack_repo/builtin/packages/py_onnx_ir/package.py
-
-# py-onnxruntime: pass cuda_arch to CMake and stop treating warnings as errors
-# (spack/spack-packages#6834). Without it +cuda builds with `-arch=all`, which
-# fails with CUDA 12.9's CCCL ("_CCCL_PP_SPLICE_WITH_IMPL1 passed 3 arguments"),
-# as do its deprecation warnings. Drop once the spack-packages pin includes
-# #6834.
-git fetch --depth 50 upstream 2ad70e9531ec3d10bce20cf3136d7a37bee80c73
-git cherry-pick 2ad70e9531ec3d10bce20cf3136d7a37bee80c73 --no-commit
+# edm4hep: add v1.2 (tag v01-02), not yet in spack-packages. Same dependencies
+# as 1.1 (podio@1.7:). Drop once the spack-packages pin has edm4hep@1.2.
+sed -i 's/^\( *\)version("main", branch="main")$/&\n\1version("1.2", sha256="de20ce7ac6af486224fd9ffaa2c9dd367ad89cf55f19cd47f83459fde2d9b1c9")/' \
+  repos/spack_repo/builtin/packages/edm4hep/package.py

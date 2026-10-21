@@ -15,16 +15,15 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines.
   Unexpected additions or removals now fail the image build.
-- **`py-onnxscript` in the `+ml` layer** (`py-onnxscript` and `py-onnx-ir` recipes taken from
-  [spack/spack-packages#6948](https://github.com/spack/spack-packages/pull/6948) via `.cherry-pick`), so
+- **`py-onnxscript` in the `+ml` layer** (`py-onnxscript` and `py-onnx-ir` recipes from
+  [spack/spack-packages#6948](https://github.com/spack/spack-packages/pull/6948)), so
   `torch.onnx.export` works with its default exporter (`dynamo=True` since PyTorch 2.9) instead of
   failing with `No module named 'onnxscript'`.
 
 ### Changed
 - **LLVM is built inside the stack** instead of taken from the Ubuntu `llvm-20`/`clang-20`/`lld-20`
-  packages as an external. The latest upstream `llvm` recipe is taken via `.cherry-pick`, so
-  `py-numba@0.66`/`py-llvmlite@0.48` can use `llvm@22`. The build is slimmed down to fit the free
-  GitHub runners: `build_type=Release`, host backend only, no `libLLVM.so`, and no
+  packages as an external, so `py-numba`/`py-llvmlite` can use `llvm@22`. The build is slimmed down
+  to fit the free GitHub runners: `build_type=Release`, host backend only, no `libLLVM.so`, and no
   clang/lldb/polly/mlir/flang/offload or runtimes. The images therefore no longer ship `clang`. A
   new `llvm` overlay recipe (`packages/llvm`) caps the parallel link jobs to avoid OOM kills and
   adds `~clang_tools_extra`/`~static_analyzer` switches for slimmer `+clang` builds.
@@ -36,11 +35,25 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `onnx` (C++), `xgboost` (via `py-xgboost`) and `py-cppy`. Tools and Python packages are now
   `type="run"` dependencies. Removed the unused `MCIlcsoftpackage` helper (`mucoll_utils.py`), the
   obsolete `%gcc@8.3.1` conflict and commented-out code.
-- **Local `torch-scatter` overlay removed** in favour of the builtin recipe, which is a
-  `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`.
+- **Local `torch-scatter` overlay reduced to a thin subclass** of the builtin recipe, which is a
+  `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`. The overlay only builds it as
+  C++20 (see Fixed).
 - **Dropped the `py-fsspec +http` requirement.** With `acorn` in both roots, both already get `+http`.
+- **EDM4hep 1.2** (was 1.1). spack-packages has no `edm4hep@1.2` yet, so `.cherry-pick` adds the
+  version to the builtin recipe.
+- **Upstream patches dropped from `.cherry-pick`.** The spack-packages commit now pinned by
+  key4hep-spack already includes every recipe and fix it used to pull in (`py-numba`, `py-llvmlite`,
+  `llvm`, `geant4 ~examples`, `py-matplotlib`, `py-pytorch-lightning`, `py-uv-build`,
+  `py-onnxscript`/`py-onnx-ir`, `py-onnxruntime`).
+- **Fewer version pins in `mucoll-common`.** Dropped the `acorn` and `k4gen` pins (the latest `acorn`
+  is now picked without one; `k4gen` is not in the stack) and the `python` version floor (`acts`
+  already requires `python@3.12:`). Raised the `py-torch` floor to `@2.14:`. The layered environment
+  still concretizes without duplicate packages.
 
 ### Fixed
+- **`torch-scatter` builds against current `py-torch` again.** `py-torch@2.14` headers require C++20,
+  but upstream's `CMakeLists.txt` hardcodes `CMAKE_CXX_STANDARD 17`, overriding the recipe's
+  `-DCMAKE_CXX_STANDARD=20`. The `packages/torch-scatter` overlay rewrites it before CMake runs.
 - **`import onnx` and `import onnxruntime` in the same process no longer abort.** Both modules
   registered `onnx/onnx-ml.proto` in the shared `libprotobuf` ("File already exists in database"),
   which also broke `onnxruntime.quantization`. `protobuf` is now built static (`~shared`).
