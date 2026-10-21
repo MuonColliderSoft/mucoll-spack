@@ -74,9 +74,10 @@ packages:
   delphes:
     require: "@master"
 
-  # Ask for Python >= 3.12 (acts@44: requires it for its python bindings)
+  # No version needed: acts@44: already requires python@3.12:, and the whole
+  # layered environment concretizes to a single interpreter.
   python:
-    require: "@3.12: +optimizations"
+    require: "+optimizations"
 
   madgraph5amc:
     require: '@3.5.9: +pythia8'
@@ -150,7 +151,7 @@ packages:
   # Pin py-torch to the latest series. Use a floor (not an
   # exact pin) so future releases are picked up automatically.
   py-torch:
-    require: '@2.8:+custom-protobuf'
+    require: '@2.14:+custom-protobuf'
 
   # Keep py-onnx in step with py-onnxruntime. The C++ runtime is built against
   # the onnx version vendored in onnxruntime's cmake/deps.txt (onnx 1.17 for
@@ -180,10 +181,10 @@ packages:
     require: +python+lhapdf+gzip
 
   edm4hep:
-    require: '@1.1'
+    require: '@1.2'
 
   k4fwcore:
-    require: '@1.7'
+    require: '@main'
 
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
@@ -201,14 +202,8 @@ packages:
   # landed upstream, so the plain upstream recipe is enough.
   k4geo:
     require: '@main~beampipe_stl'
-  k4gen:
-    require: '@0.1pre16'
   k4gaudipandora:
     require: '@main~ddkaltest'
-  # Without a requirement a fresh concretization (no installed specs to reuse)
-  # picks acorn@1.2.0 instead of the latest release.
-  acorn:
-    require: '@2.0.1'
   k4reco:
     require: '@0.3~conformal_tracking'
 
@@ -220,4 +215,4 @@ packages:
     require: '@main'
 
   lccontent:
-    require: +monitoring
+    require: '@master+monitoring'
