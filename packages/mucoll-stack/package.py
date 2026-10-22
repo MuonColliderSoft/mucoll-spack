@@ -19,7 +19,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
     version(datetime.today().strftime("%Y-%m-%d"))
 
     ### stable build
-    version("3.1")
+    version("3.2")
 
     # this bundle package installs a custom setup script,
     # so need to add the install phase
@@ -72,6 +72,8 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("k4gaudipandora")
         depends_on("k4actstracking")
         depends_on("k4simgeant4")
+        depends_on("k4reccalorimeter")
+        depends_on("k4rectracker")
         depends_on("k4clue")
 
     with when("+gen"):
@@ -132,6 +134,11 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
             env.set("MUCOLL_GEO", self.spec["k4geo"].prefix.share)
         if "k4actstracking" in self.spec:
             env.set("ACTSTRACKING_DATA", self.spec["k4actstracking"].prefix.share)
+        if "k4reco" in self.spec:
+            env.set(
+                "MUCOLL_CALO_THRESHOLDS_DIR",
+                join_path(self.spec["k4reco"].prefix.share, "k4Reco", "data"),
+            )
 
         # ROOT needs to be in LD_LIBRARY_PATH to find cxxmodules
         if "root" in self.spec:
