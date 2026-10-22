@@ -356,6 +356,7 @@
     "fastjet",
     "fcgi",
     "fftw",
+    "fjcontrib",
     "fmt",
     "font-util",
     "fontconfig",
@@ -683,6 +684,9 @@
     ],
     "fftw": [
       "27jo676govwzbtskcon3nqq42dc7k2my"
+    ],
+    "fjcontrib": [
+      "22m4g7rcuwaky4gpir6r3b3by5jzb4df"
     ],
     "fmt": [
       "sicuhait6km7t4lcwgkq4ftejo444sy3"
