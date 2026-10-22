@@ -135,9 +135,10 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         if "k4actstracking" in self.spec:
             env.set("ACTSTRACKING_DATA", self.spec["k4actstracking"].prefix.share)
         if "k4reco" in self.spec:
-            env.set("MUCOLL_CALO_THRESHOLDS_DIR",
-                    join_path(self.spec["k4reco"].prefix.share, "k4Reco", "data")
-                    )
+            env.set(
+                "MUCOLL_CALO_THRESHOLDS_DIR",
+                join_path(self.spec["k4reco"].prefix.share, "k4Reco", "data"),
+            )
 
         # ROOT needs to be in LD_LIBRARY_PATH to find cxxmodules
         if "root" in self.spec:
