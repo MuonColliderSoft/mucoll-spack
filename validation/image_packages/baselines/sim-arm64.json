@@ -405,7 +405,9 @@
     "k4fwcore",
     "k4gaudipandora",
     "k4geo",
+    "k4reccalorimeter",
     "k4reco",
+    "k4rectracker",
     "k4simgeant4",
     "kbproto",
     "krb5",
@@ -579,6 +581,7 @@
     "renderproto",
     "rngstreams",
     "root",
+    "simsipm",
     "sleef",
     "span-lite",
     "sqlite",
@@ -611,7 +614,7 @@
       "jq42xf6vb4xw7s5dzowl2c2butz2vxor"
     ],
     "acts": [
-      "zrxc6efm7q5kd6z2kfjool5mibemfkl7"
+      "o4rglvxcduo6s62ife7r6ggjzxlczxrj"
     ],
     "aida": [
       "ob2mgiddnqqvz6mqhja4ia2jebho6r57"
@@ -824,25 +827,31 @@
       "weo6eeklzfgt7qkshxyult7qmyeuyptz"
     ],
     "k4actstracking": [
-      "gqpmjob47oucfpyxxbsc2gxiqpe4ud3l"
+      "pglakagyepv2dbqdw4lil424cccfhsph"
     ],
     "k4clue": [
-      "e2ilkpownqpr4aqmqagi4vulconqfsly"
+      "e52aft4xj3deparpdufcc7xs2fya37v5"
     ],
     "k4fwcore": [
-      "z5vpibzy5a4oesy7kr6ppygk52klpy5z"
+      "2fspqiscwzlp72ksosbleuaaby3owc63"
     ],
     "k4gaudipandora": [
-      "maz2lo3pw6dxmoyv64qeeye5xdv5in33"
+      "hue23qgytxdaoagg7u2zvvcydnkj6gli"
     ],
     "k4geo": [
-      "xym77izyxisjjsedirrslmy6tbeqgkde"
+      "j4j367gl3uyqlhmudzwlmxwi43qou2ke"
+    ],
+    "k4reccalorimeter": [
+      "gwofhzo4buk7iqwiejdhyjdyroikbs4e"
     ],
     "k4reco": [
-      "yverdbta4xnl2awqerb5l4ixy3rchxer"
+      "uiw267mcam4zdhj72xsoa5ykvxlf5zfz"
+    ],
+    "k4rectracker": [
+      "c4iutz7szx7s7dne3lclsftoceyoq3ll"
     ],
     "k4simgeant4": [
-      "se7vbxjkjocuywi5p5sf37brxasn73gl"
+      "avpxar2iolfmpwucc7tmctw7zll2nh6e"
     ],
     "kbproto": [
       "7gbo34rdythy4mo2ez23b2nv3x6p7um5"
@@ -965,8 +974,8 @@
       "45lvxaxuhg676wtu355kz2n64u5py6ll"
     ],
     "mucoll-stack": [
-      "6bccjpkej3ieckrs5pjcqfreb47or46w",
-      "n3vabkj52gspj5xqdhqser4hbyqlrd35"
+      "duz6jbxs7drn7ywdyx3ub47uow3xd7pa",
+      "q7xydxzdkpr3nfu5b4wroqcfqzrxk5yv"
     ],
     "ncurses": [
       "miseljmk4w7sbx6kbugq5jemgohvu47y"
@@ -1360,6 +1369,9 @@
     ],
     "root": [
       "qiwcgnuj4wysfl3py37bxbnrqm3gwusl"
+    ],
+    "simsipm": [
+      "v6auituuy3zm6v5xn5x7gs7zb2ocembc"
     ],
     "sleef": [
       "4z3aqna2zmijjvponfz36sqwtjwtwbwc"
