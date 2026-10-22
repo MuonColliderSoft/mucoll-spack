@@ -21,6 +21,11 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   failing with `No module named 'onnxscript'`.
 
 ### Changed
+- **Smaller image layers.** The analysis and sim images no longer ship their spack install as one
+  huge layer. A build stage installs the stack as before, then `Docker/split-install-tree.py`
+  spreads the newly installed prefixes over 16 folders of similar size, and the published image
+  copies each folder as its own layer (plus a small layer for the spack database). The sim image
+  only adds prefixes that are not already in the analysis image. Image contents are unchanged.
 - **LLVM is built inside the stack** instead of taken from the Ubuntu `llvm-20`/`clang-20`/`lld-20`
   packages as an external, so `py-numba`/`py-llvmlite` can use `llvm@22`. The build is slimmed down
   to fit the free GitHub runners: `build_type=Release`, host backend only, no `libLLVM.so`, and no

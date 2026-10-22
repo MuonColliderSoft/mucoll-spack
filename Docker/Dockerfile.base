@@ -143,20 +143,60 @@ RUN --mount=type=secret,id=ocipass \
 #  only built for the real image. Keep the split at this exact point so the
 #  check mirrors the image bootstrap one-to-one.
 # --------------------------------------------------------------------------- #
-FROM concretize AS image
+FROM concretize AS build
 
-# Install fragments of the dependency tree in separate layers for cached debugging
 ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
 
-# Install ONLY the analysis root from the already-concretized environment.
+# Install ONLY the analysis root from the already-concretized environment, then
+# move every installed prefix into one of the /staging/chunkNN folders (similar
+# sizes) and the spack database into /staging/meta. The `image` stage copies
+# each folder with its own COPY, so the stack ships as several smaller layers
+# instead of one huge one. gc runs first, so build-only dependencies are gone
+# before anything is staged. This stage's install tree is unusable afterwards.
 ARG SPEC=mucoll-stack~devtools+pytools~sim+ml
 RUN --mount=type=secret,id=ocipass \
+    --mount=type=bind,source=split-install-tree.py,target=/tmp/split-install-tree.py \
     . ${HOME}/setup_env.sh && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack spec -NIt "${SPEC}" && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack install ${SPACK_INSTALL_OPTS} "${SPEC}" && \
     spack env deactivate && \
     spack gc -y && \
     spack clean -a && \
+    { spack mirror remove local-buildcache || true; } && \
+    INSTALL_ROOT=$(spack python -c 'import spack.store; print(spack.store.STORE.root)') && \
+    spack --color never find --format '{prefix}' > /tmp/installed.txt && \
+    python3 -I /tmp/split-install-tree.py --root "${INSTALL_ROOT}" \
+        --installed /tmp/installed.txt --chunks 16 --out /staging
+
+# --------------------------------------------------------------------------- #
+#  Published image: the bootstrap above plus the staged install, one layer per
+#  chunk. Keep the number of chunk COPY lines equal to --chunks above.
+# --------------------------------------------------------------------------- #
+FROM concretize AS image
+
+ENV SPACK_INSTALL_OPTS="--only-concrete --no-add --fail-fast"
+
+COPY --from=build /staging/chunk00/ /
+COPY --from=build /staging/chunk01/ /
+COPY --from=build /staging/chunk02/ /
+COPY --from=build /staging/chunk03/ /
+COPY --from=build /staging/chunk04/ /
+COPY --from=build /staging/chunk05/ /
+COPY --from=build /staging/chunk06/ /
+COPY --from=build /staging/chunk07/ /
+COPY --from=build /staging/chunk08/ /
+COPY --from=build /staging/chunk09/ /
+COPY --from=build /staging/chunk10/ /
+COPY --from=build /staging/chunk11/ /
+COPY --from=build /staging/chunk12/ /
+COPY --from=build /staging/chunk13/ /
+COPY --from=build /staging/chunk14/ /
+COPY --from=build /staging/chunk15/ /
+COPY --from=build /staging/meta/ /
+
+# The concretize stage registered the buildcache mirror; drop it here too
+# (the build stage's removal does not carry over), as before.
+RUN . /opt/setup_spack.sh && \
     { spack mirror remove local-buildcache || true; }
 
 # Point the default setup at this layer's mucoll-stack root. Only the analysis
