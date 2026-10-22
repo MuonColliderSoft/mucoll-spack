@@ -87,12 +87,22 @@ def human(size):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--root", required=True, help="spack install tree root")
-    parser.add_argument("--installed", required=True,
-                        help="file listing every installed prefix (one per line)")
-    parser.add_argument("--before", default=None,
-                        help="file listing prefixes that the parent image already has")
-    parser.add_argument("--chunks", type=int, required=True,
-                        help="number of staging folders (must match the Dockerfile COPY lines)")
+    parser.add_argument(
+        "--installed",
+        required=True,
+        help="file listing every installed prefix (one per line)",
+    )
+    parser.add_argument(
+        "--before",
+        default=None,
+        help="file listing prefixes that the parent image already has",
+    )
+    parser.add_argument(
+        "--chunks",
+        type=int,
+        required=True,
+        help="number of staging folders (must match the Dockerfile COPY lines)",
+    )
     parser.add_argument("--out", required=True, help="staging folder to create")
     args = parser.parse_args()
 
@@ -123,8 +133,10 @@ def main():
         sys.exit("error: no spack database at %s" % database)
     move_into(database, os.path.join(args.out, "meta"))
 
-    print("total:   %10s  %3d prefixes in %d chunks"
-          % (human(sum(loads)), len(sizes), args.chunks))
+    print(
+        "total:   %10s  %3d prefixes in %d chunks"
+        % (human(sum(loads)), len(sizes), args.chunks)
+    )
 
 
 if __name__ == "__main__":
