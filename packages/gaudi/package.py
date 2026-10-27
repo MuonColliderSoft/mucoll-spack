@@ -13,7 +13,7 @@
 # not stripped by SIP. Only the lookup is backported: master also renames the
 # C API symbol the module calls, which 40.5 does not have.
 #
-# v40r6 still has the old lookup. Drop this overlay once a release with the fix
+# v40r6 still has the old lookup, so the patch covers 40.5-40.6. Drop this overlay once a release with the fix
 # is used.
 
 from spack_repo.builtin.packages.gaudi.package import Gaudi as BuiltinGaudi
@@ -24,4 +24,4 @@ from spack.package import *
 class Gaudi(BuiltinGaudi):
     __doc__ = BuiltinGaudi.__doc__
 
-    patch("gaudi-pluginsvc-library-search.patch", when="@40.5")
+    patch("gaudi-pluginsvc-library-search.patch", when="@40.5:40.6")
