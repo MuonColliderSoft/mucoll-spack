@@ -56,9 +56,4 @@ packages:
   # instead (see the root override above), so the two cannot both be satisfied:
   # "'root' requires conflicting variant values '~x' and '+x'".
   lccontent:
-    require:: ~monitoring
-
-  # Build k4Reco from the development branch (see packages/k4reco), rather than
-  # the tagged release packages.yaml pins for the Linux images.
-  k4reco:
-    require:: '@main~conformal_tracking'
+    require:: '@master~monitoring'
