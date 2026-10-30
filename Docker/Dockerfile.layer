@@ -10,7 +10,7 @@
 ###############################################################################
 
 ARG BASE_IMAGE=ghcr.io/muoncollidersoft/mucoll-analysis-ubuntu24:latest
-FROM ${BASE_IMAGE} AS image
+FROM ${BASE_IMAGE} AS build
 
 # e.g. mucoll-stack+devtools+pytools+analysis+sim  or  ...+analysis+sim+ml
 ARG SPEC
@@ -20,10 +20,17 @@ ARG OCI_USERNAME
 USER root
 WORKDIR /root
 
-# Re-add the buildcache mirror (it was removed in the parent layer), install
-# only this layer's root spec reusing the parent's store, then clean up.
+# Record the prefixes the parent image already has, re-add the buildcache
+# mirror (it was removed in the parent layer), install only this layer's root
+# spec reusing the parent's store, then clean up. Finally move the prefixes
+# that are NEW in this layer into /staging/chunkNN folders of similar size and
+# the spack database into /staging/meta (see split-install-tree.py); the
+# `image` stage copies them in one layer per chunk. This stage's install tree
+# is unusable afterwards.
 RUN --mount=type=secret,id=ocipass \
+    --mount=type=bind,source=split-install-tree.py,target=/tmp/split-install-tree.py \
     . ${HOME}/setup_env.sh && \
+    spack -E --color never find --format '{prefix}' > /tmp/before.txt && \
     if [ -n "${SPACK_BUILDCACHE}" ]; then \
         OCI_PASSWORD=$(cat /run/secrets/ocipass) spack mirror add --oci-username "${OCI_USERNAME}" --oci-password-variable OCI_PASSWORD --unsigned --autopush local-buildcache "${SPACK_BUILDCACHE}"; \
     fi && \
@@ -32,7 +39,41 @@ RUN --mount=type=secret,id=ocipass \
     { spack mirror remove local-buildcache || true; } && \
     spack env deactivate && \
     spack gc -y && \
-    spack clean -a
+    spack clean -a && \
+    INSTALL_ROOT=$(spack python -c 'import spack.store; print(spack.store.STORE.root)') && \
+    spack --color never find --format '{prefix}' > /tmp/installed.txt && \
+    python3 -I /tmp/split-install-tree.py --root "${INSTALL_ROOT}" \
+        --installed /tmp/installed.txt --before /tmp/before.txt \
+        --chunks 16 --out /staging
+
+# --------------------------------------------------------------------------- #
+#  Published image: the parent image plus this layer's new prefixes, one image
+#  layer per chunk. Keep the number of chunk COPY lines equal to --chunks above.
+# --------------------------------------------------------------------------- #
+FROM ${BASE_IMAGE} AS image
+
+ARG SPEC
+
+USER root
+WORKDIR /root
+
+COPY --from=build /staging/chunk00/ /
+COPY --from=build /staging/chunk01/ /
+COPY --from=build /staging/chunk02/ /
+COPY --from=build /staging/chunk03/ /
+COPY --from=build /staging/chunk04/ /
+COPY --from=build /staging/chunk05/ /
+COPY --from=build /staging/chunk06/ /
+COPY --from=build /staging/chunk07/ /
+COPY --from=build /staging/chunk08/ /
+COPY --from=build /staging/chunk09/ /
+COPY --from=build /staging/chunk10/ /
+COPY --from=build /staging/chunk11/ /
+COPY --from=build /staging/chunk12/ /
+COPY --from=build /staging/chunk13/ /
+COPY --from=build /staging/chunk14/ /
+COPY --from=build /staging/chunk15/ /
+COPY --from=build /staging/meta/ /
 
 # Point the default setup at this layer's mucoll-stack root. The query selects
 # this layer's variant; only roots installed so far are matched.
