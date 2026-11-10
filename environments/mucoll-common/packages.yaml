@@ -1,7 +1,7 @@
 packages:
   all:
     target: [x86_64, aarch64]
-    variants: build_type=Release cxxstd=20
+    variants: build_type=Release cxxstd=23
     buildable: true
 
   # Use the system OpenGL as recommended by spack
@@ -89,10 +89,10 @@ packages:
     require: +python+tui+source-highlight~debuginfod
 
   xrootd:
-    require: +krb5 cxxstd=20
+    require: +krb5
 
   root:
-    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo cxxstd=20'
+    require: '@6.36: +davix+fftw+gsl+math+minuit+mlp+opengl~pythia8+python+r+roofit+root7+rpath~shadow+spectrum+sqlite+ssl+tbb+tmva+tmva-cpu+unuran+vc+vdt+webgui+x+xml+xrootd +ipo'
 
   hdf5:
     require: +cxx+hl
@@ -175,7 +175,7 @@ packages:
     require: '~shared'
 
   geant4:
-    require: ~opengl~qt~vecgeom~examples +ipo cxxstd=20
+    require: ~opengl~qt~vecgeom~examples +ipo
 
   pythia8:
     require: +python+lhapdf+gzip
@@ -189,7 +189,7 @@ packages:
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json+edm4hep+geant4+hepmc3 cxxstd=23'
+    require: '@main+dd4hep+json+edm4hep+geant4+hepmc3'
   k4geo:
     require: '@main~beampipe_stl'
   k4gaudipandora:
