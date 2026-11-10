@@ -181,7 +181,7 @@ packages:
     require: +python+lhapdf+gzip
 
   edm4hep:
-    require: '@1.2'
+    require: '@main'
 
   k4fwcore:
     require: '@main'
@@ -189,7 +189,7 @@ packages:
   dd4hep:
     require: '+edm4hep+xercesc+hepmc3'
   acts:
-    require: '@main+dd4hep+json+edm4hep+geant4+hepmc3 cxxstd=20'
+    require: '@main+dd4hep+json+edm4hep+geant4+hepmc3 cxxstd=23'
   k4geo:
     require: '@main~beampipe_stl'
   k4gaudipandora:
