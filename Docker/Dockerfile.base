@@ -21,15 +21,23 @@ FROM ubuntu:24.04 AS concretize
 # --------------------------------------------------------------------------- #
 # LLVM is not installed here: spack builds it inside the stack (see the llvm
 # entry in environments/mucoll-common/packages.yaml).
-# gcc-14 is the stack compiler (selected in environments/mucoll-common/packages.yaml).
-# Ubuntu 24.04's default gcc 13 sets __cplusplus to 202100L under -std=c++23,
-# which breaks headers that check for 202302L (e.g. DD4hep's OpaqueData.h).
-# build-essential still pulls in gcc 13; spack detects both and uses gcc-14.
+# gcc-14 is the only compiler in the image (spack also requires it, see
+# environments/mucoll-common/packages.yaml). Ubuntu 24.04's default gcc 13 sets
+# __cplusplus to 202100L under -std=c++23, which breaks headers that check for
+# 202302L (e.g. DD4hep's OpaqueData.h). build-essential and gfortran are not
+# installed because they pull in gcc 13; libc6-dev and make are what remains of
+# build-essential. The unversioned cc/gcc/g++/gfortran names (needed e.g. by
+# rustc as its linker) point to gcc-14 through update-alternatives.
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    build-essential gcc-14 g++-14 gfortran-14 \
-    git python3 unzip gfortran file curl pkg-config tzdata libgl1-mesa-dev libglu1-mesa-dev libkrb5-dev \
+    gcc-14 g++-14 gfortran-14 libc6-dev make \
+    git python3 unzip file curl pkg-config tzdata libgl1-mesa-dev libglu1-mesa-dev libkrb5-dev \
     vim wget rsync && \
+    for tool in gcc g++ gfortran cpp gcc-ar gcc-nm gcc-ranlib gcov; do \
+        update-alternatives --install /usr/bin/${tool} ${tool} /usr/bin/${tool}-14 100; \
+    done && \
+    update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-14 100 && \
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-14 100 && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
