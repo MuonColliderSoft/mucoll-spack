@@ -5,8 +5,8 @@
 #  Base layer of the layered Muon Collider images. Starting from a plain
 #  ubuntu:24.04 it concretizes the WHOLE layered environment
 #  (analysis + sim roots together, so shared packages get a single hash)
-#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images
-#  are built FROM this image with Dockerfile.layer and install their extra
+#  but installs ONLY the analysis root. The mucoll-sim image
+#  is built FROM this image with Dockerfile.layer and install its extra
 #  specs.
 ###############################################################################
 
@@ -19,14 +19,7 @@ FROM ubuntu:24.04 AS concretize
 # --------------------------------------------------------------------------- #
 #  System packages
 # --------------------------------------------------------------------------- #
-# LLVM is not installed here: spack builds it inside the stack (see the llvm
-# entry in environments/mucoll-common/packages.yaml).
-# gcc-14 is the only compiler in the image (spack also requires it, see
-# environments/mucoll-common/packages.yaml). Ubuntu 24.04's default gcc 13 sets
-# __cplusplus to 202100L under -std=c++23, which breaks headers that check for
-# 202302L (e.g. DD4hep's OpaqueData.h). build-essential and gfortran are not
-# installed because they pull in gcc 13; libc6-dev and make are what remains of
-# build-essential. The unversioned cc/gcc/g++/gfortran names (needed e.g. by
+# The unversioned cc/gcc/g++/gfortran names (needed e.g. by
 # rustc as its linker) point to gcc-14 through update-alternatives.
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
@@ -144,8 +137,6 @@ RUN . /opt/setup_spack.sh && \
 # minimal base: it picks up the system openssl/curl, which ship only as runtime
 # libraries + CLIs (no -dev headers), and marking them non-buildable then breaks
 # anything that compiles against them (e.g. libevent: "openssl/ssl.h not found").
-# The genuinely-wanted externals (opengl, mesa, krb5, openssh) are declared
-# explicitly in environments/mucoll-common/packages.yaml instead.
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
