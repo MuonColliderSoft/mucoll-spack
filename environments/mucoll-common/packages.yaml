@@ -4,6 +4,16 @@ packages:
     variants: build_type=Release cxxstd=23
     buildable: true
 
+  # Build the whole stack with the system gcc-14 (installed in
+  # Docker/Dockerfile.base). The image also has Ubuntu's default gcc 13, which
+  # does not fully support cxxstd=23 (it reports __cplusplus as 202100L).
+  c:
+    require: [gcc@14]
+  cxx:
+    require: [gcc@14]
+  fortran:
+    require: [gcc@14]
+
   # Use the system OpenGL as recommended by spack
   # See https://github.com/key4hep/key4hep-spack/issues/318 and
   # https://github.com/key4hep/key4hep-spack/issues/516
