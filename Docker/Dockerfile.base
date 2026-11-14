@@ -5,8 +5,8 @@
 #  Base layer of the layered Muon Collider images. Starting from a plain
 #  ubuntu:24.04 it concretizes the WHOLE layered environment
 #  (analysis + sim roots together, so shared packages get a single hash)
-#  but installs ONLY the analysis root. The mucoll-sim / mucoll-ml images
-#  are built FROM this image with Dockerfile.layer and install their extra
+#  but installs ONLY the analysis root. The mucoll-sim image
+#  is built FROM this image with Dockerfile.layer and install its extra
 #  specs.
 ###############################################################################
 
@@ -19,12 +19,20 @@ FROM ubuntu:24.04 AS concretize
 # --------------------------------------------------------------------------- #
 #  System packages
 # --------------------------------------------------------------------------- #
-# LLVM is not installed here: spack builds it inside the stack (see the llvm
-# entry in environments/mucoll-common/packages.yaml).
+# The unversioned cc/gcc/g++/gfortran names (needed e.g. by
+# rustc as its linker) point to gcc-14 through update-alternatives.
+# xz-utils, bzip2 and gnupg used to come in through build-essential (dpkg-dev);
+# spack needs xz/bzip2 to unpack source archives and gpg for buildcache signing.
 RUN apt update -y && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    build-essential git python3 unzip gfortran file curl pkg-config tzdata libgl1-mesa-dev libglu1-mesa-dev libkrb5-dev \
+    gcc-14 g++-14 gfortran-14 libc6-dev make xz-utils bzip2 gnupg \
+    git python3 unzip file curl pkg-config tzdata libgl1-mesa-dev libglu1-mesa-dev libkrb5-dev \
     vim wget rsync && \
+    for tool in gcc g++ gfortran cpp gcc-ar gcc-nm gcc-ranlib gcov; do \
+        update-alternatives --install /usr/bin/${tool} ${tool} /usr/bin/${tool}-14 100; \
+    done && \
+    update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-14 100 && \
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-14 100 && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -131,8 +139,6 @@ RUN . /opt/setup_spack.sh && \
 # minimal base: it picks up the system openssl/curl, which ship only as runtime
 # libraries + CLIs (no -dev headers), and marking them non-buildable then breaks
 # anything that compiles against them (e.g. libevent: "openssl/ssl.h not found").
-# The genuinely-wanted externals (opengl, mesa, krb5, openssh) are declared
-# explicitly in environments/mucoll-common/packages.yaml instead.
 RUN --mount=type=secret,id=ocipass \
     . ${HOME}/setup_env.sh && \
     OCI_PASSWORD=$(cat /run/secrets/ocipass) spack external find rust --not-buildable && \
