@@ -197,7 +197,7 @@ packages:
     require: '@main'
 
   dd4hep:
-    require: '+edm4hep+xercesc+hepmc3'
+    require: '@master +edm4hep+xercesc+hepmc3'
   acts:
     require: '@main+dd4hep+json+edm4hep+geant4+hepmc3'
   k4geo:
