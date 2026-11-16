@@ -218,6 +218,8 @@ packages:
     require: '@main'
   k4clue:
     require: '@main'
+  muoncvxddigitiser:
+    require: '@master'
 
   lccontent:
     require: '@master+monitoring'

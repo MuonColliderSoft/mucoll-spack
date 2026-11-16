@@ -75,6 +75,7 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
         depends_on("k4reccalorimeter")
         depends_on("k4rectracker")
         depends_on("k4clue")
+        depends_on("muoncvxddigitiser")
 
     with when("+gen"):
         depends_on("whizard +openloops")
