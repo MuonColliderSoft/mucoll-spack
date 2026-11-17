@@ -35,8 +35,8 @@ on:
 permissions:
   contents: read
 
-# mucoll-benchmarks: the head of main unless the caller pins a branch or tag
-# (release tags should, so the published plots are reproducible). The repo
+# mucoll-benchmarks: the head of main unless a manual run picks another branch
+# or tag. The commit used is recorded in the provenance (submission.json). The repo
 # carries its geometry digi/reco configs as submodules, so each checkout must
 # pull them recursively. The plotting studies (analysis/python/edm4hep/study_*.py)
 # live in the repo itself, so they need no submodule.
