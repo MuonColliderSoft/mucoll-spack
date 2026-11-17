@@ -10,32 +10,99 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [Unreleased]
+## [v3.2] — unreleased (release candidate on `release/v3.2`)
+
+Third release of the **3.x series** (`mucoll-stack@3.2`). It moves the whole stack to **C++23 built
+with gcc 14**, brings the MuColl vertex-detector digitiser back as a Gaudi algorithm, adds the key4hep
+calorimeter/tracker digitisers and CLUE, turns ACORN back on, adds a `+cuda` variant, ships the
+images as many smaller layers, and adds CI checks on what ends up in the images and on the physics.
 
 ### Added
-- **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines.
+- **`muoncvxddigitiser@0.5.0` in the `+sim` layer**, the first release of the MuonCVXDDigitiser port
+  to Gaudi algorithms for Key4hep ([#115](https://github.com/MuonColliderSoft/mucoll-spack/pull/115)).
+- **key4hep digitisers in the `+sim` layer**: `k4reccalorimeter` and `k4rectracker ~tracking`
+  (which brings in `simsipm`) ([#110](https://github.com/MuonColliderSoft/mucoll-spack/pull/110)).
+- **`k4clue` in the `+sim` layer** ([#83](https://github.com/MuonColliderSoft/mucoll-spack/pull/83)).
+- **`+cuda` variant of `mucoll-stack`** ([#102](https://github.com/MuonColliderSoft/mucoll-spack/pull/102)).
+  It requires `cuda` and builds `k4actstracking`, `py-torch` and `py-onnxruntime` with CUDA, and
+  forwards `cuda_arch` to `acts` and `torch-scatter`. The published images stay CPU-only.
+- **ACORN is back** ([#103](https://github.com/MuonColliderSoft/mucoll-spack/pull/103)) with a
+  rewritten `acorn` recipe and updated `py-atlasify`, `py-class-resolver` and `py-trackml` recipes.
+- **Image package checks** compare installed Ubuntu and Spack package names with reviewed baselines
+  (`validation/image_packages/`, [#82](https://github.com/MuonColliderSoft/mucoll-spack/pull/82),
+  [#92](https://github.com/MuonColliderSoft/mucoll-spack/pull/92),
+  [#104](https://github.com/MuonColliderSoft/mucoll-spack/pull/104)).
   Unexpected additions or removals now fail the image build.
 - **`py-onnxscript` in the `+ml` layer** (`py-onnxscript` and `py-onnx-ir` recipes from
   [spack/spack-packages#6948](https://github.com/spack/spack-packages/pull/6948)), so
   `torch.onnx.export` works with its default exporter (`dynamo=True` since PyTorch 2.9) instead of
   failing with `No module named 'onnxscript'`.
+- **Physics benchmarks in the validation CI**
+  ([#85](https://github.com/MuonColliderSoft/mucoll-spack/pull/85),
+  [#94](https://github.com/MuonColliderSoft/mucoll-spack/pull/94)).
+  - Pull requests run a fast, report-only pion chain (`physics-fast.yaml`, 10 events) against the
+    freshly published sim image.
+  - The full muon/electron/pion/photon matrix runs only on release tags. It attaches the
+    per-particle histogram files to the GitHub release and publishes the plots to GitHub Pages.
+  - Each run aggregates the per-study metrics with `mucoll-benchmarks`'
+    `aggregate_metrics.py`. `validation/write_provenance.py` records the input sample, the image
+    ID and platform, and the `mucoll-benchmarks` and `mucoll-spack` revisions.
+  - The full validation takes a `benchmarks-ref` input, so a release can pin `mucoll-benchmarks`
+    to a tag.
+- **Citation and archiving**: `LICENSE` (Apache-2.0), `CITATION.cff`, `.zenodo.json` and a workflow
+  that archives every published GitHub release on Zenodo under the concept DOI
+  ([#96](https://github.com/MuonColliderSoft/mucoll-spack/pull/96),
+  [#97](https://github.com/MuonColliderSoft/mucoll-spack/pull/97)).
+- **Repository hygiene**: pre-commit hooks (mixed line endings, trailing whitespace, `black`) with a
+  CI workflow, a PR template with release-notes markers
+  ([#106](https://github.com/MuonColliderSoft/mucoll-spack/pull/106)), and dependabot for the
+  GitHub Actions.
+- `scripts/purge_pkg_from_cache.{sh,fish}` delete every buildcache version of a package (with
+  `--dryRun`).
 
 ### Changed
-- **Smaller image layers.** The analysis and sim images no longer ship their spack install as one
-  huge layer. A build stage installs the stack as before, then `Docker/split-install-tree.py`
-  spreads the newly installed prefixes over 16 folders of similar size, and the published image
-  copies each folder as its own layer (plus a small layer for the spack database). The sim image
-  only adds prefixes that are not already in the analysis image. Image contents are unchanged.
+- **C++23 and gcc 14.** The whole stack is built with `cxxstd=23` (was 20) by the system `gcc-14`
+  ([#114](https://github.com/MuonColliderSoft/mucoll-spack/pull/114)). Ubuntu's default gcc 13 does
+  not fully support C++23 (it reports `__cplusplus` as `202100L`), so it is dropped from the base
+  image. The per-package `cxxstd=20` requirements on `root`, `geant4`, `xrootd` and `acts` are gone.
+- **Package versions.** Moved to tagged releases where one has everything we need:
+
+  | Package | v3.1 | v3.2 |
+  |---|---|---|
+  | `edm4hep` | `1.1` | `1.3` |
+  | `k4geo` | `0.26` | `00-27` (adds `MAIA_v1` with the realistic solenoid field, fixes MAIA/MuSIC/MuColl materials and beampipe) |
+  | `k4simgeant4` | `main` | `0.1.0pre19` |
+  | `k4clue` | – | `01-01-02` |
+  | `k4reccalorimeter` | – | `0.1.0pre21` |
+  | `k4rectracker` | – | `0.8.0 ~tracking` |
+  | `muoncvxddigitiser` | – | `0.5.0` |
+  | `lccontent` | latest | `5.1.1 +monitoring` |
+  | `py-torch` | `@2.8:` | `@2.14:` |
+  | `py-onnx` / `py-onnxruntime` | `@1.16:` / `@1.18:` | `1.17` / `1.22` (matched, see Fixed) |
+  | `madgraph5amc` | – | `@3.5.9: +pythia8` |
+  | `pythia8` | – | `+python+lhapdf+gzip` |
+
+  spack-packages and key4hep-spack do not have `edm4hep@1.3` or `k4geo@00-27` yet, so `.cherry-pick`
+  adds both versions (only when the recipe does not already have them).
+
+  These packages still track a branch (see *Still tracking a branch* below): `acts`, `dd4hep`,
+  `delphes`, `k4actstracking`, `k4fwcore`, `k4gaudipandora`, `k4reco`.
+- **Smaller image layers** ([#111](https://github.com/MuonColliderSoft/mucoll-spack/pull/111)). The
+  analysis and sim images no longer ship their spack install as one huge layer. A build stage
+  installs the stack as before, then `Docker/split-install-tree.py` spreads the newly installed
+  prefixes over 16 folders of similar size, and the published image copies each folder as its own
+  layer (plus a small layer for the spack database). The sim image only adds prefixes that are not
+  already in the analysis image. Image contents are unchanged.
 - **LLVM is built inside the stack** instead of taken from the Ubuntu `llvm-20`/`clang-20`/`lld-20`
-  packages as an external, so `py-numba`/`py-llvmlite` can use `llvm@22`. The build is slimmed down
-  to fit the free GitHub runners: `build_type=Release`, host backend only, no `libLLVM.so`, and no
+  packages as an external, so `py-numba`/`py-llvmlite` can use `llvm@22`. The build is slimmed down to fit the free GitHub runners:
+  `build_type=Release`, host backend only, no `libLLVM.so`, and no
   clang/lldb/polly/mlir/flang/offload or runtimes. The images therefore no longer ship `clang`. A
   new `llvm` overlay recipe (`packages/llvm`) caps the parallel link jobs to avoid OOM kills and
   adds `~clang_tools_extra`/`~static_analyzer` switches for slimmer `+clang` builds.
-
 - **`acorn` moved from `+sim` to `+ml`**, so it (and `py-torch-geometric`, `py-torch-scatter`, …)
   is now also part of the analysis image, which is built `+ml`.
-- **`mucoll-stack` recipe cleanup.** Dropped direct dependencies that nothing uses or that are already
+- **`mucoll-stack` recipe cleanup** ([#105](https://github.com/MuonColliderSoft/mucoll-spack/pull/105)).
+  Dropped direct dependencies that nothing uses or that are already
   pulled in: `torch-scatter` and `py-torch-scatter` (still brought in by `acts+gnn` and `acorn`),
   `onnx` (C++), `xgboost` (via `py-xgboost`) and `py-cppy`. Tools and Python packages are now
   `type="run"` dependencies. Removed the unused `MCIlcsoftpackage` helper (`mucoll_utils.py`), the
@@ -43,17 +110,26 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Local `torch-scatter` overlay reduced to a thin subclass** of the builtin recipe, which is a
   `CudaPackage` and gets `cuda_arch` forwarded from `mucoll-stack`. The overlay only builds it as
   C++20 (see Fixed).
+- **ACTS is built without its examples and python bindings**
+  ([#113](https://github.com/MuonColliderSoft/mucoll-spack/pull/113)): it is now required as
+  `@main +dd4hep+json+edm4hep+geant4+hepmc3`, and the local `acts` overlay recipe is gone. The
+  v3.1 material-mapping helpers (`ACTS_EXAMPLES_SCRIPTS`, the `Examples/Scripts/Python` scripts) are
+  therefore no longer in the images.
 - **Dropped the `py-fsspec +http` requirement.** With `acorn` in both roots, both already get `+http`.
-- **EDM4hep 1.2** (was 1.1). spack-packages has no `edm4hep@1.2` yet, so `.cherry-pick` adds the
-  version to the builtin recipe.
 - **Upstream patches dropped from `.cherry-pick`.** The spack-packages commit now pinned by
   key4hep-spack already includes every recipe and fix it used to pull in (`py-numba`, `py-llvmlite`,
   `llvm`, `geant4 ~examples`, `py-matplotlib`, `py-pytorch-lightning`, `py-uv-build`,
   `py-onnxscript`/`py-onnx-ir`, `py-onnxruntime`).
 - **Fewer version pins in `mucoll-common`.** Dropped the `acorn` and `k4gen` pins (the latest `acorn`
   is now picked without one; `k4gen` is not in the stack) and the `python` version floor (`acts`
-  already requires `python@3.12:`). Raised the `py-torch` floor to `@2.14:`. The layered environment
-  still concretizes without duplicate packages.
+  already requires `python@3.12:`). The layered environment still concretizes without duplicate
+  packages.
+
+### Removed
+- **Local `k4reco` fork** ([#108](https://github.com/MuonColliderSoft/mucoll-spack/pull/108)); the
+  upstream recipe is used.
+- **Local `acts` overlay** (see Changed), and the local `py-torch-cluster`, `py-torch-sparse`,
+  `py-torch-spline-conv`, `py-onnx-ir` and `py-onnxscript` recipes, now all upstream.
 
 ### Fixed
 - **`torch-scatter` builds against current `py-torch` again.** `py-torch@2.14` headers require C++20,
@@ -65,7 +141,6 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **`py-onnx` matches `py-onnxruntime`.** `py-onnx` is pinned to 1.17, the ONNX version
   `onnxruntime@1.22` is built against. `py-onnx@1.19` wrote IR version 12 / opset 24 models by
   default, which `onnxruntime@1.22` refuses to load.
-- **`acorn` is pinned to 2.0.1.** A fresh concretization otherwise picked `acorn@1.2.0`.
 - **`+cuda` combinations of `mucoll-stack`.** `+sim~ml+cuda` failed to concretize (no `cuda_arch`
   reached `py-torch`), `~sim+cuda` pulled `acts`/`k4actstracking` into the analysis root, and
   `+sim~ml~cuda` could get a CUDA-enabled `py-torch`.
@@ -76,6 +151,24 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
   ([spack/spack-packages#2526](https://github.com/spack/spack-packages/pull/2526)), so gcc's
   lto-wrapper gets a jobserver format its `make` understands instead of failing with
   `invalid --jobserver-auth string`.
+
+### Still tracking a branch
+These packages have no upstream tag yet that contains what the stack needs:
+
+- `k4fwcore@main`: the latest tag (`1.8`) does not have the `OverlayTiming` fix that adds background
+  `SimCalorimeterHit` energies to merged hits
+  ([key4hep/k4FWCore#447](https://github.com/key4hep/k4FWCore/pull/447)).
+- `k4reco@main`: after `0.5.0` came the `DDPlanarDigi` hit-time error
+  ([key4hep/k4Reco#74](https://github.com/key4hep/k4Reco/pull/74)) and a fix for tracker IDs > 20
+  ([key4hep/k4Reco#75](https://github.com/key4hep/k4Reco/pull/75)).
+- `k4gaudipandora@main`: after `0.5.0` came the theta-energy calibration parameters
+  ([key4hep/k4GaudiPandora#51](https://github.com/key4hep/k4GaudiPandora/pull/51)).
+- `acts@main` and `k4actstracking@main`: the ACTS `v48.x` releases are cut from a branch that has
+  diverged from `main`, and spack-packages only knows `acts@46.8.1`. `k4actstracking@00-07` needs
+  [key4hep/k4ActsTracking#160](https://github.com/key4hep/k4ActsTracking/pull/160) to build against
+  ACTS `main`.
+- `dd4hep@master`: `1.38` predates the C++23 CI and fixes such as the HepMC3 reader vertex units.
+- `delphes@master`: spack-packages only has `3.5.0`, which predates the fixes for newer ROOT.
 
 ---
 

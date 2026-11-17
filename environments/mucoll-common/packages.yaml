@@ -191,7 +191,7 @@ packages:
     require: +python+lhapdf+gzip
 
   edm4hep:
-    require: '@main'
+    require: '@1.3'
 
   k4fwcore:
     require: '@main'
@@ -201,25 +201,25 @@ packages:
   acts:
     require: '@main+dd4hep+json+edm4hep+geant4+hepmc3'
   k4geo:
-    require: '@main~beampipe_stl'
+    require: '@00-27~beampipe_stl'
   k4gaudipandora:
     require: '@main~ddkaltest'
   k4reco:
     require: '@main~conformal_tracking'
 
   k4reccalorimeter:
-    require: '@main'
+    require: '@0.1.0pre21'
   k4rectracker:
-    require: '@main~tracking'
+    require: '@0.8.0~tracking'
 
   k4actstracking:
     require: '@main+gnn'
   k4simgeant4:
-    require: '@main'
+    require: '@0.1.0pre19'
   k4clue:
-    require: '@main'
+    require: '@01-01-02'
   muoncvxddigitiser:
-    require: '@master'
+    require: '@0.5.0'
 
   lccontent:
-    require: '@master+monitoring'
+    require: '@5.1.1+monitoring'

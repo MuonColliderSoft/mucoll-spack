@@ -26,17 +26,23 @@ on:
         required: false
         type: string
         default: "1000"
+      benchmarks-ref:
+        description: "mucoll-benchmarks branch or tag (git clone --branch, so not a bare commit)"
+        required: false
+        type: string
+        default: main
 
 permissions:
   contents: read
 
-# mucoll-benchmarks: track the head of main. The repo carries its geometry
-# digi/reco configs as submodules, so each checkout must pull them recursively.
-# The plotting studies (analysis/python/edm4hep/study_*.py) live in the repo
-# itself, so they need no submodule.
+# mucoll-benchmarks: the head of main unless the caller pins a branch or tag
+# (release tags should, so the published plots are reproducible). The repo
+# carries its geometry digi/reco configs as submodules, so each checkout must
+# pull them recursively. The plotting studies (analysis/python/edm4hep/study_*.py)
+# live in the repo itself, so they need no submodule.
 env:
   BENCHMARKS_REPO: https://github.com/MuonColliderSoft/mucoll-benchmarks.git
-  BENCHMARKS_REF: main
+  BENCHMARKS_REF: ${{ inputs.benchmarks-ref }}
 
 defaults:
   run:
