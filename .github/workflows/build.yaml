@@ -163,8 +163,8 @@ jobs:
       image: ${{ needs.manifest-sim.outputs.image }}
       pdg: ${{ matrix.pdg }}
       # Pin mucoll-benchmarks for the release so the published plots can be
-      # reproduced. Set to a mucoll-benchmarks tag before tagging a release.
-      benchmarks-ref: main
+      # reproduced. Bump to the matching mucoll-benchmarks tag for each release.
+      benchmarks-ref: v3.2
 
   # ------------------------------------------------------------ release assets --
   release-assets:

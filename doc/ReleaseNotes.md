@@ -48,7 +48,8 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
     `aggregate_metrics.py`. `validation/write_provenance.py` records the input sample, the image
     ID and platform, and the `mucoll-benchmarks` and `mucoll-spack` revisions.
   - The full validation takes a `benchmarks-ref` input, so a release can pin `mucoll-benchmarks`
-    to a tag.
+    to a tag. The v3.2 tag validation runs against
+    [`mucoll-benchmarks` v3.2](https://github.com/MuonColliderSoft/mucoll-benchmarks/releases/tag/v3.2).
 - **Citation and archiving**: `LICENSE` (Apache-2.0), `CITATION.cff`, `.zenodo.json` and a workflow
   that archives every published GitHub release on Zenodo under the concept DOI
   ([#96](https://github.com/MuonColliderSoft/mucoll-spack/pull/96),
