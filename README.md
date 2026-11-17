@@ -136,6 +136,18 @@ There is no separate `ml` or `gen` image: the `+sim` variant covers both reconst
 simulation, the generators ride along in the same layer via `+gen`, and the machine-learning tools
 are part of the base analysis layer.
 
+### Purging packages from the buildcache
+
+`scripts/purge_pkg_from_cache.sh` (bash) and `scripts/purge_pkg_from_cache.fish` (fish) delete every
+version of a package from the `MuonColliderSoft/mucoll-buildcache` GHCR package, e.g. to force a
+rebuild. They need `jq` and a `gh` login with the `delete:packages` scope. Deletion cannot be undone,
+so run with `--dryRun` first to list what would be removed:
+
+```bash
+scripts/purge_pkg_from_cache.sh --dryRun mucoll-stack
+scripts/purge_pkg_from_cache.sh mucoll-stack
+```
+
 ## Physics validation
 
 On every tag the CI runs a per-particle `sim -> digi -> reco -> plot` chain
