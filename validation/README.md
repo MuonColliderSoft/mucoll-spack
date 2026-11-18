@@ -5,7 +5,7 @@ Muon Collider image validation has two distinct scales:
 | Workflow | Purpose | Default sample | Layout |
 |---|---|---:|---|
 | `physics-fast.yaml` | Fast integration check for a proposed image | 10 pion events | SIM, DIGI, RECO, and metrics in one job |
-| `physics-validation-template.yaml` | Release or scheduled performance study | Configurable, normally high statistics | Separate SIM, DIGI, RECO, and plotting/metrics jobs |
+| `physics-validation-template.yaml` | Release performance study | 1000 events per particle | Separate SIM, DIGI, RECO, and plotting/metrics jobs |
 
 The fast workflow pulls the container once, runs the appropriate EDM4hep
 studies, and uploads logs, production provenance, the per-study JSON fragments,
@@ -13,12 +13,14 @@ and their aggregate `metrics.json`. Its metrics are report-only: the job checks
 that the requested event count was processed, but it does not yet compare
 physics values with reference tolerances.
 
-The workflow uses immutable particle-gun inputs from the `phys-val-inputs`
-release. The studies write sidecars and
+Both workflows use pre-generated particle-gun inputs from the `phys-val-inputs`
+release. Each file holds 10,000 single-particle events, flat in log(pT) and
+uniform in theta from 10 to 170 degrees. Muons cover 1 to 10 GeV in pT, and
+electrons, pions, and photons cover 1 to 100 GeV. The studies write sidecars and
 `mucoll-benchmarks/analysis/benchmarks/aggregate_metrics.py` combines them with
 the stack, container, input, geometry, source, and GitHub run provenance. The
-`benchmarks-ref` input can select a branch or commit while changes are being
-reviewed.
+`benchmarks-ref` input can select a branch, tag, or commit while changes are
+being reviewed.
 
 The split full-validation workflow creates `submission.json` in the SIM job and
 carries it with the stage artifacts through DIGI and RECO. Its final plot job
@@ -49,21 +51,20 @@ record = json.loads(histograms.Get("provenance").GetTitle())
 print(record["submission"]["revisions"]["mucoll_benchmarks"])
 ```
 
-The active `physics-validation.yaml` manual workflow launches either mode. The
-image-build workflow also calls the fast validation against freshly built images for
-same-repository pull requests. Those pull requests, pushes to `main`, and manual
-image builds also run the split, high-statistics workflow. Both PR validation
-paths reuse the image produced by the same build. Fork pull requests skip
-physics execution because they cannot publish an image for a downstream job to
-pull.
+The `physics-validation.yaml` manual workflow launches either mode. The
+image-build workflow calls the fast validation for same-repository pull requests
+and the full validation for release tags, in both cases against the image from
+the same build. Fork pull requests skip physics execution because they cannot
+publish an image for a downstream job to pull.
 
 ## When each validation runs
 
 | Event | Validation |
 |---|---|
-| Pull request from this repository | Fast validation plus full four-particle validation, both using the same newly built image |
-| Push to `main` | Full validation: the default event count for each of muon, electron, pion, and photon |
-| Manual run of `build.yaml` | Full validation against the newly built image |
+| Pull request from this repository | Fast validation: 10 pion events against the newly built image |
+| Release tag (`v*`) | Full validation of muon, electron, pion, and photon, then publication of the release assets and GitHub Pages plots |
+| Push to `main` | No physics validation |
+| Manual run of `build.yaml` on a branch | No physics validation |
 | Manual run of `physics-validation.yaml` | The selected `fast` or `full` mode for one particle and event count |
 | Pull request from a fork | No physics validation, because its image cannot be published for a downstream job |
 

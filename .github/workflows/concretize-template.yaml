@@ -41,8 +41,8 @@ jobs:
           rm_cmd: "rmz"  # Use 'rmz' for faster deletion (default: 'rm')
           rmz_version: "3.1.1"  # Required when rm_cmd is 'rmz'
           testing: false
-      # Only the Dockerfile is needed from the checkout: the build itself clones
-      # mucoll-spack at MUCOLL_SHA, exactly like the image build does.
+      # The build itself clones mucoll-spack at MUCOLL_SHA, exactly like the image
+      # build does. The checkout provides the Dockerfile and the version script.
       - name: Checkout mucoll-spack
         uses: actions/checkout@v7.0.1
         with:
@@ -69,6 +69,14 @@ jobs:
           base="https://raw.githubusercontent.com/key4hep/key4hep-spack/$k4sha"
           echo "spack=$(curl -fsSL "$base/.latest-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
           echo "packages=$(curl -fsSL "$base/.latest-packages-commit" | tr -d '[:space:]')" >> "$GITHUB_OUTPUT"
+      - name: Resolve the mucoll-stack release version
+        # Empty for nightly builds, which keep the dated version.
+        id: stack
+        env:
+          REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          version="$(bash scripts/resolve_stack_version.sh "${REF}")"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
       - name: Concretize (Dockerfile.base, --target concretize)
         env:
           # Passed as a build secret under the id Dockerfile.base expects; the
@@ -92,6 +100,7 @@ jobs:
             --build-arg SPACK_COMMIT=${{ steps.pins.outputs.spack }} \
             --build-arg SPACK_PACKAGES_COMMIT=${{ steps.pins.outputs.packages }} \
             --build-arg KEY4HEP_SPACK_SHA=${{ steps.pins.outputs.k4sha }} \
+            --build-arg MUCOLL_STACK_VERSION=${{ steps.stack.outputs.version }} \
             --secret id=ocipass,env=OCI_PASSWORD \
             ./Docker
       - name: Dump concretized spec

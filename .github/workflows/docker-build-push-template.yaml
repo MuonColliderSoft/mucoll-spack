@@ -102,6 +102,14 @@ jobs:
         with:
           images: ${{ inputs.registry }}/${{ github.repository_owner }}/mucoll-${{ inputs.image-type }}-${{ inputs.os }}
           flavor: latest=false,suffix=-${{ inputs.platform }}
+      - name: Resolve the mucoll-stack release version
+        # Empty for nightly builds, which keep the dated version.
+        id: stack
+        env:
+          REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          version="$(bash scripts/resolve_stack_version.sh "${REF}")"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
       - name: Collect build args
         # Assembled once and reused verbatim by both builds below
         id: args
@@ -119,6 +127,7 @@ jobs:
             echo "SPACK_COMMIT=${{ steps.pins.outputs.spack }}"
             echo "SPACK_PACKAGES_COMMIT=${{ steps.pins.outputs.packages }}"
             echo "KEY4HEP_SPACK_SHA=${{ steps.pins.outputs.k4sha }}"
+            echo "MUCOLL_STACK_VERSION=${{ steps.stack.outputs.version }}"
             echo 'BUILD_ARGS_EOF'
           } >> "$GITHUB_OUTPUT"
       - name: Build and Push

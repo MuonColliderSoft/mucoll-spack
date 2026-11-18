@@ -32,7 +32,8 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
   (`validation/image_packages/`, [#82](https://github.com/MuonColliderSoft/mucoll-spack/pull/82),
   [#92](https://github.com/MuonColliderSoft/mucoll-spack/pull/92),
   [#104](https://github.com/MuonColliderSoft/mucoll-spack/pull/104)).
-  Unexpected additions or removals now fail the image build.
+  Unexpected additions or removals fail a check after the images are published, without blocking
+  the images or the physics validation.
 - **`py-onnxscript` in the `+ml` layer** (`py-onnxscript` and `py-onnx-ir` recipes from
   [spack/spack-packages#6948](https://github.com/spack/spack-packages/pull/6948)), so
   `torch.onnx.export` works with its default exporter (`dynamo=True` since PyTorch 2.9) instead of
@@ -47,6 +48,7 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
   - Each run aggregates the per-study metrics with `mucoll-benchmarks`'
     `aggregate_metrics.py`. `validation/write_provenance.py` records the input sample, the image
     ID and platform, and the `mucoll-benchmarks` and `mucoll-spack` revisions.
+  - The particle-gun inputs are flat in log(pT) and uniform in theta, replacing the fixed-pT samples.
   - Release validation resolves the head of `mucoll-benchmarks` `main` to one commit, used by every
     stage and particle. Manual runs can pick another branch, tag, or commit (`benchmarks-ref`).
   - Published histogram files embed their production record. Each release also carries per-particle
@@ -134,6 +136,9 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
   `py-torch-spline-conv`, `py-onnx-ir` and `py-onnxscript` recipes, now all upstream.
 
 ### Fixed
+- **Release images report their release version.** Builds from `v*` tags and `release/v*` branches
+  pin `mucoll-stack` to that version. They previously reported the build date, because the dated
+  nightly version sorts above every release number.
 - **`torch-scatter` builds against current `py-torch` again.** `py-torch@2.14` headers require C++20,
   but upstream's `CMakeLists.txt` hardcodes `CMAKE_CXX_STANDARD 17`, overriding the recipe's
   `-DCMAKE_CXX_STANDARD=20`. The `packages/torch-scatter` overlay rewrites it before CMake runs.

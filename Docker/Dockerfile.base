@@ -131,6 +131,16 @@ RUN . /opt/setup_spack.sh && \
     echo "cd -" >> ${HOME}/setup_env.sh && \
     echo "spack env status" >> ${HOME}/setup_env.sh
 
+# Release builds pin mucoll-stack to the release version. Otherwise spack picks
+# the recipe's dated nightly version, which sorts above every release number.
+ARG MUCOLL_STACK_VERSION=
+RUN . ${HOME}/setup_env.sh && \
+    if [ -n "${MUCOLL_STACK_VERSION}" ]; then \
+        printf 'packages:\n  mucoll-stack:\n    require: "@=%s"\n' "${MUCOLL_STACK_VERSION}" > /tmp/stack-version.yaml && \
+        spack config add --file /tmp/stack-version.yaml && \
+        rm /tmp/stack-version.yaml; \
+    fi
+
 # Concretize the WHOLE layered stack (all four roots) reusing system packages
 # as external, so shared dependencies get identical hashes across all layers.
 #

@@ -130,7 +130,7 @@ jobs:
   # ------------------------------------------------------ PR fast validation --
   physics-fast:
     # Pull requests get one fast, report-only pion chain against the freshly
-    # published image while the full validation runs alongside it.
+    # published image.
     needs: manifest-sim
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: ./.github/workflows/physics-fast.yaml
@@ -159,8 +159,8 @@ jobs:
   physics-validation:
     # Run the sim -> digi -> reco -> plot chain against the freshly published
     # multi-arch sim image. This is the expensive, full matrix, so it only runs
-    # for release tags; pushes to main and pull requests get the quick pion-only
-    # physics-fast job above instead.
+    # for release tags. Pull requests get the quick pion-only physics-fast job
+    # above instead, and pushes to main run no physics validation.
     needs: [manifest-sim, benchmarks-revision]
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     strategy:
