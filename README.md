@@ -68,9 +68,10 @@ To publish the release:
 
 1. Push the `v<version>` tag. Do not create the release in the GitHub UI first.
 2. Wait for the tag build to finish. It validates the image and creates a draft release with the histograms, metrics, and provenance files.
-3. Review the validation results and publish the draft. This starts the Zenodo archive, which creates a permanent DOI.
+3. Review the validation results and publish the draft.
+4. Run the `Archive release on Zenodo` workflow manually with the tag name. This creates a permanent DOI.
 
-If the archive fails, rerun it from the `Archive release on Zenodo` workflow with the tag name. Pre-releases are not archived.
+Publishing a release does not start the archive. If the archive fails, run the workflow again with the same tag name. Pre-releases cannot be archived.
 
 ## Modifying an existing package
 
