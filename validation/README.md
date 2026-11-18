@@ -26,6 +26,29 @@ uploads a `metrics-<particle>` artifact containing the aggregate report, the
 per-study fragments, and that production record. The fast and full workflows
 share `validation/write_provenance.py` so they record the same metadata schema.
 
+The full validation resolves `benchmarks-ref` to one commit before it starts, and
+every stage checks out that commit. Release builds resolve `main` once for all
+four particles.
+
+`validation/stamp_histograms.py` prepares the files published with a release:
+
+| Release asset | Content |
+|---|---|
+| `histos_<study>_<particle>.root` | Histograms, plus a `provenance` `TNamed` whose title is a JSON production record |
+| `metrics_<particle>.json` | Aggregate metrics report |
+| `provenance_<particle>.json` | Production record and the SHA-256 of each published file |
+
+Read the record embedded in a histogram file with:
+
+```python
+import json
+import ROOT
+
+histograms = ROOT.TFile.Open("histos_tracks_muon.root")
+record = json.loads(histograms.Get("provenance").GetTitle())
+print(record["submission"]["revisions"]["mucoll_benchmarks"])
+```
+
 The active `physics-validation.yaml` manual workflow launches either mode. The
 image-build workflow also calls the fast validation against freshly built images for
 same-repository pull requests. Those pull requests, pushes to `main`, and manual

@@ -32,7 +32,7 @@ on:
         type: string
         default: "10"
       benchmarks-ref:
-        description: "mucoll-benchmarks ref (fast: branch, tag or commit; full: branch or tag)"
+        description: "mucoll-benchmarks branch, tag, or full commit SHA"
         type: string
         default: main
 

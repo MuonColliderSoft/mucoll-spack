@@ -27,7 +27,7 @@ on:
         type: string
         default: "1000"
       benchmarks-ref:
-        description: "mucoll-benchmarks branch or tag (git clone --branch, so not a bare commit)"
+        description: "mucoll-benchmarks branch, tag, or full commit SHA"
         required: false
         type: string
         default: main
@@ -35,27 +35,33 @@ on:
 permissions:
   contents: read
 
-# mucoll-benchmarks: the head of main unless a manual run picks another branch
-# or tag. The commit used is recorded in the provenance (submission.json). The repo
-# carries its geometry digi/reco configs as submodules, so each checkout must
-# pull them recursively. The plotting studies (analysis/python/edm4hep/study_*.py)
-# live in the repo itself, so they need no submodule.
-env:
-  BENCHMARKS_REPO: https://github.com/MuonColliderSoft/mucoll-benchmarks.git
-  BENCHMARKS_REF: ${{ inputs.benchmarks-ref }}
+# mucoll-benchmarks: the meta job resolves benchmarks-ref to one commit, and every
+# stage checks out that commit. Callers running several particles pass a commit
+# they resolved once, so the whole matrix shares it. The repo carries its geometry
+# digi/reco configs as submodules, so each checkout pulls them recursively.
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  # Infer the particle label from the PDG id. Runs directly on the runner (no
-  # container) so it adds no image pull. Used for artifact names + Pages subdir.
+  # Infer the particle label from the PDG id and pin the benchmarks commit. Runs
+  # directly on the runner (no container) so it adds no image pull.
   meta:
     runs-on: ubuntu-latest
     outputs:
       particle: ${{ steps.map.outputs.particle }}
+      benchmarks-sha: ${{ steps.benchmarks.outputs.sha }}
     steps:
+      - uses: actions/checkout@v7.0.1
+      - id: benchmarks
+        name: Resolve the mucoll-benchmarks commit
+        env:
+          BENCHMARKS_REF: ${{ inputs.benchmarks-ref }}
+        run: |
+          sha="$(bash validation/resolve_benchmarks_ref.sh "${BENCHMARKS_REF}")"
+          echo "Using mucoll-benchmarks ${sha} (${BENCHMARKS_REF})"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
       - id: map
         env:
           PDG: ${{ inputs.pdg }}
@@ -90,10 +96,13 @@ jobs:
           rmz_version: "3.1.1"
           testing: false
       - uses: actions/checkout@v7.0.1
-      - name: Clone benchmarks
-        run: |
-          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks submodule update --init --recursive --depth 1
+      - name: Check out mucoll-benchmarks
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: MuonColliderSoft/mucoll-benchmarks
+          ref: ${{ needs.meta.outputs.benchmarks-sha }}
+          path: benchmarks
+          submodules: recursive
       - name: Download generated input
         # Pre-generated particle-gun file.
         # Stored as asset on the 'phys-val-inputs' release; one
@@ -164,10 +173,13 @@ jobs:
           rmz_version: "3.1.1"
           testing: false
       - uses: actions/checkout@v7.0.1
-      - name: Clone benchmarks
-        run: |
-          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks submodule update --init --recursive --depth 1
+      - name: Check out mucoll-benchmarks
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: MuonColliderSoft/mucoll-benchmarks
+          ref: ${{ needs.meta.outputs.benchmarks-sha }}
+          path: benchmarks
+          submodules: recursive
       - uses: actions/download-artifact@v8
         with:
           name: sim-${{ needs.meta.outputs.particle }}
@@ -211,10 +223,13 @@ jobs:
           rmz_version: "3.1.1"
           testing: false
       - uses: actions/checkout@v7.0.1
-      - name: Clone benchmarks
-        run: |
-          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks submodule update --init --recursive --depth 1
+      - name: Check out mucoll-benchmarks
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: MuonColliderSoft/mucoll-benchmarks
+          ref: ${{ needs.meta.outputs.benchmarks-sha }}
+          path: benchmarks
+          submodules: recursive
       - uses: actions/download-artifact@v8
         with:
           name: digi-${{ needs.meta.outputs.particle }}
@@ -258,10 +273,13 @@ jobs:
           rmz_version: "3.1.1"
           testing: false
       - uses: actions/checkout@v7.0.1
-      - name: Clone benchmarks
-        run: |
-          git clone --branch "${BENCHMARKS_REF}" --depth 1 "${BENCHMARKS_REPO}" benchmarks
-          git -C benchmarks submodule update --init --recursive --depth 1
+      - name: Check out mucoll-benchmarks
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: MuonColliderSoft/mucoll-benchmarks
+          ref: ${{ needs.meta.outputs.benchmarks-sha }}
+          path: benchmarks
+          submodules: recursive
       - uses: actions/download-artifact@v8
         with:
           name: reco-${{ needs.meta.outputs.particle }}
@@ -309,28 +327,29 @@ jobs:
             submission.json
             plot_work/**/metrics_*.json
           if-no-files-found: error
-      - name: Stage histogram files for the release
+      - name: Stage histogram files and provenance for the release
         # make_plots.sh writes plot_work/<particle>/<settings-tag>/histos_<study>.root.
-        # Release assets share one flat namespace across the whole matrix, and the
-        # study names repeat per particle (histos_tracks.root for muon, electron
-        # and pion alike), so stamp the particle into each name before uploading.
+        # Release assets share one flat namespace across the whole matrix, so every
+        # staged file name carries the particle. Staging fails if the histograms,
+        # metrics, and production record do not come from the same benchmarks commit.
         env:
           PARTICLE: ${{ needs.meta.outputs.particle }}
         run: |
-          mkdir -p histos
-          shopt -s nullglob
-          n=0
-          for f in plot_work/"${PARTICLE}"/*/histos_*.root; do
-            base="$(basename "${f}" .root)"
-            cp "${f}" "histos/${base}_${PARTICLE}.root"
-            n=$((n + 1))
-          done
-          if [ "${n}" -eq 0 ]; then
-            echo "ERROR: the studies wrote no histos_*.root under plot_work/${PARTICLE}" >&2
-            exit 1
-          fi
+          benchmarks_revision="$(git -C benchmarks rev-parse HEAD)"
+          docker exec -w /work \
+            -e PARTICLE="${PARTICLE}" -e BENCHMARKS_REVISION="${benchmarks_revision}" \
+            ci /bin/bash -lc '
+              source /opt/setup_mucoll.sh >/dev/null 2>&1
+              python /work/validation/stamp_histograms.py \
+                --particle "${PARTICLE}" \
+                --histograms-dir "/work/plot_work/${PARTICLE}" \
+                --submission /work/submission.json \
+                --metrics /work/metrics.json \
+                --benchmarks-revision "${BENCHMARKS_REVISION}" \
+                --output-dir /work/histos
+            '
           ls -l histos
-      - name: Upload histogram files
+      - name: Upload histogram files and provenance
         uses: actions/upload-artifact@v7
         with:
           name: histos-${{ needs.meta.outputs.particle }}

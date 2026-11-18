@@ -47,8 +47,10 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
   - Each run aggregates the per-study metrics with `mucoll-benchmarks`'
     `aggregate_metrics.py`. `validation/write_provenance.py` records the input sample, the image
     ID and platform, and the `mucoll-benchmarks` and `mucoll-spack` revisions.
-  - The validation always runs the head of `mucoll-benchmarks` `main`; the commit it used is
-    recorded in the provenance. Manual runs can pick another branch or tag (`benchmarks-ref`).
+  - Release validation resolves the head of `mucoll-benchmarks` `main` to one commit, used by every
+    stage and particle. Manual runs can pick another branch, tag, or commit (`benchmarks-ref`).
+  - Published histogram files embed their production record. Each release also carries per-particle
+    metrics and a provenance file with the SHA-256 of every published file.
 - **Citation and archiving**: `LICENSE` (Apache-2.0), `CITATION.cff`, `.zenodo.json` and a workflow
   that archives every published GitHub release on Zenodo under the concept DOI
   ([#96](https://github.com/MuonColliderSoft/mucoll-spack/pull/96),
