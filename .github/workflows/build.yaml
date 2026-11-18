@@ -181,8 +181,8 @@ jobs:
   # ------------------------------------------------------------ release assets --
   release-assets:
     # Attach the per-particle histogram, metrics, and provenance files from
-    # physics-validation to the release for this tag. Tag-only, like the job it
-    # consumes.
+    # physics-validation to a draft release for this tag. Publishing the draft
+    # after review starts the Zenodo archive. Tag-only, like the job it consumes.
     needs: physics-validation
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
@@ -202,12 +202,15 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           ls -l histos
-          # A release published from the GitHub UI already exists by the time the
-          # tag push lands here; a tag pushed with plain `git push` has none, so
-          # create one in that case. --clobber makes re-runs idempotent.
+          # A rerun finds the draft from the first attempt, and --clobber replaces
+          # its files. Release candidates stay marked as pre-releases.
           if ! gh release view "${TAG}" >/dev/null 2>&1; then
-            echo "No release for ${TAG} yet -- creating one."
-            gh release create "${TAG}" --verify-tag --generate-notes
+            echo "No release for ${TAG} yet -- creating a draft."
+            release_flags=(--draft)
+            if [[ "${TAG}" == *-* ]]; then
+              release_flags+=(--prerelease)
+            fi
+            gh release create "${TAG}" --verify-tag --generate-notes "${release_flags[@]}"
           fi
           gh release upload "${TAG}" histos/* --clobber
 

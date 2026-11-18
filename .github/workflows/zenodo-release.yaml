@@ -1,7 +1,9 @@
 name: Archive release on Zenodo
 
-# Archives every new GitHub release into the concept-DOI lineage created by the
-# historical backfill.
+# Archives each published final release into the concept-DOI lineage created by
+# the historical backfill. The tag build prepares a draft release with the
+# validation output; publishing that draft after review starts this workflow.
+# Use the manual trigger to retry a published release.
 #
 # Required repository Actions secrets:
 #   ZENODO_TOKEN        - a production Zenodo token with deposit:write and
@@ -14,15 +16,32 @@ name: Archive release on Zenodo
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published release tag to archive"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
+concurrency:
+  group: zenodo-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
 jobs:
   archive:
+    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
 
       # Gate: require the reviewed license and a checksum-valid ORCID for every
       # creator before making the permanent deposit.
@@ -53,21 +72,42 @@ jobs:
               assert digits[15] == expected, f"{name}: invalid ORCID checksum"
           PY
 
-      - name: Fetch release tarball
-        env:
-          tarball: ${{ github.event.release.tarball_url }}
-          repo_name: ${{ github.event.repository.name }}
-          tag_name: ${{ github.event.release.tag_name }}
+      # Gate: a Zenodo record is permanent, so require the validated output of
+      # this tag's own build before depositing anything.
+      - name: Require the complete validation output
         run: |
-          archive="${repo_name}-${tag_name//\//-}.tar.gz"
+          gh release view "${TAG}" --json assets,isDraft,isPrerelease > release.json
+          gh release download "${TAG}" --pattern 'provenance_*.json' --dir release-provenance
+          python3 scripts/check_release_archive.py assets \
+            --tag "${TAG}" \
+            --release release.json \
+            --provenance-dir release-provenance
+
+      - name: Check for an existing Zenodo record
+        id: zenodo
+        env:
+          ZENODO_CONCEPT_DOI: ${{ secrets.ZENODO_CONCEPT_DOI }}
+        run: |
+          python3 scripts/check_release_archive.py zenodo \
+            --tag "${TAG}" \
+            --concept-doi "${ZENODO_CONCEPT_DOI}"
+
+      - name: Fetch release tarball
+        if: steps.zenodo.outputs.archived == 'false'
+        env:
+          repo_name: ${{ github.event.repository.name }}
+        run: |
+          tarball="$(gh release view "${TAG}" --json tarballUrl --jq .tarballUrl)"
+          archive="${repo_name}-${TAG//\//-}.tar.gz"
           curl --fail-with-body -L "$tarball" --output "$archive"
           echo "archive=$archive" >> "$GITHUB_ENV"
 
       - name: Deposit new version on Zenodo
+        if: steps.zenodo.outputs.archived == 'false'
         uses: rseng/zenodo-release@a9c88701a0176df755015f8ca4cf8cc754162f27
         with:
           token: ${{ secrets.ZENODO_TOKEN }}
-          version: ${{ github.event.release.tag_name }}
+          version: ${{ env.TAG }}
           zenodo_json: .zenodo.json
           archive: ${{ env.archive }}
           doi: ${{ secrets.ZENODO_CONCEPT_DOI }}

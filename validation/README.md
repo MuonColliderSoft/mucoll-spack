@@ -62,7 +62,7 @@ publish an image for a downstream job to pull.
 | Event | Validation |
 |---|---|
 | Pull request from this repository | Fast validation: 10 pion events against the newly built image |
-| Release tag (`v*`) | Full validation of muon, electron, pion, and photon, then publication of the release assets and GitHub Pages plots |
+| Release tag (`v*`) | Full validation of muon, electron, pion, and photon, then a draft release with the assets and publication of the GitHub Pages plots |
 | Push to `main` | No physics validation |
 | Manual run of `build.yaml` on a branch | No physics validation |
 | Manual run of `physics-validation.yaml` | The selected `fast` or `full` mode for one particle and event count |

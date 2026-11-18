@@ -44,7 +44,7 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
   - Pull requests run a fast, report-only pion chain (`physics-fast.yaml`, 10 events) against the
     freshly published sim image.
   - The full muon/electron/pion/photon matrix runs only on release tags. It attaches the
-    per-particle histogram files to the GitHub release and publishes the plots to GitHub Pages.
+    per-particle histogram files to a draft GitHub release and publishes the plots to GitHub Pages.
   - Each run aggregates the per-study metrics with `mucoll-benchmarks`'
     `aggregate_metrics.py`. `validation/write_provenance.py` records the input sample, the image
     ID and platform, and the `mucoll-benchmarks` and `mucoll-spack` revisions.
@@ -54,7 +54,8 @@ images as many smaller layers, and adds CI checks on what ends up in the images 
   - Published histogram files embed their production record. Each release also carries per-particle
     metrics and a provenance file with the SHA-256 of every published file.
 - **Citation and archiving**: `LICENSE` (Apache-2.0), `CITATION.cff`, `.zenodo.json` and a workflow
-  that archives every published GitHub release on Zenodo under the concept DOI
+  that archives each published final release on Zenodo under the concept DOI, once the release
+  carries its complete validation output
   ([#96](https://github.com/MuonColliderSoft/mucoll-spack/pull/96),
   [#97](https://github.com/MuonColliderSoft/mucoll-spack/pull/97)).
 - **Repository hygiene**: pre-commit hooks (mixed line endings, trailing whitespace, `black`) with a
