@@ -10,7 +10,7 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [v3.2] — unreleased (release candidate on `release/v3.2`)
+## [v3.2] — 2026-11-18
 
 Third release of the **3.x series** (`mucoll-stack@3.2`). It moves the whole stack to **C++23 built
 with gcc 14**, brings the MuColl vertex-detector digitiser back as a Gaudi algorithm, adds the key4hep
