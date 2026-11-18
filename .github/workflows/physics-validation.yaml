@@ -32,7 +32,7 @@ on:
         type: string
         default: "10"
       benchmarks-ref:
-        description: "mucoll-benchmarks branch, tag, or commit (fast mode)"
+        description: "mucoll-benchmarks branch, tag, or full commit SHA"
         type: string
         default: main
 
@@ -58,3 +58,4 @@ jobs:
       pdg: ${{ inputs.pdg }}
       geometry: ${{ inputs.geometry }}
       n-events: ${{ inputs.n-events }}
+      benchmarks-ref: ${{ inputs.benchmarks-ref }}

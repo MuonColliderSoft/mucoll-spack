@@ -130,7 +130,7 @@ jobs:
   # ------------------------------------------------------ PR fast validation --
   physics-fast:
     # Pull requests get one fast, report-only pion chain against the freshly
-    # published image while the full validation runs alongside it.
+    # published image.
     needs: manifest-sim
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     uses: ./.github/workflows/physics-fast.yaml
@@ -142,12 +142,26 @@ jobs:
       benchmarks-ref: main
 
   # ------------------------------------------------------ physics validation --
+  benchmarks-revision:
+    # Resolve mucoll-benchmarks main once, so every particle uses the same commit.
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - id: resolve
+        run: |
+          sha="$(bash validation/resolve_benchmarks_ref.sh main)"
+          echo "Using mucoll-benchmarks ${sha}"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+
   physics-validation:
     # Run the sim -> digi -> reco -> plot chain against the freshly published
     # multi-arch sim image. This is the expensive, full matrix, so it only runs
-    # for release tags; pushes to main and pull requests get the quick pion-only
-    # physics-fast job above instead.
-    needs: manifest-sim
+    # for release tags. Pull requests get the quick pion-only physics-fast job
+    # above instead, and pushes to main run no physics validation.
+    needs: [manifest-sim, benchmarks-revision]
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     strategy:
       fail-fast: false
@@ -162,38 +176,43 @@ jobs:
     with:
       image: ${{ needs.manifest-sim.outputs.image }}
       pdg: ${{ matrix.pdg }}
+      benchmarks-ref: ${{ needs.benchmarks-revision.outputs.sha }}
 
   # ------------------------------------------------------------ release assets --
   release-assets:
-    # Attach the per-particle histogram files from physics-validation to the
-    # release for this tag. Tag-only, like the job it consumes.
+    # Attach the per-particle histogram, metrics, and provenance files from
+    # physics-validation to a draft release for this tag. Publishing the draft
+    # after review starts the Zenodo archive. Tag-only, like the job it consumes.
     needs: physics-validation
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Collect histogram files
+      - name: Collect histogram and provenance files
         uses: actions/download-artifact@v8
         with:
           pattern: histos-*
           path: histos
           merge-multiple: true
-      - name: Upload histograms as release assets
+      - name: Upload histograms and provenance as release assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
           ls -l histos
-          # A release published from the GitHub UI already exists by the time the
-          # tag push lands here; a tag pushed with plain `git push` has none, so
-          # create one in that case. --clobber makes re-runs idempotent.
+          # A rerun finds the draft from the first attempt, and --clobber replaces
+          # its files. Release candidates stay marked as pre-releases.
           if ! gh release view "${TAG}" >/dev/null 2>&1; then
-            echo "No release for ${TAG} yet -- creating one."
-            gh release create "${TAG}" --verify-tag --generate-notes
+            echo "No release for ${TAG} yet -- creating a draft."
+            release_flags=(--draft)
+            if [[ "${TAG}" == *-* ]]; then
+              release_flags+=(--prerelease)
+            fi
+            gh release create "${TAG}" --verify-tag --generate-notes "${release_flags[@]}"
           fi
-          gh release upload "${TAG}" histos/*.root --clobber
+          gh release upload "${TAG}" histos/* --clobber
 
   deploy-pages:
     # Publishes the plots produced by physics-validation, so it is tag-only too.

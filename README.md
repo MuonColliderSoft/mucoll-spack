@@ -62,6 +62,16 @@ spack spec --reuse -NIt
 
 Packages that are already installed in the `mucoll-layered` environment are known to Spack and will be reused, providing a clear indication of which part of the dependency tree will be modified by the new release.
 
+Images built from a `v<version>` tag or a `release/v<version>` branch use that `mucoll-stack` version, which must be defined in the recipe. All other builds use the dated nightly version.
+
+To publish the release:
+
+1. Push the `v<version>` tag. Do not create the release in the GitHub UI first.
+2. Wait for the tag build to finish. It validates the image and creates a draft release with the histograms, metrics, and provenance files.
+3. Review the validation results and publish the draft. This starts the Zenodo archive, which creates a permanent DOI.
+
+If the archive fails, rerun it from the `Archive release on Zenodo` workflow with the tag name. Pre-releases are not archived.
+
 ## Modifying an existing package
 
 It is possible to modify code of one or more packages using the [development workflow](https://spack-tutorial.readthedocs.io/en/latest/tutorial_developer_workflows.html), which lets Spack build it from your own source folder and use this custom version instead of the one installed in the release.
@@ -152,7 +162,8 @@ scripts/purge_pkg_from_cache.sh mucoll-stack
 
 On every tag the CI runs a per-particle `sim -> digi -> reco -> plot` chain
 (see `validation/` and `.github/workflows/physics-validation-template.yaml`) against the freshly
-published `mucoll-sim` image and publishes the resulting performance plots to GitHub Pages:
+published `mucoll-sim` image. It attaches the histograms, metrics, and provenance files to a draft
+GitHub release and publishes the resulting performance plots to GitHub Pages:
 
 <https://muoncollidersoft.github.io/mucoll-spack/>
 
