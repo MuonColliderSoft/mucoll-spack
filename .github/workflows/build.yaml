@@ -181,8 +181,9 @@ jobs:
   # ------------------------------------------------------------ release assets --
   release-assets:
     # Attach the per-particle histogram, metrics, and provenance files from
-    # physics-validation to a draft release for this tag. Publishing the draft
-    # after review starts the Zenodo archive. Tag-only, like the job it consumes.
+    # physics-validation to a draft release for this tag. The Zenodo archive is
+    # started manually once the draft is published. Tag-only, like the job it
+    # consumes.
     needs: physics-validation
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest

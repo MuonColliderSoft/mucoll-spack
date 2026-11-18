@@ -1,9 +1,9 @@
 name: Archive release on Zenodo
 
-# Archives each published final release into the concept-DOI lineage created by
-# the historical backfill. The tag build prepares a draft release with the
-# validation output; publishing that draft after review starts this workflow.
-# Use the manual trigger to retry a published release.
+# Archives a published final release into the concept-DOI lineage created by the
+# historical backfill. The tag build prepares a draft release with the validation
+# output. This workflow only runs when started manually with the tag of a release
+# that has been reviewed and published. Pre-releases and drafts are rejected.
 #
 # Required repository Actions secrets:
 #   ZENODO_TOKEN        - a production Zenodo token with deposit:write and
@@ -14,8 +14,6 @@ name: Archive release on Zenodo
 # running both would archive each release twice.
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       tag:
@@ -27,21 +25,20 @@ permissions:
   contents: read
 
 concurrency:
-  group: zenodo-${{ github.event.release.tag_name || inputs.tag }}
+  group: zenodo-${{ inputs.tag }}
   cancel-in-progress: false
 
 jobs:
   archive:
-    if: ${{ github.event_name == 'workflow_dispatch' || !github.event.release.prerelease }}
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      TAG: ${{ inputs.tag }}
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+          ref: refs/tags/${{ inputs.tag }}
 
       # Gate: require the reviewed license and a checksum-valid ORCID for every
       # creator before making the permanent deposit.
