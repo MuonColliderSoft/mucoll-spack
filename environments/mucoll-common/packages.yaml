@@ -193,8 +193,10 @@ packages:
   edm4hep:
     require: '@1.3'
 
+  # Upstream fix_inconsistent_overlay_tof_correction branch, via the
+  # packages/k4fwcore overlay. Back to '@main' once it is merged.
   k4fwcore:
-    require: '@main'
+    require: '@=main-tof-fix'
 
   dd4hep:
     require: '@master +edm4hep+xercesc+hepmc3'
