@@ -157,5 +157,10 @@ class MucollStack(BundlePackage, Key4hepPackage, CudaPackage):
             for path in self["py-torch"].cmake_prefix_paths:
                 env.prepend_path("CMAKE_PREFIX_PATH", path)
 
+        # pythia8+python installs its module as lib/pythia8.so, not under
+        # site-packages, so extends("python") does not put it on PYTHONPATH.
+        if self.spec.satisfies("^pythia8+python"):
+            env.prepend_path("PYTHONPATH", self.spec["pythia8"].prefix.lib)
+
     def install(self, spec: Spec, prefix: Prefix) -> None:
         install_setup_script(self, spec, prefix, "MUCOLL_LATEST_SETUP_PATH")
